@@ -10,9 +10,9 @@ import SwiftUI
 
 struct ContentView: View {
     var body: some View {
-        // Use your representable view here
+        // Tabs for testing
         CameraView()
-//            .ignoresSafeArea() // Makes the camera view fill the entire screen
+            .ignoresSafeArea(edges: .all)
     }
 }
 

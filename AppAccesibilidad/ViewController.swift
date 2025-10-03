@@ -18,6 +18,9 @@ class ViewController: UIViewController {
     // MARK: - AVFoundation Properties
     private let captureSession = AVCaptureSession()
     private var previewLayer: AVCaptureVideoPreviewLayer!
+    
+    // Vision
+    private var requests = [VNRequest]()
 
     // MARK: - Drawing Properties
     // An array to keep track of the bounding box layers we've drawn
@@ -28,6 +31,7 @@ class ViewController: UIViewController {
         super.viewDidLoad()
         setupUI()
         setupCamera()
+        try? setupVision()
     }
 
     override func viewDidLayoutSubviews() {
@@ -46,6 +50,70 @@ class ViewController: UIViewController {
             videoPreviewView.leadingAnchor.constraint(equalTo: view.leadingAnchor),
             videoPreviewView.trailingAnchor.constraint(equalTo: view.trailingAnchor)
         ])
+    }
+    
+    func setupVision() throws {
+        guard let modelURL = Bundle.main.url(forResource: "football-player-detection-v9-4", withExtension: "mlmodelc") else {
+            throw NSError(domain: "ViewController", code: -1, userInfo: [NSLocalizedDescriptionKey: "Model file is missing"])
+        }
+        
+        do {
+            let visionModel = try VNCoreMLModel(for: MLModel(contentsOf: modelURL))
+            let objectRecognition = VNCoreMLRequest(model: visionModel, completionHandler: { (request, error) in
+//                print("Results", request.results?.count as Any)
+//                // 1. Cast the results to the correct type.
+                guard let results = request.results as? [VNRecognizedObjectObservation] else {
+                    print("no results")
+                    return
+                }
+                
+                // 2. Process these results on the main thread to update the UI.
+                DispatchQueue.main.async { [weak self] in
+                    print("drawing boxes")
+                    // 3. Call a new function to draw the bounding boxes from these results.
+                    self?.drawVisionRequestResults(results)
+                }
+            })
+            objectRecognition.imageCropAndScaleOption = .scaleFill
+
+            self.requests = [objectRecognition]
+        } catch let error as NSError {
+            print("Model loading went wrong: \(error)")
+        }
+    }
+    
+    // Add this function to your ViewController
+    func drawVisionRequestResults(_ results: [VNRecognizedObjectObservation]) {
+        DispatchQueue.main.async { [weak self] in
+            guard let self = self else { return }
+            // 1. Clear any old bounding boxes.
+            clearOldBoundingBoxes() // Assumes you have the function from our previous example.
+            
+            // 2. Loop through each observation from the model.
+            for observation in results {
+                print(observation.labels)
+                
+                // You can inspect the observation's label to see what was detected.
+                // For example: if let label = observation.labels.first?.identifier { print(label) }
+                
+                // Filter out detections with low confidence to reduce noise.
+                guard observation.confidence > 0.6 else { // 60% confidence threshold
+                    continue
+                }
+//                
+                // The boundingBox is in NORMALIZED coordinates (0.0 to 1.0).
+                // You MUST convert it to the screen's coordinate space.
+                let objectBounds = previewLayer.layerRectConverted(fromMetadataOutputRect: observation.boundingBox)
+                
+                // 3. Create a CAShapeLayer for the bounding box.
+                let shapeLayer = self.createBoundingBoxLayer()
+                shapeLayer.frame = objectBounds
+                
+                // 4. Add the layer to your view and keep a reference to it.
+                videoPreviewView.layer.addSublayer(shapeLayer)
+                boundingBoxLayers.append(shapeLayer)
+            }
+        }
     }
 
     private func setupCamera() {
@@ -122,7 +190,8 @@ class ViewController: UIViewController {
         shapeLayer.fillColor = UIColor.clear.cgColor
         // This makes the layer's frame size relative to its path
         shapeLayer.shouldRasterize = true
-        shapeLayer.rasterizationScale = UIScreen.main.scale
+//        shapeLayer.rasterizationScale = UIScreen.main.scale
+        shapeLayer.rasterizationScale = view.traitCollection.displayScale
         return shapeLayer
     }
 
@@ -138,6 +207,22 @@ extension ViewController: AVCaptureVideoDataOutputSampleBufferDelegate {
 
     func captureOutput(_ output: AVCaptureOutput, didOutput sampleBuffer: CMSampleBuffer, from connection: AVCaptureConnection) {
         // This method is called for every frame captured by the camera.
+        // 1. Get the pixel buffer from the video frame.
+        guard let pixelBuffer = CMSampleBufferGetImageBuffer(sampleBuffer) else {
+            return
+        }
+        
+        // 2. Create a Vision image request handler for the current frame.
+        // The orientation is important for the model to "see" the image correctly.
+        let imageRequestHandler = VNImageRequestHandler(cvPixelBuffer: pixelBuffer, orientation: .right, options: [:])
+        
+        do {
+            // 3. Perform your configured Vision request.
+            // This triggers the model inference. The completion handler in setupVision() will be called when it's done.
+            try imageRequestHandler.perform(self.requests)
+        } catch {
+            print(error)
+        }
         
         // ---- ⚽️ YOUR ON-DEVICE MODEL LOGIC GOES HERE ⚽️ ----
         // 1. Run your Core ML model on the `sampleBuffer` or its underlying `CVPixelBuffer`.
@@ -145,15 +230,15 @@ extension ViewController: AVCaptureVideoDataOutputSampleBufferDelegate {
         
         // For this example, we'll just SIMULATE a detection result.
         // We'll pretend the model found one player in the center of the screen.
-        let simulatedNormalizedRect = CGRect(x: 0.25, y: 0.35, width: 0.5, height: 0.3)
-
-        // ---- COORDINATE CONVERSION (CRITICAL STEP) ----
-        // You MUST convert the model's normalized coordinates (0.0 to 1.0)
-        // into the coordinate system of the view where you are drawing.
-        // `AVCaptureVideoPreviewLayer` provides a helper function for this.
-        let playerBoundingBox = previewLayer.layerRectConverted(fromMetadataOutputRect: simulatedNormalizedRect)
-        
-        // Now that we have the box in screen coordinates, we can draw it.
-        drawPlayerBoxes(on: [playerBoundingBox])
+//        let simulatedNormalizedRect = CGRect(x: 0.25, y: 0.35, width: 0.5, height: 0.3)
+//
+//        // ---- COORDINATE CONVERSION (CRITICAL STEP) ----
+//        // You MUST convert the model's normalized coordinates (0.0 to 1.0)
+//        // into the coordinate system of the view where you are drawing.
+//        // `AVCaptureVideoPreviewLayer` provides a helper function for this.
+//        let playerBoundingBox = previewLayer.layerRectConverted(fromMetadataOutputRect: simulatedNormalizedRect)
+//        
+//        // Now that we have the box in screen coordinates, we can draw it.
+//        drawPlayerBoxes(on: [playerBoundingBox])
     }
 }
