@@ -24,7 +24,7 @@ class VisionViewController: ViewController {
         let error: NSError! = nil
 
         // Load model
-        guard let modelURL = Bundle.main.url(forResource: "football-player-detection-v9-4", withExtension: "mlmodelc") else {
+        guard let modelURL = Bundle.main.url(forResource: "football-detection", withExtension: "mlmodelc") else {
             return NSError(domain: "VisionViewController", code: -1, userInfo: [NSLocalizedDescriptionKey: "Model file is missing"])
         }
 
