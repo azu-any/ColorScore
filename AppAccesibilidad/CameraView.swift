@@ -12,9 +12,9 @@ struct CameraView: UIViewControllerRepresentable {
     
     // This function creates the initial view controller.
     // It's called only once.
-    func makeUIViewController(context: Context) -> ViewController {
+    func makeUIViewController(context: Context) -> ViewController { // ViewController {
         // Create an instance of your custom ViewController
-        return ViewController()
+        return VisionViewController()
     }
     
     // This function is for passing data from SwiftUI to the ViewController.
