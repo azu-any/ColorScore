@@ -9,10 +9,34 @@
 import SwiftUI
 
 struct ContentView: View {
+    @State private var calibrationTrigger = 0
+
     var body: some View {
         // Tabs for testing
-        CameraView()
-            .ignoresSafeArea(edges: .all)
+        ZStack {
+            
+            CameraView(calibrationTrigger: self.calibrationTrigger)
+                .ignoresSafeArea(edges: .all)
+            
+//            VStack {
+//                Spacer() // Pushes the button to the bottom
+//                
+//                Button(action: {
+//                    // 3. The button's only job is to change the trigger's value.
+//                    print("Calibrate button tapped!")
+//                    self.calibrationTrigger += 1
+//                }) {
+//                    Text("Calibrate Teams")
+//                        .font(.headline)
+//                        .fontWeight(.bold)
+//                        .padding()
+//                        .background(Color.blue)
+//                        .foregroundColor(.white)
+//                        .cornerRadius(10)
+//                }
+//                .padding(.bottom, 30) // Add some padding from the bottom edge
+//            }
+        }
     }
 }
 
