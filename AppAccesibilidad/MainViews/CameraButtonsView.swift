@@ -34,6 +34,15 @@ struct CameraButtonsView: View {
 
     var body: some View {
         ZStack {
+            // Background photo with zoom
+            Image("soccerPlayExample")
+                .resizable()
+                .aspectRatio(contentMode: .fill)
+                .scaleEffect(zoom)
+                .frame(maxWidth: .infinity, maxHeight: .infinity)
+                .clipped()
+                .ignoresSafeArea()
+            
             HStack {
                 VStack(alignment: .leading, spacing: 0) {
                     configButton
@@ -171,40 +180,25 @@ private extension CameraButtonsView {
             Slider(
                 value: $zoom,
                 in: minZoom...maxZoom,
-                step: 0.01,
-                label: {
-                    Text("Zoom")
-                },
-                minimumValueLabel: {
-                    EmptyView()
-                },
-                maximumValueLabel: {
-                    EmptyView()
-                },
+                step: 0.1,
                 onEditingChanged: { editing in
-                    if !editing {
-                        let snapped = (zoom / zoomStep).rounded() * zoomStep
-                        zoom = min(max(minZoom, snapped), maxZoom)
-                        zoom = (zoom * 10).rounded() / 10
-                    }
+                    print("Zoom: \(zoom)")
                 }
             )
-            .labelsHidden()
-            .controlSize(.small)
+            .controlSize(.regular)
             .frame(maxWidth: 200)
             .tint(.black)
 
             Text("\(zoom, specifier: "%.1f")×")
-                .font(.caption2.monospacedDigit())
-                .padding(.horizontal, 6)
-                .padding(.vertical, 2)
-                .background(Color.white.opacity(0.6), in: Capsule())
-                .accessibilityHidden(true)
+                .font(.caption.monospacedDigit())
+                .fontWeight(.semibold)
+                .padding(.horizontal, 8)
+                .padding(.vertical, 4)
+                .background(Color.white.opacity(0.8), in: Capsule())
+                .foregroundStyle(.black)
         }
-        .foregroundStyle(.black)
-        .padding(6)
+        .padding(8)
         .background(Color.white.opacity(0.7), in: RoundedRectangle(cornerRadius: 15, style: .continuous))
-        .accessibilityElement(children: .combine)
         .accessibilityLabel("Zoom")
         .accessibilityValue("\(zoom, specifier: "%.1f") times")
     }
@@ -225,14 +219,12 @@ private extension CameraButtonsView {
 
 #Preview {
     ZStack {
-        // Simulated camera background
-        LinearGradient(
-            colors: [.black, .gray.opacity(0.6)],
-            startPoint: .top,
-            endPoint: .bottom
-        )
-        .ignoresSafeArea()
-
+        // Background for testing
+        Rectangle()
+            .fill(.black.opacity(0.1))
+            .ignoresSafeArea()
+        
         CameraButtonsView()
     }
+    .preferredColorScheme(.light)
 }
