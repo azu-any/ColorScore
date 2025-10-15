@@ -8,7 +8,9 @@
 import SwiftUI
 
 @available(iOS 16.0, *)
-struct NewMatchView: View {
+struct HomeView: View {
+    @State private var showingCamera = false
+    
     var body: some View {
         NavigationStack {
             ZStack {
@@ -76,6 +78,7 @@ struct NewMatchView: View {
 
                         // MARK: - CTA Inferior
                         Button(action: {
+                            showingCamera = true
                             // TODO: acción “Empezar partido”
                         }) {
                             Text("Empezar partido")
@@ -107,6 +110,9 @@ struct NewMatchView: View {
                 }
             }
             .toolbar(.hidden, for: .navigationBar)
+            .fullScreenCover(isPresented: $showingCamera) {
+                CameraButtonsView()
+            }
         }
     }
 }
@@ -168,6 +174,6 @@ struct GlassCircleButton: ButtonStyle {
 
 @available(iOS 16.0, *)
 #Preview {
-    NewMatchView()
+    HomeView()
         .environment(\.locale, .init(identifier: "es"))
 }
