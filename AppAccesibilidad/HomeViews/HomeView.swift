@@ -42,23 +42,29 @@ struct HomeView: View {
                         .padding(.top, 16)
 
                         // MARK: - Team 1 Card
-                        TeamGlassLargeCard(
-                            teamTitle: "Equipo 1",
-                            teamName: "Paris Saint-Germain",
-                            badge: "parisLogo",
-                            background: "parisTeam",
-                            overlayColor: .blue
-                        )
+                        NavigationLink(destination: TeamSelectionView()) {
+                            TeamGlassLargeCard(
+                                teamTitle: "Equipo 1",
+                                teamName: "Paris Saint-Germain",
+                                badge: "parisLogo",
+                                background: "parisTeam",
+                                overlayColor: .blue
+                            )
+                        }
+                        .buttonStyle(PlainButtonStyle())
                         .padding(.horizontal, 20)
 
                         // MARK: - Team 2 Card
-                        TeamGlassLargeCard(
-                            teamTitle: "Equipo 2",
-                            teamName: "Selección Mexicana",
-                            badge: "mexicoLogo",
-                            background: "mexicoTeam",
-                            overlayColor: .green
-                        )
+                        NavigationLink(destination: TeamSelectionView()) {
+                            TeamGlassLargeCard(
+                                teamTitle: "Equipo 2",
+                                teamName: "Selección Mexicana",
+                                badge: "mexicoLogo",
+                                background: "mexicoTeam",
+                                overlayColor: .green
+                            )
+                        }
+                        .buttonStyle(PlainButtonStyle())
                         .padding(.horizontal, 20)
 
                         // MARK: - Grid inferior
