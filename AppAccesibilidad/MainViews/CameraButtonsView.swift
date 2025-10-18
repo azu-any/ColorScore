@@ -17,16 +17,22 @@ struct CameraButtonsView: View {
     @State private var leftTeamColor: Color = .blue
     @State private var rightTeamColor: Color = .red
     @State private var showScoreControls = false
+    
+    // Throw away
+    @State private var calibrationTrigger = 0
+    
 
     var body: some View {
         ZStack {
-            // Background with zoom
-            Image("soccerPlayExample")
-                .resizable()
-                .aspectRatio(contentMode: .fill)
-                .scaleEffect(zoom)
-                .clipped()
-                .ignoresSafeArea()
+//            // Background with zoom
+//            Image("soccerPlayExample")
+//                .resizable()
+//                .aspectRatio(contentMode: .fill)
+//                .scaleEffect(zoom)
+//                .clipped()
+//                .ignoresSafeArea()
+            CameraView(calibrationTrigger: self.calibrationTrigger)
+                .ignoresSafeArea(edges: .all)
             
             // Controls overlay
             VStack {
