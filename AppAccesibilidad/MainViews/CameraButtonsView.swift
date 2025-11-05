@@ -2,6 +2,8 @@ import SwiftUI
 
 /// Accessible camera overlay with zoom controls and score display
 struct CameraButtonsView: View {
+//    var onCalibrate: () -> Void
+    
     // Zoom controls
     @State private var zoom: Double = 1.0
     @State private var showZoomSlider = false
@@ -24,13 +26,7 @@ struct CameraButtonsView: View {
 
     var body: some View {
         ZStack {
-//            // Background with zoom
-//            Image("soccerPlayExample")
-//                .resizable()
-//                .aspectRatio(contentMode: .fill)
-//                .scaleEffect(zoom)
-//                .clipped()
-//                .ignoresSafeArea()
+
             CameraView(calibrationTrigger: self.calibrationTrigger)
                 .ignoresSafeArea(edges: .all)
             
@@ -41,8 +37,9 @@ struct CameraButtonsView: View {
                     // Config button on the left
                     backButton
                     Spacer()
+//                    calibrateButton
                 }
-                .padding(.leading, 16)
+                .padding(.horizontal, 16)
                 .padding(.top, 24)
                 
                 Spacer()
@@ -63,6 +60,17 @@ struct CameraButtonsView: View {
                 Spacer()
             }
         }
+//        .onAppear {
+//            DispatchQueue.main.async {
+//                AppDelegate.orientationLock = .landscapeRight
+//                print("cambiando a landscape")
+//            }
+//        }
+//        .onDisappear {
+//            DispatchQueue.main.async {
+//                AppDelegate.orientationLock = .portrait
+//            }
+//        }
     }
 }
 
@@ -70,10 +78,20 @@ struct CameraButtonsView: View {
 private extension CameraButtonsView {
     var backButton: some View {
         Button("Back") {
+            DispatchQueue.main.async {
+                AppDelegate.orientationLock = .portrait
+            }
             dismiss()
         }
         .buttonStyle(CircularButtonStyle(icon: "chevron.left"))
     }
+    
+//    var calibrateButton: some View {
+//        Button("Calibrate") {
+//            onCalibrate()
+//        }
+//        .buttonStyle(CircularButtonStyle(icon: "target"))
+//    }
     
     var scoreView: some View {
         VStack(spacing: 8) {
@@ -311,6 +329,6 @@ struct LargeScoreButtonStyle: ButtonStyle {
 }
 
 #Preview {
-    CameraButtonsView()
-        .preferredColorScheme(.light)
+//    CameraButtonsView(onCalibrate: {})
+//        .preferredColorScheme(.light)
 }

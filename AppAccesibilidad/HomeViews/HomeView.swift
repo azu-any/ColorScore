@@ -78,7 +78,11 @@ struct HomeView: View {
 
                         // MARK: - CTA Inferior
                         Button(action: {
-                            showingCamera = true
+                            DispatchQueue.main.async {
+                                AppDelegate.orientationLock = .landscapeRight
+                                print("cambiando a landscape")
+                                showingCamera = true
+                            }
                             // TODO: acción “Empezar partido”
                         }) {
                             Text("Empezar partido")
@@ -112,6 +116,8 @@ struct HomeView: View {
             .toolbar(.hidden, for: .navigationBar)
             .fullScreenCover(isPresented: $showingCamera) {
                 CameraButtonsView()
+//                CameraHostingView()
+//                    .ignoresSafeArea()
             }
         }
     }
