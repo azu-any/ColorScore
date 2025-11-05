@@ -10,14 +10,14 @@ class VisionViewController: ViewController {
     private var visionModel: VNCoreMLModel!
     // REMOVE: private var detectionRequest: VNCoreMLRequest!
     // ADD: A stateful handler for tracking
-    private let sequenceHandler = VNSequenceRequestHandler()
+//    private let sequenceHandler = VNSequenceRequestHandler()
 
     // ADD: A frame counter for periodic detection
-    private var frameCounter = 0
-    private let detectionStride = 10 // Run detection every 30 frames (adjust as needed)
+//    private var frameCounter = 0
+//    private let detectionStride = 10 // Run detection every 30 frames (adjust as needed)
 
     /// A serial queue to protect access to our tracking dictionaries.
-    private let trackerQueue = DispatchQueue(label: "Ccookers.trackerQueue")
+    private let trackerQueue = DispatchQueue(label: "Xcookers.trackerQueue")
     // ... (rest of your properties are fine)
     
 //    // Vision & Core ML
@@ -27,7 +27,7 @@ class VisionViewController: ViewController {
 //    
 //    /// A serial queue to protect access to our tracking dictionaries.
 //    private let trackerQueue = DispatchQueue(label: "Ccookers.trackerQueue")
-    private var trackedObjects: [UUID: VNTrackObjectRequest] = [:]
+//    private var trackedObjects: [UUID: VNTrackObjectRequest] = [:]
     private var trackedObjectInfo: [UUID: (box: CGRect, label: String, teamID: Int?)] = [:]
 //    
     // Team Classification
@@ -36,6 +36,9 @@ class VisionViewController: ViewController {
         private var calibrationCrops: [CGImage] = []
     private let minCropsForCalibration = 20 // Threshold of crops to collect
     private var isFittingModel = false      // Lock to prevent multiple fits at once
+    
+    // Tracker
+    private let centroidTracker = CentroidTracker(maxDisappearedFrameCount: 15, maxNormalizedDistance: 0.2)
     
     // UI & Drawing
     private var detectionOverlay: CALayer! = nil
@@ -80,67 +83,25 @@ class VisionViewController: ViewController {
         self.latestPixelBuffer = pixelBuffer
         let exifOrientation = exifOrientationFromDeviceOrientation()
         
-        // 1. Get all active tracker requests
-        let trackers = trackerQueue.sync { Array(self.trackedObjects.values) }
+        // 1. Create a handler for *this frame only*
+        let requestHandler = VNImageRequestHandler(cvPixelBuffer: pixelBuffer,
+                                                 orientation: exifOrientation,
+                                                 options: [:])
         
-        // 2. Build the list of requests for this frame
-        var requests: [VNRequest] = trackers
+        // 2. Create your one detection request
+        let request = createDetectionRequest()
         
-        // 3. Periodically, add a new detection request
-        if frameCounter % detectionStride == 0 {
-            requests.append(createDetectionRequest())
-        }
-        frameCounter = (frameCounter + 1) % detectionStride // Loop counter
-        
-        // 4. Perform all requests *inside a do-catch block*
+        // 3. Perform the request
         do {
-            try sequenceHandler.perform(requests, on: pixelBuffer, orientation: exifOrientation)
+            try requestHandler.perform([request])
         } catch {
-            // --- THIS IS THE SAFETY NET ---
-            print("❌ Failed to perform requests: \(error.localizedDescription), \(String(describing: error))")
-            
-            // This specific error is unrecoverable.
-            // We MUST reset the tracker state to prevent an immediate crash.
-            // This will clear all boxes, and detection will restart.
-            trackerQueue.sync {
-                self.trackedObjects.removeAll()
-                self.trackedObjectInfo.removeAll()
-            }
+            print("Failed to perform detection: \(error.localizedDescription)")
         }
         
-        // 5. Update the UI *once* after all requests are processed
-        updateDetectionOverlay()
-    }
-    
-    // MARK: - Main Vision Pipeline
-
-//    override func captureOutput(_ output: AVCaptureOutput, didOutput sampleBuffer: CMSampleBuffer, from connection: AVCaptureConnection) {
-//        guard let pixelBuffer = CMSampleBufferGetImageBuffer(sampleBuffer) else { return }
-//        self.latestPixelBuffer = pixelBuffer
-//        let exifOrientation = exifOrientationFromDeviceOrientation()
-//        
-//        // 1. Get all active tracker requests
-//        let trackers = trackerQueue.sync { Array(self.trackedObjects.values) }
-//        
-//        // 2. Build the list of requests for this frame
-//        var requests: [VNRequest] = trackers
-//        
-//        // 3. Periodically, add a new detection request
-//        if frameCounter % detectionStride == 0 {
-//            requests.append(createDetectionRequest())
-//        }
-//        frameCounter = (frameCounter + 1) % detectionStride // Loop counter
-//        
-//        // 4. Perform all requests using the *stateful* sequence handler
-//        do {
-//            try sequenceHandler.perform(requests, on: pixelBuffer, orientation: exifOrientation)
-//        } catch {
-//            print("Failed to perform requests: \(error.localizedDescription)")
-//        }
-//        
-//        // 5. Update the UI *once* after all requests are processed
+        // 4. Update the UI
 //        updateDetectionOverlay()
-//    }
+    }
+
     
     /// Helper to create a new detection request for the current frame.
     private func createDetectionRequest() -> VNCoreMLRequest {
@@ -151,170 +112,136 @@ class VisionViewController: ViewController {
         
     
     // MARK: - Vision Completion Handlers
-
+    
+    
 //    private func handleDetectionResults(for request: VNRequest, error: Error?) {
-//        guard let results = request.results as? [VNRecognizedObjectObservation] else { return }
+//        guard let newDetections = request.results as? [VNRecognizedObjectObservation] else { return }
+//
+//        // 1. Get all normalized bounding boxes
+//        let boxes = newDetections.map { $0.boundingBox }
+//        var normalized_boxes = [NormalizedRect]()
+//        for box in boxes {
+//            normalized_boxes.append(NormalizedRect(imageRect: box, in: CGSize(width: bufferSize.width, height: bufferSize.height)))
+//        }
 //        
-//        trackerQueue.sync { // Protect dictionary access
-//            // Get the boxes of objects we are *already* tracking
-//            let existingBoxes = self.trackedObjectInfo.values.map { $0.box }
+//        // 2. Update the CentroidTracker.
+//        // This is the core logic. It returns a dictionary of [StableID: Box]
+//        let trackedObjects = self.centroidTracker.update(rects: normalized_boxes)
+//        
+//        // 3. Create a new info dictionary for this frame
+//        var newTrackedInfo: [UUID: (box: CGRect, label: String, teamID: Int?)] = [:]
+//        
+//        // 4. Use our serial queue to safely update our state
+//        trackerQueue.async {
+//            let oldTrackedInfo = self.trackedObjectInfo
 //            
-//            for observation in results where observation.confidence > 0.6 {
+//            // Loop through the *stable* objects from the CentroidTracker
+//            for (id, box) in trackedObjects {
+//                let uuid = UUID(uuidString: "00000000-0000-0000-0000-\(String(format: "%012x", id))")!
 //                
-//                // Check if this "new" detection overlaps significantly with an existing tracker
-//                var isNew = true
-//                for box in existingBoxes {
-//                    if iou(observation.boundingBox, box) > 0.7 { // 70% overlap
-//                        isNew = false
-//                        break
-//                    }
-//                }
+//                // Find the original full observation for this box
+//                guard let observation = newDetections.first(where: { $0.boundingBox == box }) else { continue }
+//                let label = observation.labels.first?.identifier ?? "Unknown"
+//
+//                var teamID: Int? = nil
 //                
-//                if isNew {
-//                    // This is a NEWLY detected object. Create a tracker for it.
-//                    let uuid = UUID()
+//                // Check if we were tracking this object in the *previous* frame
+//                if let oldInfo = oldTrackedInfo[uuid] {
+//                    // This is a RE-DETECTION. Keep its teamID.
+//                    teamID = oldInfo.teamID
 //                    
-//                    // Create a tracker with its own completion handler
-//                    let trackRequest = VNTrackObjectRequest(detectedObjectObservation: observation) { [weak self] (req, err) in
-//                        self?.handleTrackingResults(for: req, with: uuid)
+//                    // If calibration finished and this player is unclassified, classify them.
+//                    if self.isClassifierFitted && label == "player" && teamID == nil {
+//                        self.classifyPlayer(with: uuid, observation: observation)
 //                    }
 //                    
-//                    // Add it to our state
-//                    self.trackedObjects[uuid] = trackRequest
-//                    
-//                    let label = observation.labels.first?.identifier ?? "Unknown"
-//                    self.trackedObjectInfo[uuid] = (observation.boundingBox, label, nil)
-//                    
-//                    // If classifier is ready, classify this new player immediately
+//                } else {
+//                    // This is a NEW DETECTION.
 //                    if self.isClassifierFitted && label == "player" {
+//                        // Classifier is ready. Classify immediately.
 //                        self.classifyPlayer(with: uuid, observation: observation)
 //                    }
 //                }
+//                
+//                // Collect crops if we're still calibrating
+//                if !self.isClassifierFitted && label == "player" {
+//                    self.collectCropForCalibration(from: observation)
+//                }
+//                
+//                // Add to our new state for drawing
+//                newTrackedInfo[uuid] = (box, label, teamID)
 //            }
+//            
+//            // Overwrite the old state with the new state.
+//            // This automatically "prunes" any objects that CentroidTracker removed.
+//            self.trackedObjectInfo = newTrackedInfo
 //        }
 //    }
     
+
     private func handleDetectionResults(for request: VNRequest, error: Error?) {
-        guard let results = request.results as? [VNRecognizedObjectObservation] else { return }
+        guard let newDetections = request.results as? [VNRecognizedObjectObservation] else { return }
+
+        // 1. Convert [CGRect] to [NormalizedRect]
+        let normalized_boxes = newDetections.map {
+            NormalizedRect(imageRect: $0.boundingBox, in: self.bufferSize)
+        }
         
-        trackerQueue.sync {
-            let currentTrackersInfo = self.trackedObjectInfo
-            var matchedUUIDs: Set<UUID> = []
+        // 2. Update the CentroidTracker.
+        self.centroidTracker.update(rects: normalized_boxes)
+        
+        // 3. Get the stable objects *after* updating
+        let trackedObjects = self.centroidTracker.objects
+        
+        // 4. Create a new info dictionary for this frame
+        var newTrackedInfo: [UUID: (box: CGRect, label: String, teamID: Int?)] = [:]
+        
+        // 5. ⭐️ FIX: Use .async to prevent deadlock
+        trackerQueue.async {
+            let oldTrackedInfo = self.trackedObjectInfo
+            
+            // Loop through the *stable* objects: [Int: NormalizedRect]
+            for (id, normalizedRect) in trackedObjects {
+                // Create a stable UUID from the Int ID
+                let uuid = UUID(uuidString: "00000000-0000-0000-0000-\(String(format: "%012x", id))")!
+                
+                // ⭐️ FIX: Find the original observation by comparing its rect
+                guard let observation = newDetections.first(where: { $0.boundingBox == normalizedRect.cgRect }) else { continue }
+                let label = observation.labels.first?.identifier ?? "Unknown"
 
-            // --- PART 1: MATCH AND UPDATE ---
-            // Loop through all new detections from the model
-            for newObservation in results where newObservation.confidence > 0.6 {
+                var teamID: Int? = nil
                 
-                var bestMatchUUID: UUID? = nil
-                var bestIOU: CGFloat = 0.0
-                
-                // Find the existing tracker with the best overlap
-                for (uuid, info) in currentTrackersInfo {
-                    if matchedUUIDs.contains(uuid) { continue }
+                // Check if we were tracking this object in the *previous* frame
+                if let oldInfo = oldTrackedInfo[uuid] {
+                    teamID = oldInfo.teamID
                     
-                    let iou = iou(newObservation.boundingBox, info.box)
-                    if iou > bestIOU && iou > 0.2 { // 0.2 is a good "catch" threshold
-                        bestIOU = iou
-                        bestMatchUUID = uuid
+                    if self.isClassifierFitted && label == "player" && teamID == nil {
+                        self.classifyPlayer(with: uuid, observation: observation)
                     }
-                }
-                
-                if let matchedUUID = bestMatchUUID {
-                    // --- A: RE-DETECTION ---
-                    // We found a match. Update the tracker with the new,
-                    // more-accurate box. This "snaps" it back.
-                    self.trackedObjects[matchedUUID]?.inputObservation = newObservation
-                    self.trackedObjectInfo[matchedUUID]?.box = newObservation.boundingBox
-                    matchedUUIDs.insert(matchedUUID)
-
+                    
                 } else {
-                    // --- B: NEW DETECTION ---
-                    // This is a new object. Create a tracker.
-                    let uuid = UUID()
-                    let trackRequest = VNTrackObjectRequest(detectedObjectObservation: newObservation) { [weak self] (req, err) in
-                        self?.handleTrackingResults(for: req, with: uuid)
-                    }
-                    
-                    self.trackedObjects[uuid] = trackRequest
-                    let label = newObservation.labels.first?.identifier ?? "Unknown"
-                    self.trackedObjectInfo[uuid] = (newObservation.boundingBox, label, nil)
-                    matchedUUIDs.insert(uuid) // Also add new trackers to the set
-
+                    // This is a NEW DETECTION.
                     if self.isClassifierFitted && label == "player" {
-                        self.classifyPlayer(with: uuid, observation: newObservation)
+                        self.classifyPlayer(with: uuid, observation: observation)
                     }
                 }
-            }
-            
-            // --- ⭐️ PART 2: PRUNE ZOMBIES (THE FIX) ⭐️ ---
-            //
-            // We've now matched all the detections we can.
-            // Any tracker that *wasn't* in the `matchedUUIDs` set
-            // is a "zombie" (it's lost, drifted, or occluded)
-            // and must be removed.
-            
-            // 1. Get all UUIDs we were tracking before this pass
-            let allCurrentUUIDs = Set(self.trackedObjectInfo.keys)
-            
-            // 2. Find the ones that were NOT matched or created
-            let unmatchedUUIDs = allCurrentUUIDs.subtracting(matchedUUIDs)
-            
-            // 3. Remove them.
-            for uuid in unmatchedUUIDs {
-                // Optional: You might want to be more careful, e.g.,
-                // only prune "players" and not the "ball".
-                // For now, removing all unmatched is safest.
-                self.trackedObjects.removeValue(forKey: uuid)
-                self.trackedObjectInfo.removeValue(forKey: uuid)
-            }
-        }
-    }
-    
-    private func handleTrackingResults(for request: VNRequest, with uuid: UUID) {
-        guard let results = request.results as? [VNDetectedObjectObservation], let observation = results.first else {
-            // No result, object was lost.
-            trackerQueue.sync {
-                trackedObjects.removeValue(forKey: uuid)
-                trackedObjectInfo.removeValue(forKey: uuid)
-            }
-            return
-        }
-        
-        var needsClassification = false
-        
-        trackerQueue.sync { // Protect dictionary access
-            if observation.confidence > 0.5 {
-                // CRITICAL: Update the tracker's observation so it tracks
-                // from this new position in the *next* frame.
-                self.trackedObjects[uuid]?.inputObservation = observation
                 
-                // Update the info for drawing
-                let oldInfo = self.trackedObjectInfo[uuid]
-                self.trackedObjectInfo[uuid] = (observation.boundingBox, oldInfo?.label ?? "Unknown", oldInfo?.teamID)
-                
-                // Check if we need to classify this player
-                // (e.g., if classifier was just fitted, or if teamID is still nil)
-                if self.isClassifierFitted &&
-                   oldInfo?.label == "player" &&
-                   oldInfo?.teamID == nil {
-                    needsClassification = true
+                // Collect crops if we're still calibrating
+                if !self.isClassifierFitted && label == "player" {
+                    self.collectCropForCalibration(from: observation)
                 }
                 
-            } else {
-                // Tracker lost confidence
-                self.trackedObjects.removeValue(forKey: uuid)
-                self.trackedObjectInfo.removeValue(forKey: uuid)
+                newTrackedInfo[uuid] = (normalizedRect.cgRect, label, teamID)
+            }
+            
+            // Overwrite the old state with the new state.
+            self.trackedObjectInfo = newTrackedInfo
+            
+            // 6. ⭐️ FIX: Update the UI *after* all logic is done.
+            DispatchQueue.main.async {
+                self.updateDetectionOverlay()
             }
         }
-        
-        if needsClassification {
-            // This is async (Task) so it's safe to call from here
-            classifyPlayer(with: uuid, observation: observation)
-        }
-        
-        // REMOVED: updateDetectionOverlay()
-        // This was the source of major UI performance issues, as it was
-        // being called N times per frame (once for each tracker).
     }
         
     // MARK: - Team Classification Logic
@@ -607,7 +534,7 @@ class VisionViewController: ViewController {
                 self.isClassifierFitted = true
                 self.isFittingModel = false // Release lock
                 print("✅ Automatic calibration successful!")
-                self.classifyAllExistingPlayers()
+//                self.classifyAllExistingPlayers()
                 
             } catch {
                 print("❌ Automatic calibration failed: \(error)")
@@ -621,22 +548,22 @@ class VisionViewController: ViewController {
     }
 
     /// Finds all currently tracked players and runs classification on them.
-    private func classifyAllExistingPlayers() {
-        print("Classifier fitted. Re-classifying all existing players...")
-        let currentPlayers = self.trackerQueue.sync {
-            // Get all UUIDs and observations for objects labeled "player"
-            return self.trackedObjectInfo
-                .filter { $0.value.label == "player" }
-                .compactMap { (uuid, info) -> (UUID, VNDetectedObjectObservation)? in
-                    guard let tracker = self.trackedObjects[uuid] else { return nil }
-                    return (uuid, tracker.inputObservation)
-                }
-        }
-        
-        // Call classifyPlayer for each one. This is safe because
-        // classifyPlayer already runs as an async Task.
-        for (uuid, observation) in currentPlayers {
-            self.classifyPlayer(with: uuid, observation: observation)
-        }
-    }
+//    private func classifyAllExistingPlayers() {
+//        print("Classifier fitted. Re-classifying all existing players...")
+//        let currentPlayers = self.trackerQueue.sync {
+//            // Get all UUIDs and observations for objects labeled "player"
+//            return self.trackedObjectInfo
+//                .filter { $0.value.label == "player" }
+//                .compactMap { (uuid, info) -> (UUID, VNDetectedObjectObservation)? in
+//                    guard let tracker = self.trackedObjects[uuid] else { return nil }
+//                    return (uuid, tracker.inputObservation)
+//                }
+//        }
+//        
+//        // Call classifyPlayer for each one. This is safe because
+//        // classifyPlayer already runs as an async Task.
+//        for (uuid, observation) in currentPlayers {
+//            self.classifyPlayer(with: uuid, observation: observation)
+//        }
+//    }
 }

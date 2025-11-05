@@ -27,8 +27,10 @@ struct CameraButtonsView: View {
     var body: some View {
         ZStack {
 
-            CameraView(calibrationTrigger: self.calibrationTrigger)
-                .ignoresSafeArea(edges: .all)
+//            CameraView(calibrationTrigger: self.calibrationTrigger)
+//                .ignoresSafeArea(edges: .all)
+            CameraTestView()
+                .ignoresSafeArea(.all)
             
             // Controls overlay
             VStack {
