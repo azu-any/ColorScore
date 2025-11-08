@@ -44,12 +44,22 @@ struct CameraButtonsView: View {
             // Controls overlay
             VStack {
                 // Top row
-                HStack {
+                HStack(alignment: .top) {
                     // Config button on the left
                     backButton
                     Spacer()
                     // Configuration button on the right
-                    configButton
+                    VStack(alignment: .trailing, spacing: 8) {
+                        Button("Configuration") {
+                            withAnimation(.spring(response: 0.5, dampingFraction: 0.8)) {
+                                showConfiguration.toggle()
+                            }
+                        }
+                        .buttonStyle(CircularButtonStyle(icon: showConfiguration ? "xmark" : "gearshape.fill", usesGlass: true))
+                        
+                        if showConfiguration { configurationPanel }
+                    }
+                    .frame(maxWidth: showConfiguration ? 380 : 44, alignment: .trailing)
                 }
                 .padding(.leading, 16)
                 .padding(.trailing, 16)
@@ -72,11 +82,7 @@ struct CameraButtonsView: View {
                     .padding(.top, 24)
                 Spacer()
             }
-            
-            // Configuration overlay
-            if showConfiguration {
-                configurationOverlay
-            }
+            .zIndex(1)
         }
     }
 }
@@ -90,97 +96,69 @@ private extension CameraButtonsView {
         .buttonStyle(CircularButtonStyle(icon: "chevron.left"))
     }
     
-    var configButton: some View {
-        Button("Configuration") {
-            withAnimation(.spring(response: 0.4, dampingFraction: 0.75)) {
-                showConfiguration.toggle()
+    var configurationPanel: some View {
+        VStack(spacing: 20) {
+            // Header
+            HStack {
+                Text("Customize Players")
+                    .font(.system(.headline, design: .rounded, weight: .bold))
+                    .foregroundStyle(.primary)
+                Spacer()
             }
-        }
-        .buttonStyle(CircularButtonStyle(icon: showConfiguration ? "xmark" : "gearshape.fill", usesGlass: true))
-    }
-    
-    var configurationOverlay: some View {
-        VStack(spacing: 0) {
-            // Configuration panel
-            VStack(spacing: 20) {
-                // Header
-                HStack {
-                    Text("Customize Players")
-                        .font(.system(.headline, design: .rounded, weight: .bold))
-                        .foregroundStyle(.primary)
-                    Spacer()
-                }
-                .padding(.bottom, 4)
-                
-                ScrollView {
-                    VStack(spacing: 24) {
-                        // Team 1
-                        VStack(alignment: .leading, spacing: 12) {
-                            Text("Team 1")
-                                .font(.system(.subheadline, design: .rounded, weight: .semibold))
-                                .foregroundStyle(.secondary)
-                            
-                            CompactShapeColorPicker(
-                                title: "Players",
-                                selectedShape: $team1Shape,
-                                selectedColor: $team1Color
-                            )
-                            
-                            CompactShapeColorPicker(
-                                title: "Goalkeeper",
-                                selectedShape: $goalkeeper1Shape,
-                                selectedColor: $goalkeeper1Color
-                            )
-                        }
-                        
-                        Divider()
-                            .background(Color.primary.opacity(0.15))
-                        
-                        // Team 2
-                        VStack(alignment: .leading, spacing: 12) {
-                            Text("Team 2")
-                                .font(.system(.subheadline, design: .rounded, weight: .semibold))
-                                .foregroundStyle(.secondary)
-                            
-                            CompactShapeColorPicker(
-                                title: "Players",
-                                selectedShape: $team2Shape,
-                                selectedColor: $team2Color
-                            )
-                            
-                            CompactShapeColorPicker(
-                                title: "Goalkeeper",
-                                selectedShape: $goalkeeper2Shape,
-                                selectedColor: $goalkeeper2Color
-                            )
-                        }
-                    }
-                    .padding(.vertical, 4)
-                }
-                .frame(maxHeight: 400)
-            }
-            .padding(20)
-            .frame(maxWidth: 420)
-            .glassEffect(.regular.interactive(), in: .rect(cornerRadius: 24))
-            .shadow(color: Color.black.opacity(0.15), radius: 20, x: 0, y: 10)
+            .padding(.bottom, 4)
             
-            Spacer()
-        }
-        .padding(.top, 80)
-        .frame(maxWidth: .infinity, maxHeight: .infinity)
-        .background(
-            Color.black.opacity(0.3)
-                .ignoresSafeArea()
-                .onTapGesture {
-                    withAnimation(.spring(response: 0.4, dampingFraction: 0.75)) {
-                        showConfiguration = false
+            ScrollView {
+                VStack(spacing: 24) {
+                    // Team 1
+                    VStack(alignment: .leading, spacing: 12) {
+                        Text("Team 1")
+                            .font(.system(.subheadline, design: .rounded, weight: .semibold))
+                            .foregroundStyle(.secondary)
+                        
+                        CompactShapeColorPicker(
+                            title: "Players",
+                            selectedShape: $team1Shape,
+                            selectedColor: $team1Color
+                        )
+                        
+                        CompactShapeColorPicker(
+                            title: "Goalkeeper",
+                            selectedShape: $goalkeeper1Shape,
+                            selectedColor: $goalkeeper1Color
+                        )
+                    }
+                    
+                    Divider()
+                        .background(Color.primary.opacity(0.15))
+                    
+                    // Team 2
+                    VStack(alignment: .leading, spacing: 12) {
+                        Text("Team 2")
+                            .font(.system(.subheadline, design: .rounded, weight: .semibold))
+                            .foregroundStyle(.secondary)
+                        
+                        CompactShapeColorPicker(
+                            title: "Players",
+                            selectedShape: $team2Shape,
+                            selectedColor: $team2Color
+                        )
+                        
+                        CompactShapeColorPicker(
+                            title: "Goalkeeper",
+                            selectedShape: $goalkeeper2Shape,
+                            selectedColor: $goalkeeper2Color
+                        )
                     }
                 }
-        )
-        .transition(.asymmetric(
-            insertion: .move(edge: .top).combined(with: .opacity),
-            removal: .move(edge: .top).combined(with: .opacity)
-        ))
+                .padding(.vertical, 4)
+            }
+            .frame(maxHeight: 400)
+        }
+        .padding(20)
+        .frame(width: 380)
+        .glassEffect(.regular.interactive(), in: .rect(cornerRadius: 24))
+        .shadow(color: Color.black.opacity(0.15), radius: 20, x: 0, y: 10)
+        .transition(.scale(scale: 0, anchor: .topTrailing).combined(with: .opacity))
     }
     
     var scoreView: some View {
