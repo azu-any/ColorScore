@@ -72,9 +72,11 @@ struct CameraButtonsView: View {
                     .padding(.top, 24)
                 Spacer()
             }
-        }
-        .sheet(isPresented: $showConfiguration) {
-            configurationSheet
+            
+            // Configuration overlay
+            if showConfiguration {
+                configurationOverlay
+            }
         }
     }
 }
@@ -90,52 +92,95 @@ private extension CameraButtonsView {
     
     var configButton: some View {
         Button("Configuration") {
-            showConfiguration = true
+            withAnimation(.spring(response: 0.4, dampingFraction: 0.75)) {
+                showConfiguration.toggle()
+            }
         }
-        .buttonStyle(CircularButtonStyle(icon: "gearshape.fill", usesGlass: true))
+        .buttonStyle(CircularButtonStyle(icon: showConfiguration ? "xmark" : "gearshape.fill", usesGlass: true))
     }
     
-    var configurationSheet: some View {
-        NavigationStack {
-            Form {
-                Section("Team 1") {
-                    ShapeColorPicker(
-                        title: "Players",
-                        selectedShape: $team1Shape,
-                        selectedColor: $team1Color
-                    )
-                    
-                    ShapeColorPicker(
-                        title: "Goalkeeper",
-                        selectedShape: $goalkeeper1Shape,
-                        selectedColor: $goalkeeper1Color
-                    )
+    var configurationOverlay: some View {
+        VStack(spacing: 0) {
+            // Configuration panel
+            VStack(spacing: 20) {
+                // Header
+                HStack {
+                    Text("Customize Players")
+                        .font(.system(.headline, design: .rounded, weight: .bold))
+                        .foregroundStyle(.primary)
+                    Spacer()
                 }
+                .padding(.bottom, 4)
                 
-                Section("Team 2") {
-                    ShapeColorPicker(
-                        title: "Players",
-                        selectedShape: $team2Shape,
-                        selectedColor: $team2Color
-                    )
-                    
-                    ShapeColorPicker(
-                        title: "Goalkeeper",
-                        selectedShape: $goalkeeper2Shape,
-                        selectedColor: $goalkeeper2Color
-                    )
+                ScrollView {
+                    VStack(spacing: 24) {
+                        // Team 1
+                        VStack(alignment: .leading, spacing: 12) {
+                            Text("Team 1")
+                                .font(.system(.subheadline, design: .rounded, weight: .semibold))
+                                .foregroundStyle(.secondary)
+                            
+                            CompactShapeColorPicker(
+                                title: "Players",
+                                selectedShape: $team1Shape,
+                                selectedColor: $team1Color
+                            )
+                            
+                            CompactShapeColorPicker(
+                                title: "Goalkeeper",
+                                selectedShape: $goalkeeper1Shape,
+                                selectedColor: $goalkeeper1Color
+                            )
+                        }
+                        
+                        Divider()
+                            .background(Color.primary.opacity(0.15))
+                        
+                        // Team 2
+                        VStack(alignment: .leading, spacing: 12) {
+                            Text("Team 2")
+                                .font(.system(.subheadline, design: .rounded, weight: .semibold))
+                                .foregroundStyle(.secondary)
+                            
+                            CompactShapeColorPicker(
+                                title: "Players",
+                                selectedShape: $team2Shape,
+                                selectedColor: $team2Color
+                            )
+                            
+                            CompactShapeColorPicker(
+                                title: "Goalkeeper",
+                                selectedShape: $goalkeeper2Shape,
+                                selectedColor: $goalkeeper2Color
+                            )
+                        }
+                    }
+                    .padding(.vertical, 4)
                 }
+                .frame(maxHeight: 400)
             }
-            .navigationTitle("Customize Players")
-            .navigationBarTitleDisplayMode(.inline)
-            .toolbar {
-                ToolbarItem(placement: .confirmationAction) {
-                    Button("Done") {
+            .padding(20)
+            .frame(maxWidth: 420)
+            .glassEffect(.regular.interactive(), in: .rect(cornerRadius: 24))
+            .shadow(color: Color.black.opacity(0.15), radius: 20, x: 0, y: 10)
+            
+            Spacer()
+        }
+        .padding(.top, 80)
+        .frame(maxWidth: .infinity, maxHeight: .infinity)
+        .background(
+            Color.black.opacity(0.3)
+                .ignoresSafeArea()
+                .onTapGesture {
+                    withAnimation(.spring(response: 0.4, dampingFraction: 0.75)) {
                         showConfiguration = false
                     }
                 }
-            }
-        }
+        )
+        .transition(.asymmetric(
+            insertion: .move(edge: .top).combined(with: .opacity),
+            removal: .move(edge: .top).combined(with: .opacity)
+        ))
     }
     
     var scoreView: some View {
@@ -642,6 +687,82 @@ struct ShapeColorPicker: View {
             }
         }
         .padding(.vertical, 8)
+    }
+}
+
+// MARK: - Compact Shape Color Picker for Overlay
+struct CompactShapeColorPicker: View {
+    let title: String
+    @Binding var selectedShape: PlayerShape
+    @Binding var selectedColor: PlayerColor
+    
+    var body: some View {
+        VStack(alignment: .leading, spacing: 10) {
+            HStack {
+                Text(title)
+                    .font(.system(.callout, design: .rounded, weight: .medium))
+                    .foregroundStyle(.primary)
+                Spacer()
+                // Preview
+                selectedShape.view(color: selectedColor.color, size: 20)
+            }
+            
+            // Shape picker - compact horizontal scroll
+            ScrollView(.horizontal, showsIndicators: false) {
+                HStack(spacing: 8) {
+                    ForEach(PlayerShape.allCases) { shape in
+                        Button {
+                            withAnimation(.spring(response: 0.3, dampingFraction: 0.7)) {
+                                selectedShape = shape
+                            }
+                        } label: {
+                            shape.view(color: selectedColor.color, size: 20)
+                                .frame(width: 40, height: 40)
+                                .background(
+                                    RoundedRectangle(cornerRadius: 10)
+                                        .fill(selectedShape == shape ? selectedColor.color.opacity(0.2) : Color.primary.opacity(0.05))
+                                )
+                                .overlay(
+                                    RoundedRectangle(cornerRadius: 10)
+                                        .strokeBorder(selectedShape == shape ? selectedColor.color : Color.clear, lineWidth: 2)
+                                )
+                        }
+                        .buttonStyle(.plain)
+                    }
+                }
+            }
+            
+            // Color picker - compact grid
+            LazyVGrid(columns: [GridItem(.adaptive(minimum: 36))], spacing: 8) {
+                ForEach(PlayerColor.allCases) { colorOption in
+                    Button {
+                        withAnimation(.spring(response: 0.3, dampingFraction: 0.7)) {
+                            selectedColor = colorOption
+                        }
+                    } label: {
+                        Circle()
+                            .fill(colorOption.color)
+                            .frame(width: 36, height: 36)
+                            .overlay(
+                                Circle()
+                                    .strokeBorder(selectedColor == colorOption ? Color.white : Color.clear, lineWidth: 2.5)
+                            )
+                            .overlay(
+                                Circle()
+                                    .strokeBorder(selectedColor == colorOption ? Color.primary : Color.primary.opacity(0.2), lineWidth: 1)
+                            )
+                            .shadow(color: Color.black.opacity(0.1), radius: 2, x: 0, y: 1)
+                    }
+                    .buttonStyle(.plain)
+                    .accessibilityLabel(colorOption.rawValue)
+                }
+            }
+        }
+        .padding(12)
+        .background(
+            RoundedRectangle(cornerRadius: 12)
+                .fill(Color.primary.opacity(0.05))
+        )
     }
 }
 
