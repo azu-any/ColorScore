@@ -69,11 +69,11 @@ struct HomeView: View {
 
                         // MARK: - Grid inferior
                         VStack(spacing: 18) {
-                            OptionGlassCard(
-                                title: "Configuración del partido",
-                                systemIcon: "gearshape.fill",
-                                tint: .gray
-                            )
+//                            OptionGlassCard(
+//                                title: "Configuración del partido",
+//                                systemIcon: "gearshape.fill",
+//                                tint: .gray
+//                            )
                             OptionGlassCard(
                                 title: "Estadísticas de equipos",
                                 systemIcon: "chart.bar.fill",

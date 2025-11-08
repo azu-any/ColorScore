@@ -14,6 +14,8 @@ struct Team: Identifiable {
 }
 
 struct TeamSelectionView: View {
+    @State private var showingNewTeamSheet = false
+    
     let copaLibertadoresTeams = [
         Team(name: "Boca Juniors", imageName: "boca"),
         Team(name: "River Plate", imageName: "river"),
@@ -47,7 +49,7 @@ struct TeamSelectionView: View {
                 VStack(alignment: .leading, spacing: 24) {
                     // Header
                     VStack(alignment: .leading, spacing: 8) {
-                        Text("Nuevo partido")
+                        Text("Selecciona tu equipo")
                             .font(.system(size: 34, weight: .bold))
                         
                         Text("Configura tu partido")
@@ -92,12 +94,17 @@ struct TeamSelectionView: View {
             .navigationBarTitleDisplayMode(.inline)
             .toolbar {
                 ToolbarItem(placement: .navigationBarTrailing) {
-                    Button(action: {}) {
+                    Button(action: {
+                        showingNewTeamSheet = true
+                    }) {
                         Image(systemName: "plus")
                             .font(.system(size: 22, weight: .medium))
                             .foregroundColor(.primary)
                     }
                 }
+            }
+            .sheet(isPresented: $showingNewTeamSheet) {
+                NewTeamView()
             }
         }
     }
