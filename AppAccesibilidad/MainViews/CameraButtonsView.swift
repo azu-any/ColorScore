@@ -30,6 +30,8 @@ struct CameraButtonsView: View {
     @State private var team2Color: PlayerColor = .red
     @State private var goalkeeper2Shape: PlayerShape = .square
     @State private var goalkeeper2Color: PlayerColor = .red
+    @State private var ballShape: PlayerShape = .circle
+    @State private var ballColor: PlayerColor = .orange
 
     var body: some View {
         ZStack {
@@ -59,7 +61,7 @@ struct CameraButtonsView: View {
                         
                         if showConfiguration { configurationPanel }
                     }
-                    .frame(maxWidth: showConfiguration ? 380 : 44, alignment: .trailing)
+                    .frame(maxWidth: showConfiguration ? 440 : 44, alignment: .trailing)
                 }
                 .padding(.leading, 16)
                 .padding(.trailing, 16)
@@ -149,13 +151,30 @@ private extension CameraButtonsView {
                             selectedColor: $goalkeeper2Color
                         )
                     }
+                    
+                    Divider()
+                        .background(Color.primary.opacity(0.15))
+                    
+                    // Ball
+                    VStack(alignment: .leading, spacing: 12) {
+                        Text("Ball")
+                            .font(.system(.subheadline, design: .rounded, weight: .semibold))
+                            .foregroundStyle(.secondary)
+                        
+                        CompactShapeColorPicker(
+                            title: "Ball",
+                            selectedShape: $ballShape,
+                            selectedColor: $ballColor
+                        )
+                    }
                 }
                 .padding(.vertical, 4)
+                .padding(.bottom, 20)
             }
-            .frame(maxHeight: 400)
+            .frame(maxHeight: 500)
         }
-        .padding(20)
-        .frame(width: 380)
+        .padding(24)
+        .frame(width: 440)
         .glassEffect(.regular.interactive(), in: .rect(cornerRadius: 24))
         .shadow(color: Color.black.opacity(0.15), radius: 20, x: 0, y: 10)
         .transition(.scale(scale: 0, anchor: .topTrailing).combined(with: .opacity))
@@ -167,14 +186,14 @@ private extension CameraButtonsView {
             HStack(spacing: 0) {
                 // Left team
                 HStack(spacing: 8) {
-                    teamShape(color: leftTeamColor, isCircle: false)
+                    team1Shape.view(color: team1Color.color, size: 16)
                     
                     Text(leftTeamName)
                         .lineLimit(1)
                         .fixedSize(horizontal: true, vertical: false)
                         .font(.system(.callout, design: .rounded, weight: .semibold))
                 }
-                .foregroundStyle(leftTeamColor)
+                .foregroundStyle(team1Color.color)
                 
                 Spacer()
                     .frame(width: 12)
@@ -184,7 +203,7 @@ private extension CameraButtonsView {
                     Text("\(leftScore)")
                         .monospacedDigit()
                         .font(.system(.title, design: .rounded, weight: .bold))
-                        .foregroundStyle(leftTeamColor)
+                        .foregroundStyle(team1Color.color)
                         .frame(minWidth: 28)
                     
                     Text(":")
@@ -194,7 +213,7 @@ private extension CameraButtonsView {
                     Text("\(rightScore)")
                         .monospacedDigit()
                         .font(.system(.title, design: .rounded, weight: .bold))
-                        .foregroundStyle(rightTeamColor)
+                        .foregroundStyle(team2Color.color)
                         .frame(minWidth: 28)
                 }
                 
@@ -208,9 +227,9 @@ private extension CameraButtonsView {
                         .fixedSize(horizontal: true, vertical: false)
                         .font(.system(.callout, design: .rounded, weight: .semibold))
                     
-                    teamShape(color: rightTeamColor, isCircle: true)
+                    team2Shape.view(color: team2Color.color, size: 16)
                 }
-                .foregroundStyle(rightTeamColor)
+                .foregroundStyle(team2Color.color)
             }
             
             // Score controls - only show when toggled
@@ -230,7 +249,7 @@ private extension CameraButtonsView {
                             Image(systemName: "minus.circle.fill")
                                 .font(.system(size: 26))
                         }
-                        .buttonStyle(ScoreControlButtonStyle(teamColor: leftTeamColor, enabled: leftScore > 0))
+                        .buttonStyle(ScoreControlButtonStyle(teamColor: team1Color.color, enabled: leftScore > 0))
                         .disabled(leftScore == 0)
                         .accessibilityLabel("Decrease \(leftTeamName) score")
                         
@@ -240,7 +259,7 @@ private extension CameraButtonsView {
                             Image(systemName: "plus.circle.fill")
                                 .font(.system(size: 26))
                         }
-                        .buttonStyle(ScoreControlButtonStyle(teamColor: leftTeamColor, enabled: true))
+                        .buttonStyle(ScoreControlButtonStyle(teamColor: team1Color.color, enabled: true))
                         .accessibilityLabel("Increase \(leftTeamName) score")
                     }
                     
@@ -256,7 +275,7 @@ private extension CameraButtonsView {
                             Image(systemName: "minus.circle.fill")
                                 .font(.system(size: 26))
                         }
-                        .buttonStyle(ScoreControlButtonStyle(teamColor: rightTeamColor, enabled: rightScore > 0))
+                        .buttonStyle(ScoreControlButtonStyle(teamColor: team2Color.color, enabled: rightScore > 0))
                         .disabled(rightScore == 0)
                         .accessibilityLabel("Decrease \(rightTeamName) score")
                         
@@ -266,7 +285,7 @@ private extension CameraButtonsView {
                             Image(systemName: "plus.circle.fill")
                                 .font(.system(size: 26))
                         }
-                        .buttonStyle(ScoreControlButtonStyle(teamColor: rightTeamColor, enabled: true))
+                        .buttonStyle(ScoreControlButtonStyle(teamColor: team2Color.color, enabled: true))
                         .accessibilityLabel("Increase \(rightTeamName) score")
                     }
                 }
@@ -457,7 +476,6 @@ enum PlayerShape: String, CaseIterable, Identifiable {
     case square = "Square"
     case triangle = "Triangle"
     case diamond = "Diamond"
-    case hexagon = "Hexagon"
     case star = "Star"
     
     var id: String { rawValue }
@@ -481,14 +499,10 @@ enum PlayerShape: String, CaseIterable, Identifiable {
             Diamond()
                 .fill(color)
                 .frame(width: size, height: size)
-        case .hexagon:
-            Hexagon()
-                .fill(color)
-                .frame(width: size, height: size)
         case .star:
             Star()
                 .fill(color)
-                .frame(width: size, height: size)
+                .frame(width: size * 1.2, height: size * 1.2)
         }
     }
 }
