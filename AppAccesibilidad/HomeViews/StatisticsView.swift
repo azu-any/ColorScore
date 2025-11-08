@@ -196,6 +196,7 @@ struct StatisticsMainView: View {
                     // Team Selector or Content
                     if selectedTeam == nil {
                         TeamSelectorView(teams: teamStatistics, selectedTeam: $selectedTeam)
+                            .transition(.move(edge: .leading).combined(with: .opacity))
                     } else {
                         VStack(spacing: 0) {
                             // View Tabs
@@ -249,19 +250,27 @@ struct StatisticsMainView: View {
                             // Content based on selected view
                             ScrollView {
                                 if let team = selectedTeam {
-                                    switch selectedView {
-                                    case .overview:
-                                        OverviewView(team: team, filter: selectedFilter)
-                                    case .matches:
-                                        MatchesListView(team: team, filter: selectedFilter)
-                                    case .performance:
-                                        PerformanceView(team: team)
-                                    case .players:
-                                        PlayersStatsView(team: team)
+                                    Group {
+                                        switch selectedView {
+                                        case .overview:
+                                            OverviewView(team: team, filter: selectedFilter)
+                                        case .matches:
+                                            MatchesListView(team: team, filter: selectedFilter)
+                                        case .performance:
+                                            PerformanceView(team: team)
+                                        case .players:
+                                            PlayersStatsView(team: team)
+                                        }
                                     }
+                                    .transition(.asymmetric(
+                                        insertion: .move(edge: .trailing).combined(with: .opacity),
+                                        removal: .move(edge: .leading).combined(with: .opacity)
+                                    ))
+                                    .id(selectedView) // Force view recreation for smooth transition
                                 }
                             }
                         }
+                        .transition(.move(edge: .trailing).combined(with: .opacity))
                     }
                 }
             }
@@ -437,6 +446,7 @@ struct TeamSelectorView: View {
 struct OverviewView: View {
     let team: TeamStatistics
     let filter: StatisticsFilter
+    @State private var isAnimating = false
     
     var body: some View {
         VStack(spacing: 20) {
@@ -499,6 +509,9 @@ struct OverviewView: View {
             }
             .padding(.horizontal)
             .padding(.top, 8)
+            .opacity(isAnimating ? 1 : 0)
+            .offset(y: isAnimating ? 0 : 20)
+            .animation(.spring(response: 0.6, dampingFraction: 0.8).delay(0.1), value: isAnimating)
             
             // Statistics Grid
             LazyVGrid(columns: [GridItem(.flexible()), GridItem(.flexible())], spacing: 16) {
@@ -528,6 +541,9 @@ struct OverviewView: View {
                 )
             }
             .padding(.horizontal)
+            .opacity(isAnimating ? 1 : 0)
+            .offset(y: isAnimating ? 0 : 20)
+            .animation(.spring(response: 0.6, dampingFraction: 0.8).delay(0.2), value: isAnimating)
             
             // Form Guide
             GlassCard(cornerRadius: 24, tintColor: team.teamColor) {
@@ -576,6 +592,9 @@ struct OverviewView: View {
                 }
             }
             .padding(.horizontal)
+            .opacity(isAnimating ? 1 : 0)
+            .offset(y: isAnimating ? 0 : 20)
+            .animation(.spring(response: 0.6, dampingFraction: 0.8).delay(0.3), value: isAnimating)
             
             // Win/Draw/Loss Distribution
             GlassCard(cornerRadius: 24, tintColor: team.teamColor) {
@@ -642,10 +661,16 @@ struct OverviewView: View {
                 }
             }
             .padding(.horizontal)
+            .opacity(isAnimating ? 1 : 0)
+            .offset(y: isAnimating ? 0 : 20)
+            .animation(.spring(response: 0.6, dampingFraction: 0.8).delay(0.4), value: isAnimating)
             
             Spacer(minLength: 20)
         }
         .padding(.vertical)
+        .onAppear {
+            isAnimating = true
+        }
     }
     
     func resultColor(for result: MatchResult) -> Color {
@@ -705,14 +730,21 @@ struct GlassStatCard: View {
 struct MatchesListView: View {
     let team: TeamStatistics
     let filter: StatisticsFilter
+    @State private var isAnimating = false
     
     var body: some View {
         VStack(spacing: 16) {
-            ForEach(team.matches) { match in
+            ForEach(Array(team.matches.enumerated()), id: \.element.id) { index, match in
                 GlassMatchDetailCard(match: match, teamColor: team.teamColor)
+                    .opacity(isAnimating ? 1 : 0)
+                    .offset(y: isAnimating ? 0 : 20)
+                    .animation(.spring(response: 0.6, dampingFraction: 0.8).delay(Double(index) * 0.1), value: isAnimating)
             }
         }
         .padding()
+        .onAppear {
+            isAnimating = true
+        }
     }
 }
 
@@ -876,6 +908,7 @@ struct GlassMatchDetailCard: View {
 // MARK: - Performance View
 struct PerformanceView: View {
     let team: TeamStatistics
+    @State private var isAnimating = false
     
     var body: some View {
         VStack(spacing: 20) {
@@ -951,6 +984,9 @@ struct PerformanceView: View {
             }
             .padding(.horizontal)
             .padding(.top, 8)
+            .opacity(isAnimating ? 1 : 0)
+            .offset(y: isAnimating ? 0 : 20)
+            .animation(.spring(response: 0.6, dampingFraction: 0.8).delay(0.1), value: isAnimating)
             
             // Average Stats
             LazyVGrid(columns: [GridItem(.flexible()), GridItem(.flexible())], spacing: 16) {
@@ -983,10 +1019,16 @@ struct PerformanceView: View {
                 )
             }
             .padding(.horizontal)
+            .opacity(isAnimating ? 1 : 0)
+            .offset(y: isAnimating ? 0 : 20)
+            .animation(.spring(response: 0.6, dampingFraction: 0.8).delay(0.2), value: isAnimating)
             
             Spacer(minLength: 20)
         }
         .padding(.vertical)
+        .onAppear {
+            isAnimating = true
+        }
     }
     
     func getCurrentStreak(matches: [MatchStatistic]) -> String {
@@ -1011,6 +1053,7 @@ struct PerformanceView: View {
 // MARK: - Players Stats View
 struct PlayersStatsView: View {
     let team: TeamStatistics
+    @State private var isAnimating = false
     
     var topScorers: [(name: String, goals: Int)] {
         var scorerCounts: [String: Int] = [:]
@@ -1122,6 +1165,9 @@ struct PlayersStatsView: View {
             }
             .padding(.horizontal)
             .padding(.top, 8)
+            .opacity(isAnimating ? 1 : 0)
+            .offset(y: isAnimating ? 0 : 20)
+            .animation(.spring(response: 0.6, dampingFraction: 0.8).delay(0.1), value: isAnimating)
             
             // Top Assisters
             GlassCard(cornerRadius: 24, tintColor: team.teamColor) {
@@ -1185,10 +1231,16 @@ struct PlayersStatsView: View {
                 }
             }
             .padding(.horizontal)
+            .opacity(isAnimating ? 1 : 0)
+            .offset(y: isAnimating ? 0 : 20)
+            .animation(.spring(response: 0.6, dampingFraction: 0.8).delay(0.2), value: isAnimating)
             
             Spacer(minLength: 20)
         }
         .padding(.vertical)
+        .onAppear {
+            isAnimating = true
+        }
     }
 }
 
