@@ -102,7 +102,7 @@ private extension CameraButtonsView {
         VStack(spacing: 20) {
             // Header
             HStack {
-                Text("Customize Players")
+                Text("Personalizar Jugadores")
                     .font(.system(.headline, design: .rounded, weight: .bold))
                     .foregroundStyle(.primary)
                 Spacer()
@@ -113,18 +113,18 @@ private extension CameraButtonsView {
                 VStack(spacing: 24) {
                     // Team 1
                     VStack(alignment: .leading, spacing: 12) {
-                        Text("Team 1")
+                        Text(leftTeamName)
                             .font(.system(.subheadline, design: .rounded, weight: .semibold))
                             .foregroundStyle(.secondary)
                         
                         CompactShapeColorPicker(
-                            title: "Players",
+                            title: "Jugadores",
                             selectedShape: $team1Shape,
                             selectedColor: $team1Color
                         )
                         
                         CompactShapeColorPicker(
-                            title: "Goalkeeper",
+                            title: "Portero",
                             selectedShape: $goalkeeper1Shape,
                             selectedColor: $goalkeeper1Color
                         )
@@ -135,18 +135,18 @@ private extension CameraButtonsView {
                     
                     // Team 2
                     VStack(alignment: .leading, spacing: 12) {
-                        Text("Team 2")
+                        Text(rightTeamName)
                             .font(.system(.subheadline, design: .rounded, weight: .semibold))
                             .foregroundStyle(.secondary)
                         
                         CompactShapeColorPicker(
-                            title: "Players",
+                            title: "Jugadores",
                             selectedShape: $team2Shape,
                             selectedColor: $team2Color
                         )
                         
                         CompactShapeColorPicker(
-                            title: "Goalkeeper",
+                            title: "Portero",
                             selectedShape: $goalkeeper2Shape,
                             selectedColor: $goalkeeper2Color
                         )
@@ -157,12 +157,12 @@ private extension CameraButtonsView {
                     
                     // Ball
                     VStack(alignment: .leading, spacing: 12) {
-                        Text("Ball")
+                        Text("Balón")
                             .font(.system(.subheadline, design: .rounded, weight: .semibold))
                             .foregroundStyle(.secondary)
                         
                         CompactShapeColorPicker(
-                            title: "Ball",
+                            title: "Balón",
                             selectedShape: $ballShape,
                             selectedColor: $ballColor
                         )
