@@ -10,13 +10,14 @@ import PhotosUI
 
 struct NewTeamView: View {
     @Environment(\.dismiss) var dismiss
-    @State private var teamName: String = "Cuervos de nue..."
+    @State private var teamName: String = ""
     @State private var country: String = "Mexico"
     @State private var division: String = "Liga MX"
     @State private var changeTeamColor: Bool = true
     @State private var selectedColorIndex: Int = 6 // Orange color selected by default
     @State private var selectedLogoItem: PhotosPickerItem?
     @State private var selectedLogoImage: Image?
+    @FocusState private var isTeamNameFocused: Bool
     
     // Countries with football teams
     let countries = [
@@ -83,25 +84,23 @@ struct NewTeamView: View {
                 ScrollView {
                     VStack(spacing: 0) {
                         // Team Name
-                        NavigationLink(destination: TeamNameEditView(teamName: $teamName)) {
-                            HStack {
-                                Text("Nombre del equipo")
-                                    .foregroundColor(.primary)
-                                    .font(.body)
-                                
-                                Spacer()
-                                
-                                Text(teamName)
-                                    .foregroundColor(.gray)
-                                    .font(.body)
-                                    .lineLimit(1)
-                                
-                                Image(systemName: "chevron.right")
-                                    .foregroundColor(.gray)
-                                    .font(.footnote)
-                            }
-                            .padding()
-                            .background(Color(uiColor: .systemBackground))
+                        HStack {
+                            Text("Nombre del equipo")
+                                .foregroundColor(.primary)
+                                .font(.body)
+                            
+                            Spacer()
+                            
+                            TextField("Nombre del equipo", text: $teamName)
+                                .font(.body)
+                                .multilineTextAlignment(.trailing)
+                                .submitLabel(.done)
+                                .focused($isTeamNameFocused)
+                        }
+                        .padding()
+                        .background(Color(uiColor: .systemBackground))
+                        .onTapGesture {
+                            isTeamNameFocused = true
                         }
                         
                         Divider()
@@ -149,47 +148,6 @@ struct NewTeamView: View {
                         Divider()
                             .padding(.leading)
                         
-                        // Team Logo
-                        PhotosPicker(selection: $selectedLogoItem, matching: .images) {
-                            HStack(spacing: 16) {
-                                if let selectedLogoImage {
-                                    selectedLogoImage
-                                        .resizable()
-                                        .scaledToFill()
-                                        .frame(width: 60, height: 60)
-                                        .clipShape(RoundedRectangle(cornerRadius: 8))
-                                } else {
-                                    Image(systemName: "photo")
-                                        .font(.system(size: 40))
-                                        .foregroundColor(.gray)
-                                        .frame(width: 60, height: 60)
-                                        .background(Color(uiColor: .systemGray5))
-                                        .cornerRadius(8)
-                                }
-                                
-                                VStack(alignment: .leading, spacing: 4) {
-                                    Text("Logo del equipo")
-                                        .foregroundColor(.primary)
-                                        .font(.body)
-                                    
-                                    Text("En png")
-                                        .foregroundColor(.gray)
-                                        .font(.caption)
-                                }
-                                
-                                Spacer()
-                                
-                                Image(systemName: "chevron.right")
-                                    .foregroundColor(.gray)
-                                    .font(.footnote)
-                            }
-                            .padding()
-                            .background(Color(uiColor: .systemBackground))
-                        }
-                        
-                        Divider()
-                            .padding(.leading)
-                        
                         // Division
                         HStack(spacing: 0) {
                             Text("División")
@@ -228,6 +186,47 @@ struct NewTeamView: View {
                             }
                         }
                         .background(Color(uiColor: .systemBackground))
+                        
+                        Divider()
+                            .padding(.leading)
+                        
+                        // Team Logo
+                        PhotosPicker(selection: $selectedLogoItem, matching: .images) {
+                            HStack(spacing: 16) {
+                                if let selectedLogoImage {
+                                    selectedLogoImage
+                                        .resizable()
+                                        .scaledToFill()
+                                        .frame(width: 60, height: 60)
+                                        .clipShape(RoundedRectangle(cornerRadius: 8))
+                                } else {
+                                    Image(systemName: "photo")
+                                        .font(.system(size: 40))
+                                        .foregroundColor(.gray)
+                                        .frame(width: 60, height: 60)
+                                        .background(Color(uiColor: .systemGray5))
+                                        .cornerRadius(8)
+                                }
+                                
+                                VStack(alignment: .leading, spacing: 4) {
+                                    Text("Logo del equipo")
+                                        .foregroundColor(.primary)
+                                        .font(.body)
+                                    
+                                    Text("Selecciona el logo del equipo")
+                                        .foregroundColor(.gray)
+                                        .font(.caption)
+                                }
+                                
+                                Spacer()
+                                
+                                Image(systemName: "chevron.right")
+                                    .foregroundColor(.gray)
+                                    .font(.footnote)
+                            }
+                            .padding()
+                            .background(Color(uiColor: .systemBackground))
+                        }
                     }
                 }
             }
