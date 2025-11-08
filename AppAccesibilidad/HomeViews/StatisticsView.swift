@@ -73,6 +73,75 @@ struct StatisticsMainView: View {
     @State private var showTeamSelector = false
     
     let teamStatistics: [TeamStatistics] = [
+        // Mexican Teams
+        TeamStatistics(
+            teamName: "Club América",
+            teamColor: Color(red: 1.0, green: 0.7, blue: 0.0),
+            teamLogo: "star.circle.fill",
+            matches: [
+                MatchStatistic(teamLogo: "star.circle.fill", teamName: "Club América", teamScore: 3, opponentLogo: "shield.fill", opponentName: "Chivas", opponentScore: 1, date: Date().addingTimeInterval(-86400 * 5), location: "Estadio Azteca", goalScorers: ["Henry Martín", "Álvaro Fidalgo", "Diego Valdés"], assists: ["Alejandro Zendejas", "Henry Martín"]),
+                MatchStatistic(teamLogo: "star.circle.fill", teamName: "Club América", teamScore: 2, opponentLogo: "bolt.fill", opponentName: "Pumas", opponentScore: 2, date: Date().addingTimeInterval(-86400 * 12), location: "Estadio Olímpico", goalScorers: ["Henry Martín", "Julián Quiñones"], assists: ["Diego Valdés", "Fidalgo"]),
+                MatchStatistic(teamLogo: "star.circle.fill", teamName: "Club América", teamScore: 4, opponentLogo: "flame.fill", opponentName: "Tigres", opponentScore: 1, date: Date().addingTimeInterval(-86400 * 19), location: "Estadio Azteca", goalScorers: ["Henry Martín (2)", "Julián Quiñones", "Brian Rodríguez"], assists: ["Zendejas (2)", "Valdés"]),
+                MatchStatistic(teamLogo: "star.circle.fill", teamName: "Club América", teamScore: 1, opponentLogo: "circle.fill", opponentName: "Cruz Azul", opponentScore: 0, date: Date().addingTimeInterval(-86400 * 26), location: "Estadio Azteca", goalScorers: ["Henry Martín"], assists: ["Diego Valdés"]),
+                MatchStatistic(teamLogo: "star.circle.fill", teamName: "Club América", teamScore: 3, opponentLogo: "mountain.2.fill", opponentName: "Monterrey", opponentScore: 2, date: Date().addingTimeInterval(-86400 * 33), location: "Estadio BBVA", goalScorers: ["Julián Quiñones (2)", "Fidalgo"], assists: ["Henry Martín", "Valdés"])
+            ]
+        ),
+        TeamStatistics(
+            teamName: "Chivas Guadalajara",
+            teamColor: Color(red: 0.9, green: 0.1, blue: 0.2),
+            teamLogo: "shield.fill",
+            matches: [
+                MatchStatistic(teamLogo: "shield.fill", teamName: "Chivas", teamScore: 2, opponentLogo: "bolt.fill", opponentName: "Pumas", opponentScore: 1, date: Date().addingTimeInterval(-86400 * 6), location: "Estadio Akron", goalScorers: ["Roberto Alvarado", "Víctor Guzmán"], assists: ["Fernando Beltrán", "Alexis Vega"]),
+                MatchStatistic(teamLogo: "shield.fill", teamName: "Chivas", teamScore: 1, opponentLogo: "star.circle.fill", opponentName: "América", opponentScore: 3, date: Date().addingTimeInterval(-86400 * 13), location: "Estadio Azteca", goalScorers: ["Alexis Vega"], assists: ["Roberto Alvarado"]),
+                MatchStatistic(teamLogo: "shield.fill", teamName: "Chivas", teamScore: 3, opponentLogo: "circle.fill", opponentName: "Cruz Azul", opponentScore: 1, date: Date().addingTimeInterval(-86400 * 20), location: "Estadio Akron", goalScorers: ["Alexis Vega", "Roberto Alvarado", "Víctor Guzmán"], assists: ["Beltrán (2)", "Vega"]),
+                MatchStatistic(teamLogo: "shield.fill", teamName: "Chivas", teamScore: 2, opponentLogo: "flame.fill", opponentName: "Tigres", opponentScore: 2, date: Date().addingTimeInterval(-86400 * 27), location: "Estadio Universitario", goalScorers: ["Roberto Alvarado", "Ángel Zaldívar"], assists: ["Alexis Vega", "Isaac Brizuela"])
+            ]
+        ),
+        TeamStatistics(
+            teamName: "Cruz Azul",
+            teamColor: Color(red: 0.0, green: 0.3, blue: 0.8),
+            teamLogo: "circle.fill",
+            matches: [
+                MatchStatistic(teamLogo: "circle.fill", teamName: "Cruz Azul", teamScore: 3, opponentLogo: "mountain.2.fill", opponentName: "Monterrey", opponentScore: 0, date: Date().addingTimeInterval(-86400 * 7), location: "Estadio Azteca", goalScorers: ["Uriel Antuna (2)", "Carlos Rodríguez"], assists: ["Ángel Sepúlveda", "Rodolfo Rotondi"]),
+                MatchStatistic(teamLogo: "circle.fill", teamName: "Cruz Azul", teamScore: 0, opponentLogo: "star.circle.fill", opponentName: "América", opponentScore: 1, date: Date().addingTimeInterval(-86400 * 14), location: "Estadio Azteca", goalScorers: [], assists: []),
+                MatchStatistic(teamLogo: "circle.fill", teamName: "Cruz Azul", teamScore: 2, opponentLogo: "bolt.fill", opponentName: "Pumas", opponentScore: 1, date: Date().addingTimeInterval(-86400 * 21), location: "Estadio Olímpico", goalScorers: ["Uriel Antuna", "Ángel Sepúlveda"], assists: ["Carlos Rodríguez", "Rotondi"]),
+                MatchStatistic(teamLogo: "circle.fill", teamName: "Cruz Azul", teamScore: 1, opponentLogo: "shield.fill", opponentName: "Chivas", opponentScore: 3, date: Date().addingTimeInterval(-86400 * 28), location: "Estadio Akron", goalScorers: ["Carlos Rodríguez"], assists: ["Uriel Antuna"])
+            ]
+        ),
+        TeamStatistics(
+            teamName: "Pumas UNAM",
+            teamColor: Color(red: 0.0, green: 0.2, blue: 0.5),
+            teamLogo: "bolt.fill",
+            matches: [
+                MatchStatistic(teamLogo: "bolt.fill", teamName: "Pumas", teamScore: 2, opponentLogo: "flame.fill", opponentName: "Tigres", opponentScore: 1, date: Date().addingTimeInterval(-86400 * 8), location: "Estadio Olímpico", goalScorers: ["Juan Dinenno", "César Huerta"], assists: ["Ulises Rivas", "Jorge Ruvalcaba"]),
+                MatchStatistic(teamLogo: "bolt.fill", teamName: "Pumas", teamScore: 1, opponentLogo: "circle.fill", opponentName: "Cruz Azul", opponentScore: 2, date: Date().addingTimeInterval(-86400 * 15), location: "Estadio Olímpico", goalScorers: ["Juan Dinenno"], assists: ["César Huerta"]),
+                MatchStatistic(teamLogo: "bolt.fill", teamName: "Pumas", teamScore: 2, opponentLogo: "star.circle.fill", opponentName: "América", opponentScore: 2, date: Date().addingTimeInterval(-86400 * 22), location: "Estadio Olímpico", goalScorers: ["Juan Dinenno", "César Huerta"], assists: ["Ulises Rivas", "Ruvalcaba"]),
+                MatchStatistic(teamLogo: "bolt.fill", teamName: "Pumas", teamScore: 1, opponentLogo: "shield.fill", opponentName: "Chivas", opponentScore: 2, date: Date().addingTimeInterval(-86400 * 29), location: "Estadio Akron", goalScorers: ["César Huerta"], assists: ["Juan Dinenno"])
+            ]
+        ),
+        TeamStatistics(
+            teamName: "Tigres UANL",
+            teamColor: Color(red: 1.0, green: 0.7, blue: 0.0),
+            teamLogo: "flame.fill",
+            matches: [
+                MatchStatistic(teamLogo: "flame.fill", teamName: "Tigres", teamScore: 3, opponentLogo: "mountain.2.fill", opponentName: "Monterrey", opponentScore: 2, date: Date().addingTimeInterval(-86400 * 9), location: "Estadio Universitario", goalScorers: ["André-Pierre Gignac (2)", "Nicolás Ibáñez"], assists: ["Rafael Carioca", "Sebastián Córdova"]),
+                MatchStatistic(teamLogo: "flame.fill", teamName: "Tigres", teamScore: 2, opponentLogo: "shield.fill", opponentName: "Chivas", opponentScore: 2, date: Date().addingTimeInterval(-86400 * 16), location: "Estadio Universitario", goalScorers: ["Gignac", "Nicolás Ibáñez"], assists: ["Córdova", "Carioca"]),
+                MatchStatistic(teamLogo: "flame.fill", teamName: "Tigres", teamScore: 1, opponentLogo: "star.circle.fill", opponentName: "América", opponentScore: 4, date: Date().addingTimeInterval(-86400 * 23), location: "Estadio Azteca", goalScorers: ["André-Pierre Gignac"], assists: ["Rafael Carioca"]),
+                MatchStatistic(teamLogo: "flame.fill", teamName: "Tigres", teamScore: 1, opponentLogo: "bolt.fill", opponentName: "Pumas", opponentScore: 2, date: Date().addingTimeInterval(-86400 * 30), location: "Estadio Olímpico", goalScorers: ["Nicolás Ibáñez"], assists: ["Gignac"])
+            ]
+        ),
+        TeamStatistics(
+            teamName: "Monterrey",
+            teamColor: Color(red: 0.0, green: 0.4, blue: 0.7),
+            teamLogo: "mountain.2.fill",
+            matches: [
+                MatchStatistic(teamLogo: "mountain.2.fill", teamName: "Monterrey", teamScore: 2, opponentLogo: "circle.fill", opponentName: "Cruz Azul", opponentScore: 0, date: Date().addingTimeInterval(-86400 * 10), location: "Estadio BBVA", goalScorers: ["Germán Berterame", "Rogelio Funes Mori"], assists: ["Maximiliano Meza", "Sergio Canales"]),
+                MatchStatistic(teamLogo: "mountain.2.fill", teamName: "Monterrey", teamScore: 2, opponentLogo: "flame.fill", opponentName: "Tigres", opponentScore: 3, date: Date().addingTimeInterval(-86400 * 17), location: "Estadio Universitario", goalScorers: ["Berterame", "Funes Mori"], assists: ["Canales", "Meza"]),
+                MatchStatistic(teamLogo: "mountain.2.fill", teamName: "Monterrey", teamScore: 2, opponentLogo: "star.circle.fill", opponentName: "América", opponentScore: 3, date: Date().addingTimeInterval(-86400 * 24), location: "Estadio BBVA", goalScorers: ["Germán Berterame", "Sergio Canales"], assists: ["Funes Mori", "Meza"]),
+                MatchStatistic(teamLogo: "mountain.2.fill", teamName: "Monterrey", teamScore: 0, opponentLogo: "circle.fill", opponentName: "Cruz Azul", opponentScore: 3, date: Date().addingTimeInterval(-86400 * 31), location: "Estadio Azteca", goalScorers: [], assists: [])
+            ]
+        ),
+        // Spanish Teams
         TeamStatistics(
             teamName: "Real Madrid",
             teamColor: Color(red: 0.0, green: 0.2, blue: 0.5),
@@ -182,23 +251,38 @@ struct StatisticsMainView: View {
                     .padding(.horizontal)
                     .padding(.vertical, 12)
                     
-                    // Title
-                    HStack {
-                        Text("Estadísticas")
-                            .font(.system(size: 36, weight: .bold))
-                            .foregroundColor(.primary)
-                        Spacer()
-                    }
-                    .padding(.horizontal)
-                    .padding(.top, 8)
-                    .padding(.bottom, 16)
-                    
                     // Team Selector or Content
                     if selectedTeam == nil {
-                        TeamSelectorView(teams: teamStatistics, selectedTeam: $selectedTeam)
-                            .transition(.move(edge: .leading).combined(with: .opacity))
+                        ScrollView {
+                            VStack(spacing: 0) {
+                                // Title inside scroll view
+                                HStack {
+                                    Text("Estadísticas")
+                                        .font(.system(size: 36, weight: .bold))
+                                        .foregroundColor(.primary)
+                                    Spacer()
+                                }
+                                .padding(.horizontal)
+                                .padding(.top, 8)
+                                .padding(.bottom, 16)
+                                
+                                TeamSelectorContent(teams: teamStatistics, selectedTeam: $selectedTeam)
+                            }
+                        }
+                        .transition(.move(edge: .leading).combined(with: .opacity))
                     } else {
                         VStack(spacing: 0) {
+                            // Title inside tabs section
+                            HStack {
+                                Text("Estadísticas")
+                                    .font(.system(size: 36, weight: .bold))
+                                    .foregroundColor(.primary)
+                                Spacer()
+                            }
+                            .padding(.horizontal)
+                            .padding(.top, 8)
+                            .padding(.bottom, 16)
+                            
                             // View Tabs
                             ScrollView(.horizontal, showsIndicators: false) {
                                 HStack(spacing: 12) {
@@ -358,87 +442,85 @@ struct GlassButtonStyle: ButtonStyle {
     }
 }
 
-// MARK: - Team Selector View
-struct TeamSelectorView: View {
+// MARK: - Team Selector Content
+struct TeamSelectorContent: View {
     let teams: [TeamStatistics]
     @Binding var selectedTeam: TeamStatistics?
     
     var body: some View {
-        ScrollView {
-            VStack(spacing: 16) {
-                Text("Selecciona un equipo")
-                    .font(.title3)
-                    .fontWeight(.semibold)
-                    .foregroundColor(.secondary)
-                    .padding(.top, 20)
-                
-                ForEach(teams) { team in
-                    Button(action: {
-                        withAnimation(.spring(response: 0.4, dampingFraction: 0.8)) {
-                            selectedTeam = team
-                        }
-                    }) {
-                        GlassCard(cornerRadius: 20, tintColor: team.teamColor) {
-                            HStack(spacing: 16) {
-                                // Team Logo
-                                ZStack {
-                                    Circle()
-                                        .fill(team.teamColor.opacity(0.15))
-                                        .frame(width: 70, height: 70)
-                                        .overlay(
-                                            Circle()
-                                                .stroke(team.teamColor.opacity(0.3), lineWidth: 2)
-                                        )
-                                    
-                                    Image(systemName: team.teamLogo)
-                                        .font(.system(size: 32))
-                                        .foregroundColor(team.teamColor)
-                                }
-                                
-                                VStack(alignment: .leading, spacing: 6) {
-                                    Text(team.teamName)
-                                        .font(.title2)
-                                        .fontWeight(.bold)
-                                        .foregroundColor(.primary)
-                                    
-                                    HStack(spacing: 16) {
-                                        Label("\(team.totalMatches) PJ", systemImage: "sportscourt.fill")
-                                            .font(.caption)
-                                            .foregroundColor(.secondary)
-                                        
-                                        Label("\(team.wins) G", systemImage: "checkmark.circle.fill")
-                                            .font(.caption)
-                                            .foregroundColor(.green)
-                                        
-                                        Label("\(team.points) Pts", systemImage: "star.fill")
-                                            .font(.caption)
-                                            .foregroundColor(.orange)
-                                    }
-                                }
-                                
-                                Spacer()
-                                
-                                Image(systemName: "chevron.right")
-                                    .foregroundColor(.secondary)
-                                    .font(.title3)
-                                    .padding(8)
-                                    .background(
-                                        Circle()
-                                            .fill(.ultraThinMaterial)
-                                    )
+        VStack(spacing: 16) {
+            Text("Selecciona un equipo")
+                .font(.title3)
+                .fontWeight(.semibold)
+                .foregroundColor(.secondary)
+                .padding(.top, 20)
+            
+            ForEach(teams) { team in
+                Button(action: {
+                    withAnimation(.spring(response: 0.4, dampingFraction: 0.8)) {
+                        selectedTeam = team
+                    }
+                }) {
+                    GlassCard(cornerRadius: 20, tintColor: team.teamColor) {
+                        HStack(spacing: 16) {
+                            // Team Logo
+                            ZStack {
+                                Circle()
+                                    .fill(team.teamColor.opacity(0.15))
+                                    .frame(width: 70, height: 70)
                                     .overlay(
                                         Circle()
-                                            .strokeBorder(.white.opacity(0.2), lineWidth: 1)
+                                            .stroke(team.teamColor.opacity(0.3), lineWidth: 2)
                                     )
+                                
+                                Image(systemName: team.teamLogo)
+                                    .font(.system(size: 32))
+                                    .foregroundColor(team.teamColor)
                             }
-                            .padding(20)
+                            
+                            VStack(alignment: .leading, spacing: 6) {
+                                Text(team.teamName)
+                                    .font(.title2)
+                                    .fontWeight(.bold)
+                                    .foregroundColor(.primary)
+                                
+                                HStack(spacing: 16) {
+                                    Label("\(team.totalMatches) PJ", systemImage: "sportscourt.fill")
+                                        .font(.caption)
+                                        .foregroundColor(.secondary)
+                                    
+                                    Label("\(team.wins) G", systemImage: "checkmark.circle.fill")
+                                        .font(.caption)
+                                        .foregroundColor(.green)
+                                    
+                                    Label("\(team.points) Pts", systemImage: "star.fill")
+                                        .font(.caption)
+                                        .foregroundColor(.orange)
+                                }
+                            }
+                            
+                            Spacer()
+                            
+                            Image(systemName: "chevron.right")
+                                .foregroundColor(.secondary)
+                                .font(.title3)
+                                .padding(8)
+                                .background(
+                                    Circle()
+                                        .fill(.ultraThinMaterial)
+                                )
+                                .overlay(
+                                    Circle()
+                                        .strokeBorder(.white.opacity(0.2), lineWidth: 1)
+                                )
                         }
+                        .padding(20)
                     }
-                    .buttonStyle(GlassButtonStyle())
                 }
+                .buttonStyle(GlassButtonStyle())
             }
-            .padding()
         }
+        .padding()
     }
 }
 
@@ -608,19 +690,19 @@ struct OverviewView: View {
                     HStack(spacing: 0) {
                         if team.wins > 0 {
                             Rectangle()
-                                .fill(Color.green)
+                                .fill(Color.accessibleSuccess)
                                 .frame(width: CGFloat(team.wins) / CGFloat(team.totalMatches) * (UIScreen.main.bounds.width - 96))
                         }
                         
                         if team.draws > 0 {
                             Rectangle()
-                                .fill(Color.orange)
+                                .fill(Color.accessibleWarning)
                                 .frame(width: CGFloat(team.draws) / CGFloat(team.totalMatches) * (UIScreen.main.bounds.width - 96))
                         }
                         
                         if team.losses > 0 {
                             Rectangle()
-                                .fill(Color.red)
+                                .fill(Color.accessibleDanger)
                                 .frame(width: CGFloat(team.losses) / CGFloat(team.totalMatches) * (UIScreen.main.bounds.width - 96))
                         }
                     }
@@ -631,7 +713,7 @@ struct OverviewView: View {
                     VStack(alignment: .leading, spacing: 8) {
                         HStack(spacing: 8) {
                             Circle()
-                                .fill(Color.green)
+                                .fill(Color.accessibleSuccess)
                                 .frame(width: 12, height: 12)
                             Text("Victorias: \(team.wins)")
                                 .font(.caption)
@@ -640,7 +722,7 @@ struct OverviewView: View {
                         
                         HStack(spacing: 8) {
                             Circle()
-                                .fill(Color.orange)
+                                .fill(Color.accessibleWarning)
                                 .frame(width: 12, height: 12)
                             Text("Empates: \(team.draws)")
                                 .font(.caption)
@@ -649,7 +731,7 @@ struct OverviewView: View {
                         
                         HStack(spacing: 8) {
                             Circle()
-                                .fill(Color.red)
+                                .fill(Color.accessibleDanger)
                                 .frame(width: 12, height: 12)
                             Text("Derrotas: \(team.losses)")
                                 .font(.caption)
@@ -675,9 +757,9 @@ struct OverviewView: View {
     
     func resultColor(for result: MatchResult) -> Color {
         switch result {
-        case .win: return .green
-        case .draw: return .orange
-        case .loss: return .red
+        case .win: return Color(red: 0.0, green: 0.5, blue: 0.8) // Blue instead of green
+        case .draw: return Color(red: 0.9, green: 0.6, blue: 0.0) // Amber/Gold
+        case .loss: return Color(red: 0.8, green: 0.3, blue: 0.3) // Softer red
         }
     }
     
@@ -688,6 +770,15 @@ struct OverviewView: View {
         case .loss: return "D"
         }
     }
+}
+
+// MARK: - Accessible Colors Helper
+extension Color {
+    // Colorblind-friendly palette
+    static let accessibleSuccess = Color(red: 0.0, green: 0.5, blue: 0.8) // Blue
+    static let accessibleWarning = Color(red: 0.9, green: 0.6, blue: 0.0) // Amber
+    static let accessibleDanger = Color(red: 0.8, green: 0.3, blue: 0.3) // Soft Red
+    static let accessibleInfo = Color(red: 0.4, green: 0.2, blue: 0.6) // Purple
 }
 
 // MARK: - Glass Stat Card
@@ -781,7 +872,7 @@ struct GlassMatchDetailCard: View {
                             .padding(.vertical, 6)
                             .background(
                                 Capsule()
-                                    .fill(match.result == .win ? Color.green : match.result == .draw ? Color.orange : Color.red)
+                                    .fill(match.result == .win ? Color.accessibleSuccess : match.result == .draw ? Color.accessibleWarning : Color.accessibleDanger)
                             )
                     }
                     .padding()
@@ -927,7 +1018,7 @@ struct PerformanceView: View {
                                 x: .value("Partido", index + 1),
                                 y: .value("Goles", match.teamScore)
                             )
-                            .foregroundStyle(Color.green)
+                            .foregroundStyle(Color.accessibleSuccess)
                             .symbol(.circle)
                             .lineStyle(StrokeStyle(lineWidth: 3))
                             
@@ -935,7 +1026,7 @@ struct PerformanceView: View {
                                 x: .value("Partido", index + 1),
                                 y: .value("Goles en contra", match.opponentScore)
                             )
-                            .foregroundStyle(Color.red)
+                            .foregroundStyle(Color.accessibleDanger)
                             .symbol(.circle)
                             .lineStyle(StrokeStyle(lineWidth: 3))
                         }
@@ -962,7 +1053,7 @@ struct PerformanceView: View {
                     HStack(spacing: 24) {
                         HStack(spacing: 8) {
                             Circle()
-                                .fill(Color.green)
+                                .fill(Color.accessibleSuccess)
                                 .frame(width: 12, height: 12)
                             Text("Goles a favor")
                                 .font(.caption)
@@ -971,7 +1062,7 @@ struct PerformanceView: View {
                         
                         HStack(spacing: 8) {
                             Circle()
-                                .fill(Color.red)
+                                .fill(Color.accessibleDanger)
                                 .frame(width: 12, height: 12)
                             Text("Goles en contra")
                                 .font(.caption)
