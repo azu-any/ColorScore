@@ -4,4 +4,5 @@ AppAccesibilidad.xcodeproj/project.xcworkspace/xcuserdata/
 
 # Ignorar archivos del sistema en macOS
 AppAccesibilidad/.DS_Store
+*.DS_Store
 
