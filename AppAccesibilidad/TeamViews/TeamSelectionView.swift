@@ -55,7 +55,7 @@ struct TeamSelectionView: View {
                             .foregroundColor(.secondary)
                     }
                     .padding(.horizontal)
-                    .padding(.top, 8)
+                    .padding(.top, 16)
                     
                     // Copa Libertadores Section
                     VStack(alignment: .leading, spacing: 12) {
