@@ -64,6 +64,7 @@ enum StatisticsView: String, CaseIterable {
     case players = "Jugadores"
 }
 
+@available(iOS 16.0, *)
 struct StatisticsMainView: View {
     @Environment(\.dismiss) var dismiss
     @State private var selectedTeam: TeamStatistics?
@@ -110,9 +111,17 @@ struct StatisticsMainView: View {
     var body: some View {
         NavigationView {
             ZStack {
-                // White background
-                Color.white
-                    .ignoresSafeArea()
+                // Liquid Glass background with gradient
+                LinearGradient(
+                    colors: [
+                        Color(.systemBackground),
+                        Color(.systemGray6).opacity(0.3),
+                        Color(.systemBackground)
+                    ],
+                    startPoint: .topLeading,
+                    endPoint: .bottomTrailing
+                )
+                .ignoresSafeArea()
                 
                 VStack(spacing: 0) {
                     // Header
@@ -128,10 +137,18 @@ struct StatisticsMainView: View {
                             }
                         }) {
                             Image(systemName: "chevron.left")
-                                .font(.title3)
-                                .fontWeight(.semibold)
+                                .font(.title3.bold())
                                 .foregroundColor(.primary)
-                                .frame(width: 44, height: 44)
+                                .padding(10)
+                                .background(
+                                    Circle()
+                                        .fill(.ultraThinMaterial)
+                                )
+                                .overlay(
+                                    Circle()
+                                        .strokeBorder(.white.opacity(0.25), lineWidth: 1)
+                                )
+                                .shadow(color: .black.opacity(0.1), radius: 6, x: 0, y: 3)
                         }
                         
                         Spacer()
@@ -148,12 +165,17 @@ struct StatisticsMainView: View {
                                         .fontWeight(.semibold)
                                 }
                                 .foregroundColor(.white)
-                                .padding(.horizontal, 16)
+                                .padding(.horizontal, 18)
                                 .padding(.vertical, 10)
                                 .background(
-                                    RoundedRectangle(cornerRadius: 20)
+                                    Capsule()
                                         .fill(selectedTeam?.teamColor ?? .blue)
                                 )
+                                .overlay(
+                                    Capsule()
+                                        .strokeBorder(.white.opacity(0.3), lineWidth: 1)
+                                )
+                                .shadow(color: (selectedTeam?.teamColor ?? .blue).opacity(0.3), radius: 8, x: 0, y: 4)
                             }
                         }
                     }
@@ -192,15 +214,30 @@ struct StatisticsMainView: View {
                                                 .padding(.horizontal, 20)
                                                 .padding(.vertical, 10)
                                                 .background(
-                                                    ZStack {
+                                                    Group {
                                                         if selectedView == view {
-                                                            RoundedRectangle(cornerRadius: 20)
+                                                            Capsule()
                                                                 .fill(selectedTeam?.teamColor ?? .blue)
                                                         } else {
-                                                            RoundedRectangle(cornerRadius: 20)
-                                                                .fill(Color.gray.opacity(0.1))
+                                                            Capsule()
+                                                                .fill(.ultraThinMaterial)
                                                         }
                                                     }
+                                                )
+                                                .overlay(
+                                                    Capsule()
+                                                        .strokeBorder(
+                                                            selectedView == view ?
+                                                                .white.opacity(0.3) : .white.opacity(0.15),
+                                                            lineWidth: 1
+                                                        )
+                                                )
+                                                .shadow(
+                                                    color: selectedView == view ?
+                                                        (selectedTeam?.teamColor ?? .blue).opacity(0.3) : .clear,
+                                                    radius: 6,
+                                                    x: 0,
+                                                    y: 3
                                                 )
                                         }
                                     }
@@ -236,52 +273,79 @@ struct StatisticsMainView: View {
     }
 }
 
-// MARK: - Glassmorphic Background Component
-struct GlassmorphicBackground: View {
-    let cornerRadius: CGFloat
-    
-    var body: some View {
-        RoundedRectangle(cornerRadius: cornerRadius)
-            .fill(.ultraThinMaterial)
-            .overlay(
-                RoundedRectangle(cornerRadius: cornerRadius)
-                    .stroke(
-                        LinearGradient(
-                            colors: [
-                                Color.white.opacity(0.5),
-                                Color.white.opacity(0.1)
-                            ],
-                            startPoint: .topLeading,
-                            endPoint: .bottomTrailing
-                        ),
-                        lineWidth: 1
-                    )
-            )
-            .shadow(color: Color.black.opacity(0.1), radius: 10, x: 0, y: 5)
-    }
-}
-
-// MARK: - Glass Card Component
-struct GlassCard<Content: View>: View {
+// MARK: - Liquid Glass Card Component
+@available(iOS 18.0, *)
+struct LiquidGlassCard<Content: View>: View {
     let content: Content
     let cornerRadius: CGFloat
+    let tintColor: Color?
     
-    init(cornerRadius: CGFloat = 20, @ViewBuilder content: () -> Content) {
+    init(cornerRadius: CGFloat = 20, tintColor: Color? = nil, @ViewBuilder content: () -> Content) {
         self.cornerRadius = cornerRadius
+        self.tintColor = tintColor
         self.content = content()
     }
     
     var body: some View {
         content
             .background(
-                RoundedRectangle(cornerRadius: cornerRadius)
-                    .fill(Color.white)
-                    .overlay(
-                        RoundedRectangle(cornerRadius: cornerRadius)
-                            .stroke(Color.gray.opacity(0.2), lineWidth: 1)
-                    )
-                    .shadow(color: Color.black.opacity(0.08), radius: 8, x: 0, y: 2)
+                RoundedRectangle(cornerRadius: cornerRadius, style: .continuous)
+                    .fill(.ultraThinMaterial)
             )
+            .overlay(
+                RoundedRectangle(cornerRadius: cornerRadius, style: .continuous)
+                    .strokeBorder(.white.opacity(0.25), lineWidth: 1)
+            )
+            .glassEffect(
+                .regular
+                    .tint(tintColor?.opacity(0.2) ?? .clear)
+                    .interactive(),
+                in: .rect(cornerRadius: cornerRadius)
+            )
+            .shadow(color: Color.black.opacity(0.08), radius: 12, x: 0, y: 6)
+    }
+}
+
+// MARK: - Fallback Glass Card for iOS 16-17
+@available(iOS 16.0, *)
+struct GlassCard<Content: View>: View {
+    let content: Content
+    let cornerRadius: CGFloat
+    let tintColor: Color?
+    
+    init(cornerRadius: CGFloat = 20, tintColor: Color? = nil, @ViewBuilder content: () -> Content) {
+        self.cornerRadius = cornerRadius
+        self.tintColor = tintColor
+        self.content = content()
+    }
+    
+    var body: some View {
+        if #available(iOS 18.0, *) {
+            LiquidGlassCard(cornerRadius: cornerRadius, tintColor: tintColor) {
+                content
+            }
+        } else {
+            content
+                .background(
+                    RoundedRectangle(cornerRadius: cornerRadius, style: .continuous)
+                        .fill(.ultraThinMaterial)
+                        .overlay(
+                            RoundedRectangle(cornerRadius: cornerRadius, style: .continuous)
+                                .strokeBorder(.white.opacity(0.2), lineWidth: 1)
+                        )
+                        .shadow(color: Color.black.opacity(0.08), radius: 8, x: 0, y: 2)
+                )
+        }
+    }
+}
+
+// MARK: - Interactive Glass Button Style
+@available(iOS 16.0, *)
+struct GlassButtonStyle: ButtonStyle {
+    func makeBody(configuration: Configuration) -> some View {
+        configuration.label
+            .scaleEffect(configuration.isPressed ? 0.97 : 1.0)
+            .animation(.easeInOut(duration: 0.15), value: configuration.isPressed)
     }
 }
 
@@ -305,7 +369,7 @@ struct TeamSelectorView: View {
                             selectedTeam = team
                         }
                     }) {
-                        GlassCard(cornerRadius: 20) {
+                        GlassCard(cornerRadius: 20, tintColor: team.teamColor) {
                             HStack(spacing: 16) {
                                 // Team Logo
                                 ZStack {
@@ -348,10 +412,20 @@ struct TeamSelectorView: View {
                                 Image(systemName: "chevron.right")
                                     .foregroundColor(.secondary)
                                     .font(.title3)
+                                    .padding(8)
+                                    .background(
+                                        Circle()
+                                            .fill(.ultraThinMaterial)
+                                    )
+                                    .overlay(
+                                        Circle()
+                                            .strokeBorder(.white.opacity(0.2), lineWidth: 1)
+                                    )
                             }
                             .padding(20)
                         }
                     }
+                    .buttonStyle(GlassButtonStyle())
                 }
             }
             .padding()
@@ -367,7 +441,7 @@ struct OverviewView: View {
     var body: some View {
         VStack(spacing: 20) {
             // Team Header Card
-            GlassCard(cornerRadius: 24) {
+            GlassCard(cornerRadius: 24, tintColor: team.teamColor) {
                 VStack(spacing: 16) {
                     ZStack {
                         Circle()
@@ -456,7 +530,7 @@ struct OverviewView: View {
             .padding(.horizontal)
             
             // Form Guide
-            GlassCard(cornerRadius: 24) {
+            GlassCard(cornerRadius: 24, tintColor: team.teamColor) {
                 VStack(alignment: .leading, spacing: 16) {
                     Text("Últimos resultados")
                         .font(.headline)
@@ -504,7 +578,7 @@ struct OverviewView: View {
             .padding(.horizontal)
             
             // Win/Draw/Loss Distribution
-            GlassCard(cornerRadius: 24) {
+            GlassCard(cornerRadius: 24, tintColor: team.teamColor) {
                 VStack(alignment: .leading, spacing: 16) {
                     Text("Distribución de resultados")
                         .font(.headline)
@@ -599,11 +673,17 @@ struct GlassStatCard: View {
     let color: Color
     
     var body: some View {
-        GlassCard(cornerRadius: 20) {
+        GlassCard(cornerRadius: 20, tintColor: color) {
             VStack(spacing: 12) {
-                Image(systemName: icon)
-                    .font(.system(size: 32))
-                    .foregroundColor(color)
+                ZStack {
+                    Circle()
+                        .fill(color.opacity(0.15))
+                        .frame(width: 50, height: 50)
+                    
+                    Image(systemName: icon)
+                        .font(.system(size: 24))
+                        .foregroundColor(color)
+                }
                 
                 Text(value)
                     .font(.title)
@@ -641,7 +721,7 @@ struct GlassMatchDetailCard: View {
     let teamColor: Color
     
     var body: some View {
-        GlassCard(cornerRadius: 24) {
+        GlassCard(cornerRadius: 24, tintColor: teamColor) {
             VStack(spacing: 0) {
                 // Match Header with gradient
                 ZStack {
@@ -800,7 +880,7 @@ struct PerformanceView: View {
     var body: some View {
         VStack(spacing: 20) {
             // Goals Chart
-            GlassCard(cornerRadius: 24) {
+            GlassCard(cornerRadius: 24, tintColor: team.teamColor) {
                 VStack(alignment: .leading, spacing: 16) {
                     Text("Evolución de goles")
                         .font(.headline)
@@ -980,7 +1060,7 @@ struct PlayersStatsView: View {
     var body: some View {
         VStack(spacing: 20) {
             // Top Scorers
-            GlassCard(cornerRadius: 24) {
+            GlassCard(cornerRadius: 24, tintColor: team.teamColor) {
                 VStack(alignment: .leading, spacing: 12) {
                     HStack {
                         Image(systemName: "soccerball.circle.fill")
@@ -1044,7 +1124,7 @@ struct PlayersStatsView: View {
             .padding(.top, 8)
             
             // Top Assisters
-            GlassCard(cornerRadius: 24) {
+            GlassCard(cornerRadius: 24, tintColor: team.teamColor) {
                 VStack(alignment: .leading, spacing: 12) {
                     HStack {
                         Image(systemName: "figure.run.circle.fill")
@@ -1122,8 +1202,16 @@ struct FilterSheet: View {
     var body: some View {
         NavigationView {
             ZStack {
-                Color.white
-                    .ignoresSafeArea()
+                LinearGradient(
+                    colors: [
+                        Color(.systemBackground),
+                        Color(.systemGray6).opacity(0.3),
+                        Color(.systemBackground)
+                    ],
+                    startPoint: .topLeading,
+                    endPoint: .bottomTrailing
+                )
+                .ignoresSafeArea()
                 
                 ScrollView {
                     VStack(spacing: 20) {
@@ -1150,18 +1238,20 @@ struct FilterSheet: View {
                                             if selectedFilter == filter {
                                                 Image(systemName: "checkmark.circle.fill")
                                                     .foregroundColor(.blue)
+                                                    .font(.title3)
                                             }
                                         }
                                         .padding()
                                         .background(
                                             selectedFilter == filter ?
-                                            Color.blue.opacity(0.1) : Color.clear
+                                            Color.blue.opacity(0.08) : Color.clear
                                         )
                                     }
+                                    .buttonStyle(.plain)
                                     
                                     if filter != StatisticsFilter.allCases.last {
                                         Divider()
-                                            .background(Color.gray.opacity(0.3))
+                                            .background(Color.gray.opacity(0.2))
                                             .padding(.leading)
                                     }
                                 }
@@ -1185,9 +1275,16 @@ struct FilterSheet: View {
                                             dismiss()
                                         }
                                     }) {
-                                        HStack {
-                                            Image(systemName: team.teamLogo)
-                                                .foregroundColor(team.teamColor)
+                                        HStack(spacing: 12) {
+                                            ZStack {
+                                                Circle()
+                                                    .fill(team.teamColor.opacity(0.15))
+                                                    .frame(width: 40, height: 40)
+                                                
+                                                Image(systemName: team.teamLogo)
+                                                    .font(.system(size: 20))
+                                                    .foregroundColor(team.teamColor)
+                                            }
                                             
                                             Text(team.teamName)
                                                 .foregroundColor(.primary)
@@ -1197,18 +1294,20 @@ struct FilterSheet: View {
                                             if selectedTeam?.id == team.id {
                                                 Image(systemName: "checkmark.circle.fill")
                                                     .foregroundColor(.blue)
+                                                    .font(.title3)
                                             }
                                         }
                                         .padding()
                                         .background(
                                             selectedTeam?.id == team.id ?
-                                            Color.blue.opacity(0.1) : Color.clear
+                                            team.teamColor.opacity(0.05) : Color.clear
                                         )
                                     }
+                                    .buttonStyle(.plain)
                                     
                                     if team.id != teams.last?.id {
                                         Divider()
-                                            .background(Color.gray.opacity(0.3))
+                                            .background(Color.gray.opacity(0.2))
                                             .padding(.leading)
                                     }
                                 }
@@ -1228,6 +1327,7 @@ struct FilterSheet: View {
                         dismiss()
                     }
                     .foregroundColor(.blue)
+                    .fontWeight(.semibold)
                 }
             }
         }
@@ -1255,6 +1355,7 @@ struct RoundedCorner: Shape {
     }
 }
 
+@available(iOS 16.0, *)
 struct StatisticsView_Previews: PreviewProvider {
     static var previews: some View {
         StatisticsMainView()
