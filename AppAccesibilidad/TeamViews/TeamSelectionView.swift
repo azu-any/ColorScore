@@ -44,68 +44,68 @@ struct TeamSelectionView: View {
     ]
     
     var body: some View {
-        NavigationView {
-            ScrollView {
-                VStack(alignment: .leading, spacing: 24) {
-                    // Header
-                    VStack(alignment: .leading, spacing: 8) {
-                        Text("Selecciona tu equipo")
-                            .font(.system(size: 34, weight: .bold))
-                        
-                        Text("Configura tu partido")
-                            .font(.system(size: 17, weight: .regular))
-                            .foregroundColor(.secondary)
-                    }
-                    .padding(.horizontal)
-                    .padding(.top, 16)
+        ScrollView {
+            VStack(alignment: .leading, spacing: 24) {
+                // Header
+                VStack(alignment: .leading, spacing: 8) {
+                    Text("Selecciona tu equipo")
+                        .font(.system(size: 34, weight: .bold))
                     
-                    // Copa Libertadores Section
-                    VStack(alignment: .leading, spacing: 12) {
-                        Text("Copa libertadores")
-                            .font(.system(size: 22, weight: .bold))
-                            .foregroundColor(.black)
-                            .padding(.horizontal)
-                        
-                        TeamRowComponentView(teams: copaLibertadoresTeams, sectionColor: .red)
-                    }
-                    
-                    // Mexico Section
-                    VStack(alignment: .leading, spacing: 12) {
-                        Text("Liga MX")
-                            .font(.system(size: 22, weight: .bold))
-                            .foregroundColor(.black)
-                            .padding(.horizontal)
-                        
-                        TeamRowComponentView(teams: mexicoTeams, sectionColor: .blue)
-                    }
-                    
-                    // Premier League Section
-                    VStack(alignment: .leading, spacing: 12) {
-                        Text("Premier League")
-                            .font(.system(size: 22, weight: .bold))
-                            .foregroundColor(.black)
-                            .padding(.horizontal)
-                        
-                        TeamRowComponentView(teams: premierLeagueTeams, sectionColor: .indigo)
-                    }
+                    Text("Configura tu partido")
+                        .font(.system(size: 17, weight: .regular))
+                        .foregroundColor(.secondary)
                 }
-                .padding(.vertical)
-            }
-            .navigationBarTitleDisplayMode(.inline)
-            .toolbar {
-                ToolbarItem(placement: .navigationBarTrailing) {
-                    Button(action: {
-                        showingNewTeamSheet = true
-                    }) {
-                        Image(systemName: "plus")
-                            .font(.system(size: 22, weight: .medium))
-                            .foregroundColor(.primary)
-                    }
+                .padding(.horizontal)
+                .padding(.top, 16)
+                
+                // Copa Libertadores Section
+                VStack(alignment: .leading, spacing: 12) {
+                    Text("Copa libertadores")
+                        .font(.system(size: 22, weight: .bold))
+                        .foregroundColor(.black)
+                        .padding(.horizontal)
+                    
+                    TeamRowComponentView(teams: copaLibertadoresTeams, sectionColor: .red)
+                }
+                
+                // Mexico Section
+                VStack(alignment: .leading, spacing: 12) {
+                    Text("Liga MX")
+                        .font(.system(size: 22, weight: .bold))
+                        .foregroundColor(.black)
+                        .padding(.horizontal)
+                    
+                    TeamRowComponentView(teams: mexicoTeams, sectionColor: .blue)
+                }
+                
+                // Premier League Section
+                VStack(alignment: .leading, spacing: 12) {
+                    Text("Premier League")
+                        .font(.system(size: 22, weight: .bold))
+                        .foregroundColor(.black)
+                        .padding(.horizontal)
+                    
+                    TeamRowComponentView(teams: premierLeagueTeams, sectionColor: .indigo)
                 }
             }
-            .sheet(isPresented: $showingNewTeamSheet) {
-                NewTeamView()
+            .padding(.vertical)
+        }
+        .navigationBarTitleDisplayMode(.inline)
+        .toolbar {
+            ToolbarItem(placement: .navigationBarTrailing) {
+                Button(action: {
+                    showingNewTeamSheet = true
+                }) {
+                    Image(systemName: "plus")
+                        .font(.system(size: 22, weight: .medium))
+                        .foregroundColor(.primary)
+                }
             }
+        }
+        .sheet(isPresented: $showingNewTeamSheet) {
+            NewTeamView()
+                .presentationDetents([.medium])
+                .presentationDragIndicator(.visible)
         }
     }
 }
