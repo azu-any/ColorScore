@@ -15,8 +15,6 @@ struct NewTeamView: View {
     @State private var division: String = "Liga MX"
     @State private var changeTeamColor: Bool = true
     @State private var selectedColorIndex: Int = 6 // Orange color selected by default
-    @State private var showingCountryPicker = false
-    @State private var showingDivisionPicker = false
     @State private var selectedLogoItem: PhotosPickerItem?
     @State private var selectedLogoImage: Image?
     
@@ -110,65 +108,43 @@ struct NewTeamView: View {
                             .padding(.leading)
                         
                         // Country
-                        VStack(spacing: 0) {
-                            Button(action: {
-                                withAnimation {
-                                    showingCountryPicker.toggle()
+                        HStack(spacing: 0) {
+                            Text("País")
+                                .foregroundColor(.primary)
+                                .font(.body)
+                                .padding()
+                            
+                            Spacer()
+                            
+                            Menu {
+                                ForEach(countries, id: \.self) { countryOption in
+                                    Button(action: {
+                                        country = countryOption
+                                    }) {
+                                        HStack {
+                                            Text(countryOption)
+                                            if countryOption == country {
+                                                Spacer()
+                                                Image(systemName: "checkmark")
+                                            }
+                                        }
+                                    }
                                 }
-                            }) {
-                                HStack {
-                                    Text("País")
-                                        .foregroundColor(.primary)
-                                        .font(.body)
-                                    
-                                    Spacer()
-                                    
+                            } label: {
+                                HStack(spacing: 8) {
                                     Text(country)
                                         .foregroundColor(.gray)
                                         .font(.body)
                                     
-                                    Image(systemName: showingCountryPicker ? "chevron.up" : "chevron.down")
+                                    Image(systemName: "chevron.up.chevron.down")
                                         .foregroundColor(.gray)
                                         .font(.caption)
                                 }
                                 .padding()
-                                .background(Color(uiColor: .systemBackground))
-                            }
-                            
-                            if showingCountryPicker {
-                                VStack(spacing: 0) {
-                                    ForEach(countries, id: \.self) { countryOption in
-                                        Button(action: {
-                                            country = countryOption
-                                            withAnimation {
-                                                showingCountryPicker = false
-                                            }
-                                        }) {
-                                            HStack {
-                                                Text(countryOption)
-                                                    .foregroundColor(.primary)
-                                                    .font(.body)
-                                                
-                                                Spacer()
-                                                
-                                                if countryOption == country {
-                                                    Image(systemName: "checkmark")
-                                                        .foregroundColor(.blue)
-                                                }
-                                            }
-                                            .padding(.horizontal)
-                                            .padding(.vertical, 12)
-                                        }
-                                        
-                                        if countryOption != countries.last {
-                                            Divider()
-                                                .padding(.leading)
-                                        }
-                                    }
-                                }
-                                .background(Color(uiColor: .systemBackground))
+                                .contentShape(Rectangle())
                             }
                         }
+                        .background(Color(uiColor: .systemBackground))
                         
                         Divider()
                             .padding(.leading)
@@ -215,38 +191,48 @@ struct NewTeamView: View {
                             .padding(.leading)
                         
                         // Division
-                        Button(action: {
-                            showingDivisionPicker = true
-                        }) {
-                            HStack {
-                                Text("División")
-                                    .foregroundColor(.primary)
-                                    .font(.body)
-                                
-                                Spacer()
-                                
-                                Text(division)
-                                    .foregroundColor(.gray)
-                                    .font(.body)
-                                
-                                Image(systemName: "chevron.up.chevron.down")
-                                    .foregroundColor(.gray)
-                                    .font(.caption)
+                        HStack(spacing: 0) {
+                            Text("División")
+                                .foregroundColor(.primary)
+                                .font(.body)
+                                .padding()
+                            
+                            Spacer()
+                            
+                            Menu {
+                                ForEach(mexicoDivisions, id: \.self) { divisionOption in
+                                    Button(action: {
+                                        division = divisionOption
+                                    }) {
+                                        HStack {
+                                            Text(divisionOption)
+                                            if divisionOption == division {
+                                                Spacer()
+                                                Image(systemName: "checkmark")
+                                            }
+                                        }
+                                    }
+                                }
+                            } label: {
+                                HStack(spacing: 8) {
+                                    Text(division)
+                                        .foregroundColor(.gray)
+                                        .font(.body)
+                                    
+                                    Image(systemName: "chevron.up.chevron.down")
+                                        .foregroundColor(.gray)
+                                        .font(.caption)
+                                }
+                                .padding()
+                                .contentShape(Rectangle())
                             }
-                            .padding()
-                            .background(Color(uiColor: .systemBackground))
                         }
+                        .background(Color(uiColor: .systemBackground))
                     }
                 }
             }
             .background(Color(uiColor: .systemGray6))
             .navigationBarHidden(true)
-            .sheet(isPresented: $showingCountryPicker) {
-                CountryPickerView(selectedCountry: $country)
-            }
-            .sheet(isPresented: $showingDivisionPicker) {
-                DivisionPickerView(selectedDivision: $division, divisions: mexicoDivisions)
-            }
             .onChange(of: selectedLogoItem) { _, newItem in
                 Task {
                     if let data = try? await newItem?.loadTransferable(type: Data.self),
