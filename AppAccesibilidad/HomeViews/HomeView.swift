@@ -74,11 +74,15 @@ struct HomeView: View {
 //                                systemIcon: "gearshape.fill",
 //                                tint: .gray
 //                            )
-                            OptionGlassCard(
-                                title: "Estadísticas de equipos",
-                                systemIcon: "chart.bar.fill",
-                                tint: .orange
-                            )
+                            NavigationLink(destination: StatisticsMainView()
+                                .navigationBarBackButtonHidden(true)) {
+                                OptionGlassCard(
+                                    title: "Estadísticas de equipos",
+                                    systemIcon: "chart.bar.fill",
+                                    tint: .orange
+                                )
+                            }
+                            .buttonStyle(PlainButtonStyle())
                         }
                         .padding(.horizontal, 20)
 
