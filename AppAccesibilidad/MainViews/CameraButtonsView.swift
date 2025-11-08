@@ -12,8 +12,8 @@ struct CameraButtonsView: View {
     // Score tracking
     @State private var leftScore = 0
     @State private var rightScore = 0
-    @State private var leftTeamName = "LFT"
-    @State private var rightTeamName = "RGT"
+    @State private var leftTeamName = "México"
+    @State private var rightTeamName = "Francia"
     @State private var leftTeamColor: Color = .blue
     @State private var rightTeamColor: Color = .red
     @State private var showScoreControls = false
@@ -77,7 +77,7 @@ private extension CameraButtonsView {
                 
                 Text(leftTeamName)
                     .lineLimit(1)
-                    .frame(width: 40, alignment: .leading)
+                    .fixedSize(horizontal: true, vertical: false)
                 
                 Text("\(leftScore)")
                     .monospacedDigit()
@@ -91,7 +91,7 @@ private extension CameraButtonsView {
                 
                 Text(rightTeamName)
                     .lineLimit(1)
-                    .frame(width: 40, alignment: .trailing)
+                    .fixedSize(horizontal: true, vertical: false)
                     
                 teamShape(color: rightTeamColor, isCircle: true)
             }
@@ -142,7 +142,8 @@ private extension CameraButtonsView {
         }
         .padding(.horizontal, 16)
         .padding(.vertical, 12)
-        .frame(maxWidth: showScoreControls ? 300 : 300)
+        .fixedSize(horizontal: !showScoreControls, vertical: false)
+        .frame(maxWidth: showScoreControls ? 380 : nil)
         .glassEffect(.regular.interactive(), in: .rect(cornerRadius: showScoreControls ? 12 : 22))
         .onTapGesture {
             withAnimation(.easeInOut(duration: 0.3)) {
