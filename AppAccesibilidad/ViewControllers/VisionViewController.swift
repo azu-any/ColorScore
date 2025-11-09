@@ -15,6 +15,8 @@ class VisionViewController: CameraViewController, VisionProcesorDelegate {
     
     // MARK: - Properties
     var visionProcessor = VisionProcessor()
+    var settings: MatchSettings?
+
     
     // ADD: A frame counter for periodic detection
     private var frameCounter = 0
@@ -118,11 +120,6 @@ class VisionViewController: CameraViewController, VisionProcesorDelegate {
         let bounds = rootLayer.bounds
         var scale: CGFloat
         
-        // **THE FIX:**
-        // The buffer is now landscape (e.g., 1920x1080).
-        // The bounds are also landscape (e.g., 812x375).
-        // We match width-to-width and height-to-height.
-        
         let xScale: CGFloat = bounds.size.width / bufferSize.width
         let yScale: CGFloat = bounds.size.height / bufferSize.height
         
@@ -133,11 +130,6 @@ class VisionViewController: CameraViewController, VisionProcesorDelegate {
         
         CATransaction.begin()
         CATransaction.setValue(kCFBooleanTrue, forKey: kCATransactionDisableActions)
-        
-        // **THE FIX:**
-        // REMOVED: CGAffineTransform(rotationAngle: CGFloat(.pi / 2.0))
-        // We only need to scale and flip vertically (because Core Graphics
-        // and CALayer have different coordinate origins).
         detectionOverlay.setAffineTransform(CGAffineTransform(scaleX: scale, y: -scale))
         
         // center the layer
@@ -149,29 +141,52 @@ class VisionViewController: CameraViewController, VisionProcesorDelegate {
     
     
     func createShapeLayerWithBounds(_ bounds: CGRect, _ label: String, teamID: Int? = nil) -> CAShapeLayer {
-        let shapeLayer = CAShapeLayer()
-        shapeLayer.name = label
-        var path: UIBezierPath
-
-        switch label {
-        case "ball":
-            path = UIBezierPath(ovalIn: bounds)
-            shapeLayer.fillColor = UIColor(Color.ball).withAlphaComponent(0.6).cgColor
-        case "player":
-            path = UIBezierPath(rect: bounds)
-            if let id = teamID {
-                let teamColor = (id == 0) ? Color.teamA : Color.blue
-                path = (id == 0) ? UIBezierPath(rect: bounds) : UIBezierPath(ovalIn: bounds)
-                shapeLayer.fillColor = UIColor(teamColor).withAlphaComponent(0.6).cgColor
-            } else {
-                shapeLayer.fillColor = UIColor.gray.withAlphaComponent(0.5).cgColor
-            }
-        default:
-            path = UIBezierPath(rect: bounds)
-            shapeLayer.fillColor = UIColor.yellow.withAlphaComponent(0.5).cgColor
+        
+        // Safely unwrap the settings. If they're not ready,
+        // draw a default gray box and exit the function.
+        guard let settings = self.settings else {
+            let defaultLayer = CAShapeLayer()
+            defaultLayer.name = label
+            defaultLayer.path = UIBezierPath(rect: bounds).cgPath
+            defaultLayer.fillColor = UIColor.gray.withAlphaComponent(0.4).cgColor
+            return defaultLayer
         }
         
-        shapeLayer.path = path.cgPath
+        let detection = DetectionType(label: label, teamID: teamID)
+        let style = settings.style(for: detection)
+        let shapeLayer = CAShapeLayer()
+        shapeLayer.name = label
+        
+        // 4. Use the new enum helpers to apply the style
+        shapeLayer.path = style.shape.path(in: bounds).cgPath
+        shapeLayer.fillColor = style.color.withAlphaComponent(0.6).cgColor
+        shapeLayer.lineWidth = 1.0
+        shapeLayer.strokeColor = UIColor.black.cgColor
+        
         return shapeLayer
+//        let shapeLayer = CAShapeLayer()
+//        shapeLayer.name = label
+//        var path: UIBezierPath
+//
+//        switch label {
+//        case "ball":
+//            path = UIBezierPath(ovalIn: bounds)
+//            shapeLayer.fillColor = UIColor(Color.ball).withAlphaComponent(0.6).cgColor
+//        case "player":
+//            path = UIBezierPath(rect: bounds)
+//            if let id = teamID {
+//                let teamColor = (id == 0) ? Color.teamA : Color.blue
+//                path = (id == 0) ? UIBezierPath(rect: bounds) : UIBezierPath(ovalIn: bounds)
+//                shapeLayer.fillColor = UIColor(teamColor).withAlphaComponent(0.6).cgColor
+//            } else {
+//                shapeLayer.fillColor = UIColor.gray.withAlphaComponent(0.5).cgColor
+//            }
+//        default:
+//            path = UIBezierPath(rect: bounds)
+//            shapeLayer.fillColor = UIColor.yellow.withAlphaComponent(0.5).cgColor
+//        }
+//        
+//        shapeLayer.path = path.cgPath
+//        return shapeLayer
     }
 }

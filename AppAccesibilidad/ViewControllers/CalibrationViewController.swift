@@ -31,7 +31,9 @@ class CalibrationViewController: VisionViewController {
     private let classifier = TeamClassifier()
     private var collectedCrops: [CGImage] = []
     private let context = CIContext()
-//    private var requests = [VNRequest]()
+    
+    var frameCount: Int = 0
+    var frameSkip: Int = 10
     
     // --- State & Timer ---
     private let calibrationDuration: TimeInterval = 10.0
@@ -186,52 +188,15 @@ class CalibrationViewController: VisionViewController {
     
     // MARK: - Capture & Cropping
     
-    /// We override the base class's captureOutput to ADD cropping logic.
-//    override func captureOutput(_ output: AVCaptureOutput, didOutput sampleBuffer: CMSampleBuffer, from connection: AVCaptureConnection) {
-//         // This synchronously performs the request and calls the completion handler
-//        // which will (on the main thread) call `drawVisionRequestResults`
-//        super.captureOutput(output, didOutput: sampleBuffer, from: connection)
-//        
-//        guard isCollecting else { return }
-//        
-//        // Get the results that the `super.captureOutput` just populated
-//        guard let results = self.visionProcessor.requests.first?.results as? [VNRecognizedObjectObservation],
-//              !results.isEmpty,
-//              let pixelBuffer = CMSampleBufferGetImageBuffer(sampleBuffer)
-//        else {
-//            return
-//        }
-//        
-//        // Background thread to avoid blocking the main thread with CIContext image creation
-//        DispatchQueue.global(qos: .userInitiated).async { [weak self] in
-//            let ciImage = CIImage(cvPixelBuffer: pixelBuffer)
-//            let context = CIContext()
-//            
-//            var newCrops: [CGImage] = []
-//            
-//            for observation in results {
-//                // Convert bounding box to pixel coordinates
-//                let boundingBox = observation.boundingBox
-//                let imageSize = ciImage.extent.size
-//                
-//                guard let bufferSize = self?.bufferSize else { continue }
-//                
-//                let pixelRect = VNImageRectForNormalizedRect(boundingBox,
-//                                                             Int(bufferSize.width),
-//                                                             Int(bufferSize.height))
-//                
-//                let croppedCIImage = ciImage.cropped(to: pixelRect)
-//                if let cgImage = context.createCGImage(croppedCIImage, from: croppedCIImage.extent) {
-//                    newCrops.append(cgImage)
-//                }
-//            }
-//            
-//            // Add new crops to the main array on the main thread
-//            DispatchQueue.main.async {
-//                self?.collectedCrops.append(contentsOf: newCrops)
-//            }
-//        }
-//    }
+    override func captureOutput(_ output: AVCaptureOutput, didOutput sampleBuffer: CMSampleBuffer, from connection: AVCaptureConnection) {
+        if frameCount == 0 {
+            super.captureOutput(output, didOutput: sampleBuffer, from: connection)
+        } else if frameCount == frameSkip {
+            frameCount = 0
+            return
+        }
+        frameCount += 1
+    }
 
     // MARK: - UI & Actions
     
