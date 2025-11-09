@@ -1,0 +1,8 @@
+# Ignorar configuraciones específicas del usuario de Xcode
+AppAccesibilidad.xcodeproj/project.xcworkspace/xcuserdata/
+*.xcuserstate
+
+# Ignorar archivos del sistema en macOS
+AppAccesibilidad/.DS_Store
+*.DS_Store
+
