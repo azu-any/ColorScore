@@ -35,13 +35,8 @@ struct CameraButtonsView: View {
 
     var body: some View {
         ZStack {
-            // Background with zoom
-            Image("soccerPlayExample")
-                .resizable()
-                .aspectRatio(contentMode: .fill)
-                .scaleEffect(zoom)
-                .clipped()
-                .ignoresSafeArea()
+            CameraView()
+                .edgesIgnoringSafeArea(.all)
             
             // Controls overlay
             VStack {
