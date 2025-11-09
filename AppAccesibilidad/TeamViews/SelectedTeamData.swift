@@ -15,14 +15,16 @@ struct SelectedTeamData: Identifiable, Equatable {
     let imageData: Data? // For custom teams
     let country: String?
     let division: String?
+    let teamColorHex: String? // Team color
     
-    // Initializer for predefined teams
-    init(name: String, imageName: String) {
+    // Initializer for predefined teams (with color)
+    init(name: String, imageName: String, teamColor: Color? = nil) {
         self.name = name
         self.imageName = imageName
         self.imageData = nil
         self.country = nil
         self.division = nil
+        self.teamColorHex = teamColor?.toHex()
     }
     
     // Initializer for custom teams
@@ -32,6 +34,15 @@ struct SelectedTeamData: Identifiable, Equatable {
         self.imageData = customTeam.logoImageData
         self.country = customTeam.country
         self.division = customTeam.division
+        self.teamColorHex = customTeam.teamColorHex
+    }
+    
+    // Get color from hex
+    var teamColor: Color {
+        if let hex = teamColorHex {
+            return Color(hex: hex)
+        }
+        return Color.blue // Default
     }
     
     static func == (lhs: SelectedTeamData, rhs: SelectedTeamData) -> Bool {

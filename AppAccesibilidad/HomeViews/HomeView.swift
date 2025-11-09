@@ -52,8 +52,7 @@ struct HomeView: View {
                                 teamName: teamSelectionManager.team1?.name ?? "Seleccionar equipo",
                                 badge: teamSelectionManager.team1?.imageName ?? "",
                                 badgeData: teamSelectionManager.team1?.imageData,
-                                background: "parisTeam",
-                                overlayColor: .blue
+                                overlayColor: teamSelectionManager.team1?.teamColor ?? .blue
                             )
                         }
                         .buttonStyle(PlainButtonStyle())
@@ -69,8 +68,7 @@ struct HomeView: View {
                                 teamName: teamSelectionManager.team2?.name ?? "Seleccionar equipo",
                                 badge: teamSelectionManager.team2?.imageName ?? "",
                                 badgeData: teamSelectionManager.team2?.imageData,
-                                background: "mexicoTeam",
-                                overlayColor: .green
+                                overlayColor: teamSelectionManager.team2?.teamColor ?? .green
                             )
                         }
                         .buttonStyle(PlainButtonStyle())

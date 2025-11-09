@@ -13,19 +13,25 @@ struct TeamGlassLargeCard: View {
     let teamName: String
     let badge: String
     var badgeData: Data? = nil // Optional badge data for custom teams
-    let background: String
     let overlayColor: Color
 
     var body: some View {
         ZStack {
-            // Imagen de fondo con esquinas redondeadas
-            Image(background)
-                .resizable()
-                .scaledToFill()
+            // Use solid color background for all teams
+            RoundedRectangle(cornerRadius: 24, style: .continuous)
+                .fill(overlayColor)
                 .frame(height: 170)
-                .clipShape(RoundedRectangle(cornerRadius: 24, style: .continuous))
-                .overlay(overlayColor.opacity(0.50))
-                .overlay(Color.black.opacity(0.35))
+                .overlay(
+                    // Add subtle gradient for depth
+                    LinearGradient(
+                        colors: [
+                            Color.black.opacity(0.2),
+                            Color.black.opacity(0.4)
+                        ],
+                        startPoint: .top,
+                        endPoint: .bottom
+                    )
+                )
                 .overlay(
                     RoundedRectangle(cornerRadius: 24, style: .continuous)
                         .strokeBorder(.white.opacity(0.25), lineWidth: 1)
@@ -112,7 +118,6 @@ struct TeamGlassLargeCard: View {
         teamTitle: "Equipo 2",
         teamName: "Selección Mexicana",
         badge: "mexicoLogo",
-        background: "mexicoTeam",
         overlayColor: .green
     )
     .padding()

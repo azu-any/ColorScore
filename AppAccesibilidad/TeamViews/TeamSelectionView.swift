@@ -330,7 +330,8 @@ struct TeamSelectionView: View {
     
     // MARK: - Selection Handlers
     private func selectTeam(_ team: Team) {
-        let selectedTeam = SelectedTeamData(name: team.name, imageName: team.imageName)
+        let teamColor = TeamColors.color(for: team.name)
+        let selectedTeam = SelectedTeamData(name: team.name, imageName: team.imageName, teamColor: teamColor)
         
         if teamSlot == 1 {
             selectionManager.team1 = selectedTeam
@@ -366,60 +367,82 @@ struct CustomTeamCard: View {
             onTeamSelected?()
         }) {
             VStack(spacing: 12) {
-                // Logo
-                if let imageData = team.logoImageData,
-                   let uiImage = UIImage(data: imageData) {
-                    Image(uiImage: uiImage)
-                        .resizable()
-                        .scaledToFill()
-                        .frame(width: 80, height: 80)
-                        .clipShape(RoundedRectangle(cornerRadius: 12))
-                } else {
-                    Image(systemName: "shield.fill")
-                        .font(.system(size: 40))
-                        .foregroundColor(.blue)
-                        .frame(width: 80, height: 80)
-                        .background(Color(uiColor: .systemGray5))
-                        .clipShape(RoundedRectangle(cornerRadius: 12))
+                // Logo with color background
+                ZStack {
+                    // Team color background
+                    RoundedRectangle(cornerRadius: 12)
+                        .fill(team.teamColor)
+                        .frame(width: 140, height: 140)
+                        .overlay(
+                            // Subtle gradient for depth
+                            LinearGradient(
+                                colors: [
+                                    Color.black.opacity(0.1),
+                                    Color.black.opacity(0.2)
+                                ],
+                                startPoint: .top,
+                                endPoint: .bottom
+                            )
+                        )
+                    
+                    // Logo overlay
+                    if let imageData = team.logoImageData,
+                       let uiImage = UIImage(data: imageData) {
+                        Image(uiImage: uiImage)
+                            .resizable()
+                            .scaledToFit()
+                            .frame(width: 100, height: 100)
+                            .shadow(color: Color.black.opacity(0.3), radius: 4, x: 0, y: 2)
+                    } else {
+                        Image(systemName: "shield.fill")
+                            .resizable()
+                            .scaledToFit()
+                            .frame(width: 60, height: 60)
+                            .foregroundColor(.white)
+                            .shadow(color: Color.black.opacity(0.3), radius: 4, x: 0, y: 2)
+                    }
                 }
+                .shadow(color: Color.black.opacity(0.15), radius: 8, x: 0, y: 4)
                 
                 // Team Info
                 VStack(spacing: 4) {
                     Text(team.name)
-                        .font(.system(size: 16, weight: .semibold))
+                        .font(.system(size: 13, weight: .medium))
                         .lineLimit(2)
                         .multilineTextAlignment(.center)
                         .foregroundColor(.primary)
                     
-                    Text(team.country)
-                        .font(.system(size: 14))
-                        .foregroundColor(.secondary)
-                    
-                    Text(team.division)
-                        .font(.system(size: 12))
-                        .foregroundColor(.secondary)
-                        .lineLimit(1)
+                    HStack(spacing: 4) {
+                        Text(team.country)
+                            .font(.system(size: 11))
+                            .foregroundColor(.secondary)
+                        
+                        Text("•")
+                            .font(.system(size: 11))
+                            .foregroundColor(.secondary)
+                        
+                        Text(team.division)
+                            .font(.system(size: 11))
+                            .foregroundColor(.secondary)
+                            .lineLimit(1)
+                    }
                 }
+                .frame(width: 140)
                 
                 // Delete button
                 Button(action: {
                     showDeleteAlert = true
                 }) {
                     Image(systemName: "trash")
-                        .font(.system(size: 14))
+                        .font(.system(size: 12))
                         .foregroundColor(.red)
-                        .padding(8)
+                        .padding(6)
                         .background(Color(uiColor: .systemGray6))
                         .clipShape(Circle())
                 }
             }
         }
         .buttonStyle(PlainButtonStyle())
-        .frame(width: 140)
-        .padding()
-        .background(Color(uiColor: .systemBackground))
-        .cornerRadius(16)
-        .shadow(color: Color.black.opacity(0.1), radius: 8, x: 0, y: 4)
         .alert("Eliminar equipo", isPresented: $showDeleteAlert) {
             Button("Cancelar", role: .cancel) { }
             Button("Eliminar", role: .destructive) {
