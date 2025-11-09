@@ -9,7 +9,6 @@
 import SwiftUI
 
 struct CameraView: UIViewControllerRepresentable {
-    let calibrationTrigger: Int
 
     // This function creates the initial view controller.
     // It's called only once.
@@ -22,8 +21,5 @@ struct CameraView: UIViewControllerRepresentable {
     // Since our camera view is self-contained, we can leave this empty.
     func updateUIViewController(_ uiViewController: VisionViewController, context: Context) {
         // No updates needed for this simple case.
-        if self.calibrationTrigger > 0 {
-            uiViewController.calibrateTeamsButtonPressed()
-        }
     }
 }

@@ -20,14 +20,10 @@ struct CameraButtonsView: View {
     @State private var rightTeamColor: Color = .red
     @State private var showScoreControls = false
     
-    // Throw away
-    @State private var calibrationTrigger = 0
-    
-
     var body: some View {
         ZStack {
 
-            CameraView(calibrationTrigger: self.calibrationTrigger)
+            CameraView()
                 .ignoresSafeArea(edges: .all)
             
             // Controls overlay
