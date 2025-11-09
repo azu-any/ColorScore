@@ -10,6 +10,7 @@ import SwiftUI
 @available(iOS 16.0, *)
 struct HomeView: View {
     @State private var showingCamera = false
+    @State private var teamSelectionManager = TeamSelectionManager()
     
     var body: some View {
         NavigationStack {
@@ -42,11 +43,15 @@ struct HomeView: View {
                         .padding(.top, 16)
 
                         // MARK: - Team 1 Card
-                        NavigationLink(destination: TeamSelectionView()) {
+                        NavigationLink(destination: TeamSelectionView(
+                            selectionManager: teamSelectionManager,
+                            teamSlot: 1
+                        )) {
                             TeamGlassLargeCard(
                                 teamTitle: "Equipo 1",
-                                teamName: "Paris Saint-Germain",
-                                badge: "parisLogo",
+                                teamName: teamSelectionManager.team1?.name ?? "Seleccionar equipo",
+                                badge: teamSelectionManager.team1?.imageName ?? "",
+                                badgeData: teamSelectionManager.team1?.imageData,
                                 background: "parisTeam",
                                 overlayColor: .blue
                             )
@@ -55,11 +60,15 @@ struct HomeView: View {
                         .padding(.horizontal, 20)
 
                         // MARK: - Team 2 Card
-                        NavigationLink(destination: TeamSelectionView()) {
+                        NavigationLink(destination: TeamSelectionView(
+                            selectionManager: teamSelectionManager,
+                            teamSlot: 2
+                        )) {
                             TeamGlassLargeCard(
                                 teamTitle: "Equipo 2",
-                                teamName: "Selección Mexicana",
-                                badge: "mexicoLogo",
+                                teamName: teamSelectionManager.team2?.name ?? "Seleccionar equipo",
+                                badge: teamSelectionManager.team2?.imageName ?? "",
+                                badgeData: teamSelectionManager.team2?.imageData,
                                 background: "mexicoTeam",
                                 overlayColor: .green
                             )

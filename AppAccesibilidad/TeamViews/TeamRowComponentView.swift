@@ -10,10 +10,12 @@ import SwiftUI
 struct TeamRowComponentView: View {
     let teams: [Team]
     let sectionColor: Color
+    var onTeamSelected: ((Team) -> Void)? = nil
     
-    init(teams: [Team], sectionColor: Color = .primary) {
+    init(teams: [Team], sectionColor: Color = .primary, onTeamSelected: ((Team) -> Void)? = nil) {
         self.teams = teams
         self.sectionColor = sectionColor
+        self.onTeamSelected = onTeamSelected
     }
     
     var body: some View {
@@ -21,6 +23,9 @@ struct TeamRowComponentView: View {
             HStack(spacing: 12) {
                 ForEach(teams) { team in
                     TeamCardView(team: team, sectionColor: sectionColor)
+                        .onTapGesture {
+                            onTeamSelected?(team)
+                        }
                 }
             }
             .padding(.horizontal)

@@ -12,6 +12,7 @@ struct TeamGlassLargeCard: View {
     let teamTitle: String
     let teamName: String
     let badge: String
+    var badgeData: Data? = nil // Optional badge data for custom teams
     let background: String
     let overlayColor: Color
 
@@ -35,13 +36,21 @@ struct TeamGlassLargeCard: View {
             VStack {
                 HStack {
                     // Logo o badge del equipo
-                    if UIImage(named: badge) != nil {
+                    if let badgeData = badgeData, let uiImage = UIImage(data: badgeData) {
+                        // Custom team logo from data
+                        Image(uiImage: uiImage)
+                            .resizable()
+                            .scaledToFit()
+                            .frame(width: 65, height: 65)
+                            .clipShape(RoundedRectangle(cornerRadius: 8))
+                    } else if !badge.isEmpty, UIImage(named: badge) != nil {
+                        // Predefined team logo from assets
                         Image(badge)
                             .resizable()
                             .scaledToFit()
                             .frame(width: 65, height: 65)
                     } else {
-                        // Placeholder icon si no hay imagen
+                        // Placeholder icon if no image
                         Image(systemName: "shield.fill")
                             .font(.system(size: 24, weight: .medium))
                             .foregroundStyle(.white.opacity(0.9))

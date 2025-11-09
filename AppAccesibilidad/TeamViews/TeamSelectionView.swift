@@ -16,8 +16,12 @@ struct Team: Identifiable {
 
 struct TeamSelectionView: View {
     @Environment(\.modelContext) private var modelContext
+    @Environment(\.dismiss) private var dismiss
     @Query(sort: \CustomTeam.createdDate, order: .reverse) private var customTeams: [CustomTeam]
     @State private var showingNewTeamSheet = false
+    
+    var selectionManager: TeamSelectionManager
+    var teamSlot: Int // 1 or 2
     
     // MARK: - América del Norte / Central
     let mexicoTeams = [
@@ -291,7 +295,9 @@ struct TeamSelectionView: View {
                 .foregroundColor(.black)
                 .padding(.horizontal)
             
-            TeamRowComponentView(teams: teams, sectionColor: color)
+            TeamRowComponentView(teams: teams, sectionColor: color) { team in
+                selectTeam(team)
+            }
         }
     }
     
@@ -312,12 +318,39 @@ struct TeamSelectionView: View {
             ScrollView(.horizontal, showsIndicators: false) {
                 HStack(spacing: 16) {
                     ForEach(customTeams) { team in
-                        CustomTeamCard(team: team, modelContext: modelContext)
+                        CustomTeamCard(team: team, modelContext: modelContext) {
+                            selectCustomTeam(team)
+                        }
                     }
                 }
                 .padding(.horizontal)
             }
         }
+    }
+    
+    // MARK: - Selection Handlers
+    private func selectTeam(_ team: Team) {
+        let selectedTeam = SelectedTeamData(name: team.name, imageName: team.imageName)
+        
+        if teamSlot == 1 {
+            selectionManager.team1 = selectedTeam
+        } else {
+            selectionManager.team2 = selectedTeam
+        }
+        
+        dismiss()
+    }
+    
+    private func selectCustomTeam(_ team: CustomTeam) {
+        let selectedTeam = SelectedTeamData(customTeam: team)
+        
+        if teamSlot == 1 {
+            selectionManager.team1 = selectedTeam
+        } else {
+            selectionManager.team2 = selectedTeam
+        }
+        
+        dismiss()
     }
 }
 
@@ -325,56 +358,63 @@ struct TeamSelectionView: View {
 struct CustomTeamCard: View {
     let team: CustomTeam
     var modelContext: ModelContext
+    var onTeamSelected: (() -> Void)? = nil
     @State private var showDeleteAlert = false
     
     var body: some View {
-        VStack(spacing: 12) {
-            // Logo
-            if let imageData = team.logoImageData,
-               let uiImage = UIImage(data: imageData) {
-                Image(uiImage: uiImage)
-                    .resizable()
-                    .scaledToFill()
-                    .frame(width: 80, height: 80)
-                    .clipShape(RoundedRectangle(cornerRadius: 12))
-            } else {
-                Image(systemName: "shield.fill")
-                    .font(.system(size: 40))
-                    .foregroundColor(.blue)
-                    .frame(width: 80, height: 80)
-                    .background(Color(uiColor: .systemGray5))
-                    .clipShape(RoundedRectangle(cornerRadius: 12))
-            }
-            
-            // Team Info
-            VStack(spacing: 4) {
-                Text(team.name)
-                    .font(.system(size: 16, weight: .semibold))
-                    .lineLimit(2)
-                    .multilineTextAlignment(.center)
+        Button(action: {
+            onTeamSelected?()
+        }) {
+            VStack(spacing: 12) {
+                // Logo
+                if let imageData = team.logoImageData,
+                   let uiImage = UIImage(data: imageData) {
+                    Image(uiImage: uiImage)
+                        .resizable()
+                        .scaledToFill()
+                        .frame(width: 80, height: 80)
+                        .clipShape(RoundedRectangle(cornerRadius: 12))
+                } else {
+                    Image(systemName: "shield.fill")
+                        .font(.system(size: 40))
+                        .foregroundColor(.blue)
+                        .frame(width: 80, height: 80)
+                        .background(Color(uiColor: .systemGray5))
+                        .clipShape(RoundedRectangle(cornerRadius: 12))
+                }
                 
-                Text(team.country)
-                    .font(.system(size: 14))
-                    .foregroundColor(.secondary)
+                // Team Info
+                VStack(spacing: 4) {
+                    Text(team.name)
+                        .font(.system(size: 16, weight: .semibold))
+                        .lineLimit(2)
+                        .multilineTextAlignment(.center)
+                        .foregroundColor(.primary)
+                    
+                    Text(team.country)
+                        .font(.system(size: 14))
+                        .foregroundColor(.secondary)
+                    
+                    Text(team.division)
+                        .font(.system(size: 12))
+                        .foregroundColor(.secondary)
+                        .lineLimit(1)
+                }
                 
-                Text(team.division)
-                    .font(.system(size: 12))
-                    .foregroundColor(.secondary)
-                    .lineLimit(1)
-            }
-            
-            // Delete button
-            Button(action: {
-                showDeleteAlert = true
-            }) {
-                Image(systemName: "trash")
-                    .font(.system(size: 14))
-                    .foregroundColor(.red)
-                    .padding(8)
-                    .background(Color(uiColor: .systemGray6))
-                    .clipShape(Circle())
+                // Delete button
+                Button(action: {
+                    showDeleteAlert = true
+                }) {
+                    Image(systemName: "trash")
+                        .font(.system(size: 14))
+                        .foregroundColor(.red)
+                        .padding(8)
+                        .background(Color(uiColor: .systemGray6))
+                        .clipShape(Circle())
+                }
             }
         }
+        .buttonStyle(PlainButtonStyle())
         .frame(width: 140)
         .padding()
         .background(Color(uiColor: .systemBackground))
@@ -398,6 +438,6 @@ struct CustomTeamCard: View {
 
 struct TeamSelectionView_Previews: PreviewProvider {
     static var previews: some View {
-        TeamSelectionView()
+        TeamSelectionView(selectionManager: TeamSelectionManager(), teamSlot: 1)
     }
 }
