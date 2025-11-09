@@ -88,6 +88,7 @@ struct CameraButtonsView: View {
 private extension CameraButtonsView {
     var backButton: some View {
         Button("Back") {
+            
             dismiss()
         }
         .buttonStyle(CircularButtonStyle(icon: "chevron.left"))
