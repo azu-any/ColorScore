@@ -16,6 +16,8 @@ struct NewTeamView: View {
     @State private var country: String = "Mexico"
     @State private var division: String = "Liga MX"
     @State private var selectedColorIndex: Int = 0 // Default to first color
+    @State private var customColor: Color = .blue // For custom color picker
+    @State private var useCustomColor: Bool = false // Toggle between preset and custom colors
     @State private var selectedLogoItem: PhotosPickerItem?
     @State private var selectedLogoImage: Image?
     @State private var logoImageData: Data?
@@ -76,15 +78,17 @@ struct NewTeamView: View {
                     
                     Button(action: {
                         // Save action
+                        saveTeam()
                         dismiss()
                     }) {
                         Image(systemName: "checkmark")
                             .font(.title2)
                             .foregroundColor(.white)
                             .frame(width: 44, height: 44)
-                            .background(Color.blue)
+                            .background(teamName.isEmpty ? Color.gray : Color.blue)
                             .clipShape(Circle())
                     }
+                    .disabled(teamName.isEmpty)
                 }
                 .padding(.horizontal)
                 .padding(.vertical, 12)
@@ -253,26 +257,66 @@ struct NewTeamView: View {
                             .padding(.horizontal)
                             .padding(.top)
                             
-                            Text("Selecciona el color representativo del equipo")
+                            Text("Elige un color predefinido o personalizado")
                                 .foregroundColor(.gray)
                                 .font(.caption)
                                 .padding(.horizontal)
                             
-                            // Color Grid
-                            LazyVGrid(columns: Array(repeating: GridItem(.flexible(), spacing: 12), count: 4), spacing: 12) {
-                                ForEach(Array(teamColors.enumerated()), id: \.offset) { index, color in
-                                    ColorButton(
-                                        color: color,
-                                        isSelected: selectedColorIndex == index,
-                                        action: {
-                                            selectedColorIndex = index
-                                        }
-                                    )
-                                }
+                            // Color mode toggle
+                            Picker("", selection: $useCustomColor) {
+                                Text("Predefinidos").tag(false)
+                                Text("Personalizado").tag(true)
                             }
+                            .pickerStyle(.segmented)
                             .padding(.horizontal)
-                            .padding(.bottom)
+                            
+                            if useCustomColor {
+                                // Custom Color Picker
+                                VStack(spacing: 16) {
+                                    // Color preview
+                                    ZStack {
+                                        RoundedRectangle(cornerRadius: 12)
+                                            .fill(customColor)
+                                            .frame(height: 120)
+                                            .overlay(
+                                                LinearGradient(
+                                                    colors: [
+                                                        Color.black.opacity(0.1),
+                                                        Color.black.opacity(0.2)
+                                                    ],
+                                                    startPoint: .top,
+                                                    endPoint: .bottom
+                                                )
+                                            )
+                                        
+                                        Image(systemName: "shield.fill")
+                                            .font(.system(size: 50))
+                                            .foregroundColor(.white)
+                                            .shadow(color: Color.black.opacity(0.3), radius: 4, x: 0, y: 2)
+                                    }
+                                    .padding(.horizontal)
+                                    
+                                    // Color picker
+                                    ColorPicker("Seleccionar color", selection: $customColor, supportsOpacity: false)
+                                        .padding(.horizontal)
+                                }
+                            } else {
+                                // Preset Color Grid
+                                LazyVGrid(columns: Array(repeating: GridItem(.flexible(), spacing: 12), count: 4), spacing: 12) {
+                                    ForEach(Array(teamColors.enumerated()), id: \.offset) { index, color in
+                                        ColorButton(
+                                            color: color,
+                                            isSelected: selectedColorIndex == index && !useCustomColor,
+                                            action: {
+                                                selectedColorIndex = index
+                                            }
+                                        )
+                                    }
+                                }
+                                .padding(.horizontal)
+                            }
                         }
+                        .padding(.bottom)
                         .background(Color(uiColor: .systemBackground))
                     }
                 }
@@ -295,7 +339,7 @@ struct NewTeamView: View {
     private func saveTeam() {
         guard !teamName.isEmpty else { return }
         
-        let selectedColor = teamColors[selectedColorIndex]
+        let selectedColor = useCustomColor ? customColor : teamColors[selectedColorIndex]
         let colorHex = selectedColor.toHex()
         
         let newTeam = CustomTeam(
@@ -317,7 +361,7 @@ struct NewTeamView: View {
     
     // Helper function to get the selected color
     func getSelectedColor() -> Color {
-        return teamColors[selectedColorIndex]
+        return useCustomColor ? customColor : teamColors[selectedColorIndex]
     }
 }
 
