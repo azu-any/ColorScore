@@ -14,7 +14,7 @@ class LiveAnalysisViewController: VisionViewController, CalibrationViewControlle
     
     var classifier: TeamClassifier?
     var frameCount: Int = 0
-    var frameSkip: Int = 5
+    var frameSkip: Int = 3
     
     override func viewDidAppear(_ animated: Bool) {
         super.viewDidAppear(animated)
@@ -47,7 +47,7 @@ class LiveAnalysisViewController: VisionViewController, CalibrationViewControlle
         classifier: TeamClassifier
     ) async -> [(VNRecognizedObjectObservation, Int?)] {
             
-        let context = CIContext()
+//        let context = CIContext()
         let ciImage = CIImage(cvPixelBuffer: buffer)
         var classifiedResults: [(VNRecognizedObjectObservation, Int?)] = []
         
@@ -56,17 +56,17 @@ class LiveAnalysisViewController: VisionViewController, CalibrationViewControlle
             let pixelRect = VNImageRectForNormalizedRect(observation.boundingBox, Int(bufferSize.width), Int(bufferSize.height))
             let croppedCIImage = ciImage.cropped(to: pixelRect)
             
-            guard let cgImage = context.createCGImage(croppedCIImage, from: croppedCIImage.extent) else {
-                classifiedResults.append((observation, nil)) // Append with nil team
-                continue
-            }
+//            guard let cgImage = context.createCGImage(croppedCIImage, from: croppedCIImage.extent) else {
+//                classifiedResults.append((observation, nil)) // Append with nil team
+//                continue
+//            }
             
             // Get the unique ID for this observation
             let playerID = observation.uuid
             
             do {
                 // Predict the team
-                let teamID = try await classifier.predict(for: cgImage, playerID: playerID)
+                let teamID = try await classifier.predict(for: croppedCIImage, playerID: playerID)
                 classifiedResults.append((observation, teamID))
             } catch TeamClassifier.ClassifierError.noiseDetected {
                 // This is a noise object (e.g., referee), add it as unclassified

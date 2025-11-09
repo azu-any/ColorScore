@@ -29,7 +29,7 @@ class CalibrationViewController: VisionViewController {
     
     // MARK: - Properties
     private let classifier = TeamClassifier()
-    private var collectedCrops: [CGImage] = []
+    private var collectedCrops: [CIImage] = []
     private let context = CIContext()
     
     var frameCount: Int = 0
@@ -79,6 +79,15 @@ class CalibrationViewController: VisionViewController {
         
         print("Frame processed. Detections found: \(results.count)")
         
+        if frameCount == frameSkip  {
+            frameCount = 0
+            return
+        } else if frameCount != 0  {
+            frameCount += 1
+            return
+        }
+        frameCount += 1
+        
         super.visionService(service, didFind: results, on: buffer)
         
         // --- 2. Check if we are in the collecting state ---
@@ -91,7 +100,7 @@ class CalibrationViewController: VisionViewController {
             guard let self = self else { return }
             
             let ciImage = CIImage(cvPixelBuffer: buffer)
-            var newCrops: [CGImage] = []
+            var newCrops: [CIImage] = []
             
             for observation in results {
                 // Get the bounding box from the observation
@@ -106,9 +115,9 @@ class CalibrationViewController: VisionViewController {
                 let croppedCIImage = ciImage.cropped(to: pixelRect)
                 
                 // Convert to CGImage
-                if let cgImage = self.context.createCGImage(croppedCIImage, from: croppedCIImage.extent) {
-                    newCrops.append(cgImage)
-                }
+//                if let cgImage = self.context.createCGImage(croppedCIImage, from: croppedCIImage.extent) {
+                newCrops.append(croppedCIImage)
+//                }
             }
             
             // Add new crops to the main array (on the main thread)
@@ -189,13 +198,7 @@ class CalibrationViewController: VisionViewController {
     // MARK: - Capture & Cropping
     
     override func captureOutput(_ output: AVCaptureOutput, didOutput sampleBuffer: CMSampleBuffer, from connection: AVCaptureConnection) {
-        if frameCount == 0 {
-            super.captureOutput(output, didOutput: sampleBuffer, from: connection)
-        } else if frameCount == frameSkip {
-            frameCount = 0
-            return
-        }
-        frameCount += 1
+        super.captureOutput(output, didOutput: sampleBuffer, from: connection)
     }
 
     // MARK: - UI & Actions

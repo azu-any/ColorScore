@@ -127,7 +127,14 @@ struct SimpleKMeans {
 
             // 3. Pick the next center with probability proportional to D(x)^2
             let totalDistance = distances.reduce(0, +)
-            guard totalDistance > 0 else { continue } // Avoid division by zero
+            if totalDistance == 0 {
+                // All points are identical to existing centers.
+                // Just pick another random point to ensure we get nClusters.
+                if let randomPoint = points.randomElement() {
+                    centers.append(randomPoint)
+                }
+                continue // Go to the next iteration of the for loop
+            }
             
             let randomValue = Double.random(in: 0...totalDistance)
             var cumulativeDistance: Double = 0
