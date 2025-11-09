@@ -7,9 +7,11 @@
 
 import SwiftUI
 import PhotosUI
+import SwiftData
 
 struct NewTeamView: View {
     @Environment(\.dismiss) var dismiss
+    @Environment(\.modelContext) private var modelContext
     @State private var teamName: String = ""
     @State private var country: String = "Mexico"
     @State private var division: String = "Liga MX"
@@ -17,6 +19,7 @@ struct NewTeamView: View {
     @State private var selectedColorIndex: Int = 6 // Orange color selected by default
     @State private var selectedLogoItem: PhotosPickerItem?
     @State private var selectedLogoImage: Image?
+    @State private var logoImageData: Data?
     @FocusState private var isTeamNameFocused: Bool
     
     // Countries with football teams
@@ -66,15 +69,17 @@ struct NewTeamView: View {
                     
                     Button(action: {
                         // Save action
+                        saveTeam()
                         dismiss()
                     }) {
                         Image(systemName: "checkmark")
                             .font(.title2)
                             .foregroundColor(.white)
                             .frame(width: 44, height: 44)
-                            .background(Color.blue)
+                            .background(teamName.isEmpty ? Color.gray : Color.blue)
                             .clipShape(Circle())
                     }
+                    .disabled(teamName.isEmpty)
                 }
                 .padding(.horizontal)
                 .padding(.vertical, 12)
@@ -237,9 +242,30 @@ struct NewTeamView: View {
                     if let data = try? await newItem?.loadTransferable(type: Data.self),
                        let uiImage = UIImage(data: data) {
                         selectedLogoImage = Image(uiImage: uiImage)
+                        logoImageData = data
                     }
                 }
             }
+        }
+    }
+    
+    // Save team to SwiftData
+    private func saveTeam() {
+        guard !teamName.isEmpty else { return }
+        
+        let newTeam = CustomTeam(
+            name: teamName,
+            country: country,
+            division: division,
+            logoImageData: logoImageData
+        )
+        
+        modelContext.insert(newTeam)
+        
+        do {
+            try modelContext.save()
+        } catch {
+            print("Error saving team: \(error)")
         }
     }
     

@@ -6,6 +6,7 @@
 //
 
 import SwiftUI
+import SwiftData
 
 struct Team: Identifiable {
     let id = UUID()
@@ -14,6 +15,8 @@ struct Team: Identifiable {
 }
 
 struct TeamSelectionView: View {
+    @Environment(\.modelContext) private var modelContext
+    @Query(sort: \CustomTeam.createdDate, order: .reverse) private var customTeams: [CustomTeam]
     @State private var showingNewTeamSheet = false
     
     // MARK: - América del Norte / Central
@@ -202,6 +205,11 @@ struct TeamSelectionView: View {
                 .padding(.horizontal)
                 .padding(.top, 16)
                 
+                // MARK: - Custom Teams Section
+                if !customTeams.isEmpty {
+                    customTeamsSection()
+                }
+                
                 // MARK: - América del Norte / Central
                 continentHeader("🌎 América del Norte / Central")
                 
@@ -285,6 +293,106 @@ struct TeamSelectionView: View {
             
             TeamRowComponentView(teams: teams, sectionColor: color)
         }
+    }
+    
+    // MARK: - Custom Teams Section
+    @ViewBuilder
+    private func customTeamsSection() -> some View {
+        VStack(alignment: .leading, spacing: 12) {
+            HStack {
+                Text("⚽️ Mis Equipos Creados")
+                    .font(.system(size: 28, weight: .bold))
+                    .foregroundColor(.primary)
+                
+                Spacer()
+            }
+            .padding(.horizontal)
+            .padding(.top, 8)
+            
+            ScrollView(.horizontal, showsIndicators: false) {
+                HStack(spacing: 16) {
+                    ForEach(customTeams) { team in
+                        CustomTeamCard(team: team, modelContext: modelContext)
+                    }
+                }
+                .padding(.horizontal)
+            }
+        }
+    }
+}
+
+// MARK: - Custom Team Card
+struct CustomTeamCard: View {
+    let team: CustomTeam
+    var modelContext: ModelContext
+    @State private var showDeleteAlert = false
+    
+    var body: some View {
+        VStack(spacing: 12) {
+            // Logo
+            if let imageData = team.logoImageData,
+               let uiImage = UIImage(data: imageData) {
+                Image(uiImage: uiImage)
+                    .resizable()
+                    .scaledToFill()
+                    .frame(width: 80, height: 80)
+                    .clipShape(RoundedRectangle(cornerRadius: 12))
+            } else {
+                Image(systemName: "shield.fill")
+                    .font(.system(size: 40))
+                    .foregroundColor(.blue)
+                    .frame(width: 80, height: 80)
+                    .background(Color(uiColor: .systemGray5))
+                    .clipShape(RoundedRectangle(cornerRadius: 12))
+            }
+            
+            // Team Info
+            VStack(spacing: 4) {
+                Text(team.name)
+                    .font(.system(size: 16, weight: .semibold))
+                    .lineLimit(2)
+                    .multilineTextAlignment(.center)
+                
+                Text(team.country)
+                    .font(.system(size: 14))
+                    .foregroundColor(.secondary)
+                
+                Text(team.division)
+                    .font(.system(size: 12))
+                    .foregroundColor(.secondary)
+                    .lineLimit(1)
+            }
+            
+            // Delete button
+            Button(action: {
+                showDeleteAlert = true
+            }) {
+                Image(systemName: "trash")
+                    .font(.system(size: 14))
+                    .foregroundColor(.red)
+                    .padding(8)
+                    .background(Color(uiColor: .systemGray6))
+                    .clipShape(Circle())
+            }
+        }
+        .frame(width: 140)
+        .padding()
+        .background(Color(uiColor: .systemBackground))
+        .cornerRadius(16)
+        .shadow(color: Color.black.opacity(0.1), radius: 8, x: 0, y: 4)
+        .alert("Eliminar equipo", isPresented: $showDeleteAlert) {
+            Button("Cancelar", role: .cancel) { }
+            Button("Eliminar", role: .destructive) {
+                deleteTeam()
+            }
+        } message: {
+            Text("¿Estás seguro de que quieres eliminar \(team.name)?")
+        }
+    }
+    
+    private func deleteTeam() {
+        modelContext.delete(team)
+        try? modelContext.save()
     }
 }
 
