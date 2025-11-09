@@ -3,7 +3,6 @@ import SwiftUI
 /// Accessible camera overlay with zoom controls and score display
 struct CameraButtonsView: View {
     // Zoom controls
-    @State private var zoom: Double = 1.0
     @State private var showZoomSlider = false
     
     // Dismiss environment
@@ -22,20 +21,11 @@ struct CameraButtonsView: View {
     @State private var showConfiguration = false
     
     // Team and goalkeeper customization
-    @State private var team1Shape: PlayerShape = .circle
-    @State private var team1Color: PlayerColor = .blue
-    @State private var goalkeeper1Shape: PlayerShape = .square
-    @State private var goalkeeper1Color: PlayerColor = .blue
-    @State private var team2Shape: PlayerShape = .circle
-    @State private var team2Color: PlayerColor = .red
-    @State private var goalkeeper2Shape: PlayerShape = .square
-    @State private var goalkeeper2Color: PlayerColor = .red
-    @State private var ballShape: PlayerShape = .circle
-    @State private var ballColor: PlayerColor = .orange
+    @State var matchSettings = MatchSettings()
 
     var body: some View {
         ZStack {
-            CameraView()
+            CameraView(settings: matchSettings)
                 .edgesIgnoringSafeArea(.all)
             
             // Controls overlay
@@ -88,6 +78,9 @@ struct CameraButtonsView: View {
 private extension CameraButtonsView {
     var backButton: some View {
         Button("Back") {
+            DispatchQueue.main.async {
+                AppDelegate.orientationLock = .portrait
+            }
             dismiss()
         }
         .buttonStyle(CircularButtonStyle(icon: "chevron.left"))
@@ -114,14 +107,14 @@ private extension CameraButtonsView {
                         
                         CompactShapeColorPicker(
                             title: "Jugadores",
-                            selectedShape: $team1Shape,
-                            selectedColor: $team1Color
+                            selectedShape: $matchSettings.team1Shape,
+                            selectedColor: $matchSettings.team1Color
                         )
                         
                         CompactShapeColorPicker(
                             title: "Portero",
-                            selectedShape: $goalkeeper1Shape,
-                            selectedColor: $goalkeeper1Color
+                            selectedShape: $matchSettings.goalkeeper1Shape,
+                            selectedColor: $matchSettings.goalkeeper1Color
                         )
                     }
                     
@@ -136,14 +129,14 @@ private extension CameraButtonsView {
                         
                         CompactShapeColorPicker(
                             title: "Jugadores",
-                            selectedShape: $team2Shape,
-                            selectedColor: $team2Color
+                            selectedShape: $matchSettings.team2Shape,
+                            selectedColor: $matchSettings.team2Color
                         )
                         
                         CompactShapeColorPicker(
                             title: "Portero",
-                            selectedShape: $goalkeeper2Shape,
-                            selectedColor: $goalkeeper2Color
+                            selectedShape: $matchSettings.goalkeeper2Shape,
+                            selectedColor: $matchSettings.goalkeeper2Color
                         )
                     }
                     
@@ -158,8 +151,8 @@ private extension CameraButtonsView {
                         
                         CompactShapeColorPicker(
                             title: "Balón",
-                            selectedShape: $ballShape,
-                            selectedColor: $ballColor
+                            selectedShape: $matchSettings.ballShape,
+                            selectedColor: $matchSettings.ballColor
                         )
                     }
                 }
@@ -181,14 +174,14 @@ private extension CameraButtonsView {
             HStack(spacing: 0) {
                 // Left team
                 HStack(spacing: 8) {
-                    team1Shape.view(color: team1Color.color, size: 16)
+                    matchSettings.team1Shape.view(color: matchSettings.team1Color.color, size: 16)
                     
                     Text(leftTeamName)
                         .lineLimit(1)
                         .fixedSize(horizontal: true, vertical: false)
                         .font(.system(.callout, design: .rounded, weight: .semibold))
                 }
-                .foregroundStyle(team1Color.color)
+                .foregroundStyle(matchSettings.team1Color.color)
                 
                 Spacer()
                     .frame(width: 12)
@@ -198,7 +191,7 @@ private extension CameraButtonsView {
                     Text("\(leftScore)")
                         .monospacedDigit()
                         .font(.system(.title, design: .rounded, weight: .bold))
-                        .foregroundStyle(team1Color.color)
+                        .foregroundStyle(matchSettings.team1Color.color)
                         .frame(minWidth: 28)
                     
                     Text(":")
@@ -208,7 +201,7 @@ private extension CameraButtonsView {
                     Text("\(rightScore)")
                         .monospacedDigit()
                         .font(.system(.title, design: .rounded, weight: .bold))
-                        .foregroundStyle(team2Color.color)
+                        .foregroundStyle(matchSettings.team2Color.color)
                         .frame(minWidth: 28)
                 }
                 
@@ -222,9 +215,9 @@ private extension CameraButtonsView {
                         .fixedSize(horizontal: true, vertical: false)
                         .font(.system(.callout, design: .rounded, weight: .semibold))
                     
-                    team2Shape.view(color: team2Color.color, size: 16)
+                    matchSettings.team2Shape.view(color: matchSettings.team2Color.color, size: 16)
                 }
-                .foregroundStyle(team2Color.color)
+                .foregroundStyle(matchSettings.team2Color.color)
             }
             
             // Score controls - only show when toggled
@@ -244,7 +237,7 @@ private extension CameraButtonsView {
                             Image(systemName: "minus.circle.fill")
                                 .font(.system(size: 26))
                         }
-                        .buttonStyle(ScoreControlButtonStyle(teamColor: team1Color.color, enabled: leftScore > 0))
+                        .buttonStyle(ScoreControlButtonStyle(teamColor: matchSettings.team1Color.color, enabled: leftScore > 0))
                         .disabled(leftScore == 0)
                         .accessibilityLabel("Decrease \(leftTeamName) score")
                         
@@ -254,7 +247,7 @@ private extension CameraButtonsView {
                             Image(systemName: "plus.circle.fill")
                                 .font(.system(size: 26))
                         }
-                        .buttonStyle(ScoreControlButtonStyle(teamColor: team1Color.color, enabled: true))
+                        .buttonStyle(ScoreControlButtonStyle(teamColor: matchSettings.team1Color.color, enabled: true))
                         .accessibilityLabel("Increase \(leftTeamName) score")
                     }
                     
@@ -270,7 +263,7 @@ private extension CameraButtonsView {
                             Image(systemName: "minus.circle.fill")
                                 .font(.system(size: 26))
                         }
-                        .buttonStyle(ScoreControlButtonStyle(teamColor: team2Color.color, enabled: rightScore > 0))
+                        .buttonStyle(ScoreControlButtonStyle(teamColor: matchSettings.team2Color.color, enabled: rightScore > 0))
                         .disabled(rightScore == 0)
                         .accessibilityLabel("Decrease \(rightTeamName) score")
                         
@@ -280,7 +273,7 @@ private extension CameraButtonsView {
                             Image(systemName: "plus.circle.fill")
                                 .font(.system(size: 26))
                         }
-                        .buttonStyle(ScoreControlButtonStyle(teamColor: team2Color.color, enabled: true))
+                        .buttonStyle(ScoreControlButtonStyle(teamColor: matchSettings.team2Color.color, enabled: true))
                         .accessibilityLabel("Increase \(rightTeamName) score")
                     }
                 }
@@ -320,8 +313,8 @@ private extension CameraButtonsView {
     }
     
     var zoomSlider: some View {
-        Slider(value: $zoom, in: 1.0...5.0, step: 0.1) { _ in
-            print("Zoom: \(zoom)")
+        Slider(value: $matchSettings.zoom, in: 1.0...5.0, step: 0.1) { _ in
+            print("Zoom: \(matchSettings.zoom)")
         }
         .controlSize(.regular)
         .frame(maxWidth: 220)
@@ -329,7 +322,7 @@ private extension CameraButtonsView {
         .padding(.horizontal, 12)
         .frame(height: 44)
         .glassEffect(.regular.interactive(), in: .capsule)
-        .accessibilityLabel("Zoom: \(zoom, specifier: "%.1f")x")
+        .accessibilityLabel("Zoom: \(matchSettings.zoom, specifier: "%.1f")x")
         .transition(.scale(scale: 0, anchor: .leading).combined(with: .opacity))
     }
     
@@ -384,374 +377,6 @@ private extension CameraButtonsView {
     }
 }
 
-// MARK: - Button Styles
-struct CircularButtonStyle: ButtonStyle {
-    let icon: String
-    let usesGlass: Bool
-    
-    init(icon: String, usesGlass: Bool = false) {
-        self.icon = icon
-        self.usesGlass = usesGlass
-    }
-    
-    func makeBody(configuration: Configuration) -> some View {
-        Image(systemName: icon)
-            .font(.system(size: 20, weight: .semibold))
-            .foregroundStyle(Color.black)
-            .frame(width: 44, height: 44)
-            .background {
-                if usesGlass {
-                    Circle().glassEffect(.regular.interactive())
-                } else {
-                    Circle().fill(.ultraThinMaterial)
-                }
-            }
-            .scaleEffect(configuration.isPressed ? 0.95 : 1.0)
-            .animation(.easeInOut(duration: 0.1), value: configuration.isPressed)
-            .accessibilityAddTraits(.isButton)
-    }
-}
-
-struct ScoreButtonStyle: ButtonStyle {
-    func makeBody(configuration: Configuration) -> some View {
-        configuration.label
-            .font(.system(.caption, weight: .bold))
-            .foregroundStyle(Color.black)
-            .frame(width: 24, height: 24)
-            .background {
-                Circle()
-                    .fill(Color.white.opacity(0.8))
-                    .overlay {
-                        Circle()
-                            .strokeBorder(Color.black.opacity(0.2), lineWidth: 0.5)
-                    }
-            }
-            .scaleEffect(configuration.isPressed ? 0.9 : 1.0)
-            .animation(.easeInOut(duration: 0.1), value: configuration.isPressed)
-    }
-}
-
-struct LargeScoreButtonStyle: ButtonStyle {
-    let teamColor: Color
-    
-    func makeBody(configuration: Configuration) -> some View {
-        configuration.label
-            .font(.system(.title2, weight: .bold))
-            .foregroundStyle(Color.white)
-            .frame(width: 40, height: 40)
-            .background {
-                Circle()
-                    .fill(teamColor)
-                    .overlay {
-                        Circle()
-                            .strokeBorder(Color.white.opacity(0.3), lineWidth: 1)
-                    }
-                    .shadow(color: teamColor.opacity(0.3), radius: 2, x: 0, y: 1)
-            }
-            .scaleEffect(configuration.isPressed ? 0.9 : 1.0)
-            .animation(.easeInOut(duration: 0.15), value: configuration.isPressed)
-    }
-}
-
-struct ScoreControlButtonStyle: ButtonStyle {
-    let teamColor: Color
-    let enabled: Bool
-    
-    func makeBody(configuration: Configuration) -> some View {
-        configuration.label
-            .foregroundStyle(enabled ? teamColor : teamColor.opacity(0.3))
-            .scaleEffect(configuration.isPressed ? 0.85 : 1.0)
-            .animation(.spring(response: 0.3, dampingFraction: 0.6), value: configuration.isPressed)
-    }
-}
-
-// MARK: - Player Customization Types
-enum PlayerShape: String, CaseIterable, Identifiable {
-    case circle = "Circle"
-    case square = "Square"
-    case triangle = "Triangle"
-    case diamond = "Diamond"
-    case star = "Star"
-    
-    var id: String { rawValue }
-    
-    @ViewBuilder
-    func view(color: Color, size: CGFloat = 24) -> some View {
-        switch self {
-        case .circle:
-            Circle()
-                .fill(color)
-                .frame(width: size, height: size)
-        case .square:
-            Rectangle()
-                .fill(color)
-                .frame(width: size, height: size)
-        case .triangle:
-            Triangle()
-                .fill(color)
-                .frame(width: size, height: size)
-        case .diamond:
-            Diamond()
-                .fill(color)
-                .frame(width: size, height: size)
-        case .star:
-            Star()
-                .fill(color)
-                .frame(width: size * 1.2, height: size * 1.2)
-        }
-    }
-}
-
-enum PlayerColor: String, CaseIterable, Identifiable {
-    case blue = "Blue"
-    case red = "Red"
-    case green = "Green"
-    case orange = "Orange"
-    case purple = "Purple"
-    case yellow = "Yellow"
-    case cyan = "Cyan"
-    case pink = "Pink"
-    
-    var id: String { rawValue }
-    
-    var color: Color {
-        switch self {
-        case .blue: return Color(red: 0.0, green: 0.48, blue: 0.8)      // Colorblind-friendly blue
-        case .red: return Color(red: 0.9, green: 0.27, blue: 0.23)      // Colorblind-friendly red
-        case .green: return Color(red: 0.0, green: 0.62, blue: 0.45)    // Colorblind-friendly green
-        case .orange: return Color(red: 0.9, green: 0.6, blue: 0.0)     // High contrast orange
-        case .purple: return Color(red: 0.58, green: 0.4, blue: 0.74)   // Distinct purple
-        case .yellow: return Color(red: 0.95, green: 0.9, blue: 0.25)   // High visibility yellow
-        case .cyan: return Color(red: 0.2, green: 0.73, blue: 0.87)     // Light cyan
-        case .pink: return Color(red: 0.96, green: 0.51, blue: 0.69)    // Distinct pink
-        }
-    }
-}
-
-// MARK: - Custom Shapes
-struct Triangle: Shape {
-    func path(in rect: CGRect) -> Path {
-        var path = Path()
-        path.move(to: CGPoint(x: rect.midX, y: rect.minY))
-        path.addLine(to: CGPoint(x: rect.maxX, y: rect.maxY))
-        path.addLine(to: CGPoint(x: rect.minX, y: rect.maxY))
-        path.closeSubpath()
-        return path
-    }
-}
-
-struct Diamond: Shape {
-    func path(in rect: CGRect) -> Path {
-        var path = Path()
-        path.move(to: CGPoint(x: rect.midX, y: rect.minY))
-        path.addLine(to: CGPoint(x: rect.maxX, y: rect.midY))
-        path.addLine(to: CGPoint(x: rect.midX, y: rect.maxY))
-        path.addLine(to: CGPoint(x: rect.minX, y: rect.midY))
-        path.closeSubpath()
-        return path
-    }
-}
-
-struct Hexagon: Shape {
-    func path(in rect: CGRect) -> Path {
-        var path = Path()
-        let width = rect.width
-        let height = rect.height
-        
-        path.move(to: CGPoint(x: width * 0.5, y: 0))
-        path.addLine(to: CGPoint(x: width, y: height * 0.25))
-        path.addLine(to: CGPoint(x: width, y: height * 0.75))
-        path.addLine(to: CGPoint(x: width * 0.5, y: height))
-        path.addLine(to: CGPoint(x: 0, y: height * 0.75))
-        path.addLine(to: CGPoint(x: 0, y: height * 0.25))
-        path.closeSubpath()
-        
-        return path
-    }
-}
-
-struct Star: Shape {
-    func path(in rect: CGRect) -> Path {
-        var path = Path()
-        let center = CGPoint(x: rect.midX, y: rect.midY)
-        let outerRadius = min(rect.width, rect.height) / 2
-        let innerRadius = outerRadius * 0.4
-        let points = 5
-        
-        for i in 0..<points * 2 {
-            let angle = (Double(i) * .pi / Double(points)) - .pi / 2
-            let radius = i.isMultiple(of: 2) ? outerRadius : innerRadius
-            let x = center.x + CGFloat(cos(angle)) * radius
-            let y = center.y + CGFloat(sin(angle)) * radius
-            
-            if i == 0 {
-                path.move(to: CGPoint(x: x, y: y))
-            } else {
-                path.addLine(to: CGPoint(x: x, y: y))
-            }
-        }
-        path.closeSubpath()
-        
-        return path
-    }
-}
-
-// MARK: - Shape Color Picker Component
-struct ShapeColorPicker: View {
-    let title: String
-    @Binding var selectedShape: PlayerShape
-    @Binding var selectedColor: PlayerColor
-    
-    var body: some View {
-        VStack(alignment: .leading, spacing: 12) {
-            Text(title)
-                .font(.headline)
-            
-            // Shape picker
-            VStack(alignment: .leading, spacing: 8) {
-                Text("Shape")
-                    .font(.subheadline)
-                    .foregroundStyle(.secondary)
-                
-                ScrollView(.horizontal, showsIndicators: false) {
-                    HStack(spacing: 12) {
-                        ForEach(PlayerShape.allCases) { shape in
-                            Button {
-                                selectedShape = shape
-                            } label: {
-                                VStack(spacing: 6) {
-                                    shape.view(color: selectedColor.color, size: 32)
-                                        .frame(width: 60, height: 60)
-                                        .background(
-                                            RoundedRectangle(cornerRadius: 12)
-                                                .fill(selectedShape == shape ? Color.accentColor.opacity(0.15) : Color.secondary.opacity(0.1))
-                                        )
-                                        .overlay(
-                                            RoundedRectangle(cornerRadius: 12)
-                                                .strokeBorder(selectedShape == shape ? Color.accentColor : Color.clear, lineWidth: 2)
-                                        )
-                                    
-                                    Text(shape.rawValue)
-                                        .font(.caption2)
-                                        .foregroundStyle(selectedShape == shape ? .primary : .secondary)
-                                }
-                            }
-                            .buttonStyle(.plain)
-                        }
-                    }
-                    .padding(.vertical, 4)
-                }
-            }
-            
-            // Color picker
-            VStack(alignment: .leading, spacing: 8) {
-                Text("Color")
-                    .font(.subheadline)
-                    .foregroundStyle(.secondary)
-                
-                LazyVGrid(columns: [GridItem(.adaptive(minimum: 44))], spacing: 12) {
-                    ForEach(PlayerColor.allCases) { colorOption in
-                        Button {
-                            selectedColor = colorOption
-                        } label: {
-                            Circle()
-                                .fill(colorOption.color)
-                                .frame(width: 44, height: 44)
-                                .overlay(
-                                    Circle()
-                                        .strokeBorder(selectedColor == colorOption ? Color.primary : Color.clear, lineWidth: 3)
-                                )
-                                .overlay(
-                                    Circle()
-                                        .strokeBorder(Color.white, lineWidth: 1)
-                                )
-                                .shadow(color: Color.black.opacity(0.1), radius: 2, x: 0, y: 1)
-                        }
-                        .buttonStyle(.plain)
-                        .accessibilityLabel(colorOption.rawValue)
-                    }
-                }
-            }
-        }
-        .padding(.vertical, 8)
-    }
-}
-
-// MARK: - Compact Shape Color Picker for Overlay
-struct CompactShapeColorPicker: View {
-    let title: String
-    @Binding var selectedShape: PlayerShape
-    @Binding var selectedColor: PlayerColor
-    
-    var body: some View {
-        VStack(alignment: .leading, spacing: 10) {
-            HStack {
-                Text(title)
-                    .font(.system(.callout, design: .rounded, weight: .medium))
-                    .foregroundStyle(.primary)
-                Spacer()
-                // Preview
-                selectedShape.view(color: selectedColor.color, size: 20)
-            }
-            
-            // Shape picker - compact horizontal scroll
-            ScrollView(.horizontal, showsIndicators: false) {
-                HStack(spacing: 8) {
-                    ForEach(PlayerShape.allCases) { shape in
-                        Button {
-                            withAnimation(.spring(response: 0.3, dampingFraction: 0.7)) {
-                                selectedShape = shape
-                            }
-                        } label: {
-                            shape.view(color: selectedColor.color, size: 20)
-                                .frame(width: 40, height: 40)
-                                .background(
-                                    RoundedRectangle(cornerRadius: 10)
-                                        .fill(selectedShape == shape ? selectedColor.color.opacity(0.2) : Color.primary.opacity(0.05))
-                                )
-                                .overlay(
-                                    RoundedRectangle(cornerRadius: 10)
-                                        .strokeBorder(selectedShape == shape ? selectedColor.color : Color.clear, lineWidth: 2)
-                                )
-                        }
-                        .buttonStyle(.plain)
-                    }
-                }
-            }
-            
-            // Color picker - compact grid
-            LazyVGrid(columns: [GridItem(.adaptive(minimum: 36))], spacing: 8) {
-                ForEach(PlayerColor.allCases) { colorOption in
-                    Button {
-                        withAnimation(.spring(response: 0.3, dampingFraction: 0.7)) {
-                            selectedColor = colorOption
-                        }
-                    } label: {
-                        Circle()
-                            .fill(colorOption.color)
-                            .frame(width: 36, height: 36)
-                            .overlay(
-                                Circle()
-                                    .strokeBorder(selectedColor == colorOption ? Color.white : Color.clear, lineWidth: 2.5)
-                            )
-                            .overlay(
-                                Circle()
-                                    .strokeBorder(selectedColor == colorOption ? Color.primary : Color.primary.opacity(0.2), lineWidth: 1)
-                            )
-                            .shadow(color: Color.black.opacity(0.1), radius: 2, x: 0, y: 1)
-                    }
-                    .buttonStyle(.plain)
-                    .accessibilityLabel(colorOption.rawValue)
-                }
-            }
-        }
-        .padding(12)
-        .background(
-            RoundedRectangle(cornerRadius: 12)
-                .fill(Color.primary.opacity(0.05))
-        )
-    }
-}
 
 #Preview {
     CameraButtonsView()

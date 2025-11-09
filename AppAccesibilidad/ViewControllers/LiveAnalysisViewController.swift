@@ -6,13 +6,16 @@
 //
 
 import UIKit
+import SwiftUI
 import AVFoundation
 import Vision
 
 class LiveAnalysisViewController: VisionViewController, CalibrationViewControllerDelegate {
     
     var classifier: TeamClassifier?
-
+    var frameCount: Int = 0
+    var frameSkip: Int = 3
+    
     override func viewDidAppear(_ animated: Bool) {
         super.viewDidAppear(animated)
         
@@ -28,8 +31,6 @@ class LiveAnalysisViewController: VisionViewController, CalibrationViewControlle
     override func visionService(_ service: VisionProcessor, didFind results: [VNRecognizedObjectObservation], on buffer: CVPixelBuffer) {
             
         guard let classifier = self.classifier else {
-            // Classifier not ready. Fall back to parent's behavior
-            super.visionService(service, didFind: results, on: buffer)
             return
         }
         
@@ -46,7 +47,7 @@ class LiveAnalysisViewController: VisionViewController, CalibrationViewControlle
         classifier: TeamClassifier
     ) async -> [(VNRecognizedObjectObservation, Int?)] {
             
-        let context = CIContext()
+//        let context = CIContext()
         let ciImage = CIImage(cvPixelBuffer: buffer)
         var classifiedResults: [(VNRecognizedObjectObservation, Int?)] = []
         
@@ -55,20 +56,24 @@ class LiveAnalysisViewController: VisionViewController, CalibrationViewControlle
             let pixelRect = VNImageRectForNormalizedRect(observation.boundingBox, Int(bufferSize.width), Int(bufferSize.height))
             let croppedCIImage = ciImage.cropped(to: pixelRect)
             
-            guard let cgImage = context.createCGImage(croppedCIImage, from: croppedCIImage.extent) else {
-                classifiedResults.append((observation, nil)) // Append with nil team
-                continue
-            }
+//            guard let cgImage = context.createCGImage(croppedCIImage, from: croppedCIImage.extent) else {
+//                classifiedResults.append((observation, nil)) // Append with nil team
+//                continue
+//            }
             
             // Get the unique ID for this observation
             let playerID = observation.uuid
             
             do {
                 // Predict the team
-                let teamID = try await classifier.predict(for: cgImage, playerID: playerID)
+                let teamID = try await classifier.predict(for: croppedCIImage, playerID: playerID)
                 classifiedResults.append((observation, teamID))
+            } catch TeamClassifier.ClassifierError.noiseDetected {
+                // This is a noise object (e.g., referee), add it as unclassified
+                classifiedResults.append((observation, nil))
             } catch {
-                classifiedResults.append((observation, nil)) // Failed prediction
+                // Handle other errors
+                classifiedResults.append((observation, nil))
             }
         }
         return classifiedResults
@@ -103,24 +108,18 @@ class LiveAnalysisViewController: VisionViewController, CalibrationViewControlle
     
     override func captureOutput(_ output: AVCaptureOutput, didOutput sampleBuffer: CMSampleBuffer, from connection: AVCaptureConnection) {
         // If we don't have a classifier, don't do anything.
-        guard let classifier = self.classifier else {
-            // You could optionally still show basic detections
-            // by calling super.captureOutput(...)
+        guard self.classifier != nil else {
             return
         }
         
-        super.captureOutput(output, didOutput: sampleBuffer, from: connection) 
+        if frameCount == 0 {
+            super.captureOutput(output, didOutput: sampleBuffer, from: connection)
+        } else if frameCount == frameSkip {
+            frameCount = 0
+            return
+        }
+        frameCount += 1
         
-        // If we *do* have a classifier, run the full
-        // detection + prediction + cropping logic here.
-        
-        // ... (your logic to run detection) ...
-        
-        // ... (your logic to get crops) ...
-        
-        // ... (your logic to call `await classifier.predict(...)`) ...
-        
-        // ... (your logic to draw results *with team colors*) ...
     }
 
     // MARK: - CalibrationViewControllerDelegate
@@ -135,12 +134,26 @@ class LiveAnalysisViewController: VisionViewController, CalibrationViewControlle
     
     func calibrationDidCancel() {
         print("Calibration was cancelled.")
-        
         // Dismiss the VC
         self.dismiss(animated: true, completion: nil)
+    }
+    
+    func setZoom(factor: Double) {
+        let vidioDevice = AVCaptureDevice.DiscoverySession(deviceTypes: [.builtInWideAngleCamera], mediaType: .video, position: .back).devices.first
+        guard let device = vidioDevice else { return }
         
-        // Here, you might want to show an alert to the user
-        // telling them they must calibrate to use the app,
-        // or just let them tap a "Calibrate" button to try again.
+        // 2. Clamp the zoom factor to the device's valid range
+        let minZoom = device.minAvailableVideoZoomFactor
+        let maxZoom = device.maxAvailableVideoZoomFactor
+        let clampedFactor = max(minZoom, min(factor, maxZoom))
+        
+        // 3. Lock the device, apply the zoom, and unlock
+        do {
+            try device.lockForConfiguration()
+            device.videoZoomFactor = clampedFactor
+            device.unlockForConfiguration()
+        } catch {
+            print("Failed to set zoom: \(error.localizedDescription)")
+        }
     }
 }
