@@ -27,10 +27,15 @@ class TeamClassifier {
     /// "Trains" the classifier by learning the two team clusters from a set of player images.
     /// - Parameter crops: An array of CGImage crops, one for each player.
     func fit(on crops: [CGImage]) async throws {
-        print("Fitting TeamClassifier on \(crops.count) player crops...")
+        
+        // Limit crops
+        let maxCrops = 2000
+        // Select randomly from the array of crops
+        let cropsToUse = Array(crops.shuffled().prefix(maxCrops))
+        print("Fitting TeamClassifier on \(cropsToUse.count) player crops...")
         
         // 1. Extract high-dimensional feature vectors from all player crops.
-        let features = try await extractFeatures(from: crops)
+        let features = try await extractFeatures(from: cropsToUse)
         
         guard features.count > 1 else {
             print("Not enough features to fit the model.")
@@ -53,8 +58,9 @@ class TeamClassifier {
     ///   - crop: The CGImage of the player to classify.
     ///   - playerID: The unique tracking ID for the player.
     /// - Returns: The team ID (0 or 1).
+    /// Predicts the team for a single player.
     func predict(for crop: CGImage, playerID: UUID) async throws -> Int {
-        // Check the cache first for this tracked player.
+        // 1. Check cache (Fastest path)
         if let teamID = playerTeamDict[playerID] {
             return teamID
         }
@@ -63,15 +69,15 @@ class TeamClassifier {
             throw ClassifierError.modelNotFitted
         }
 
-        // 1. Extract the feature vector for the new player crop.
-        guard let features = try await extractFeatures(from: [crop]).first else {
-            throw ClassifierError.featureExtractionFailed
-        }
+        // 2. Extract features (This is now faster)
+        // --- MODIFIED ---
+        // We now call the singular extractFeature, which has no TaskGroup overhead.
+        let features = try await extractFeature(from: crop)
         
-        // 2. Predict which cluster the features belong to.
+        // 3. Predict from features
         let teamID = kmeans.predict(features)
         
-        // 3. Cache the result.
+        // 4. Cache the result
         playerTeamDict[playerID] = teamID
         
         return teamID
@@ -79,14 +85,16 @@ class TeamClassifier {
 
     // MARK: - Core ML Feature Extraction
 
-    /// Runs the Siglip model on an array of images concurrently to get their feature embeddings.
+    /// Runs the Siglip model on an array of images concurrently. (Used by fit)
     private func extractFeatures(from crops: [CGImage]) async throws -> [[Double]] {
         try await withThrowingTaskGroup(of: [Double].self) { group in
             var allFeatures: [[Double]] = []
 
             for crop in crops {
                 group.addTask {
-                    try await self.performVisionRequest(on: crop)
+                    // --- MODIFIED ---
+                    // Call our new singular function
+                    try await self.extractFeature(from: crop)
                 }
             }
             
@@ -95,6 +103,40 @@ class TeamClassifier {
             }
             
             return allFeatures
+        }
+    }
+    
+    /// Performs a VNCoreMLRequest for a SINGLE image to get its feature vector.
+    private func extractFeature(from image: CGImage) async throws -> [Double] {
+        return try await withCheckedThrowingContinuation { continuation in
+            let request = VNCoreMLRequest(model: self.visionModel) { request, error in
+                if let error = error {
+                    continuation.resume(throwing: error)
+                    return
+                }
+                guard let results = request.results as? [VNCoreMLFeatureValueObservation],
+                      let featureObservation = results.first,
+                      let multiArray = featureObservation.featureValue.multiArrayValue else {
+                    continuation.resume(throwing: ClassifierError.featureExtractionFailed)
+                    return
+                }
+                
+                // Convert MLMultiArray (Float) to [Double]
+                let pointer = multiArray.dataPointer.bindMemory(to: Float.self, capacity: multiArray.count)
+                let buffer = UnsafeBufferPointer(start: pointer, count: multiArray.count)
+                let features = buffer.map { Double($0) }
+                
+                continuation.resume(returning: features)
+            }
+
+            request.imageCropAndScaleOption = .scaleFill
+            let handler = VNImageRequestHandler(cgImage: image)
+            
+            do {
+                try handler.perform([request])
+            } catch {
+                continuation.resume(throwing: error)
+            }
         }
     }
     

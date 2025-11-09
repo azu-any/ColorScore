@@ -1,5 +1,4 @@
 import Foundation
-import Accelerate
 
 // A simple, self-contained KMeans implementation.
 struct SimpleKMeans {
@@ -12,19 +11,13 @@ struct SimpleKMeans {
         self.maxIterations = maxIterations
     }
 
-    /// Finds the *squared* Euclidean distance between two n-dimensional points.
-        private func distance(from p1: [Double], to p2: [Double]) -> Double {
-            // We use vDSP to calculate (p1 - p2)
-            var difference = [Double](repeating: 0.0, count: p1.count)
-            vDSP_vsubD(p2, 1, p1, 1, &difference, 1, vDSP_Length(p1.count))
-            
-            // Then we calculate the dot product of the difference with itself:
-            // (p1-p2) • (p1-p2), which is the squared distance.
-            var squaredDistance: Double = 0.0
-            vDSP_dotprD(difference, 1, difference, 1, &squaredDistance, vDSP_Length(p1.count))
-            
-            return squaredDistance
-        }
+    /// Finds the distance between two points (colors).
+    private func distance(from p1: [Double], to p2: [Double]) -> Double {
+        let r_dist = p1[0] - p2[0]
+        let g_dist = p1[1] - p2[1]
+        let b_dist = p1[2] - p2[2]
+        return r_dist*r_dist + g_dist*g_dist + b_dist*b_dist
+    }
 
     /// Finds the closest cluster center for a given point.
     func predict(_ point: [Double]) -> Int {
@@ -42,37 +35,25 @@ struct SimpleKMeans {
 
     /// Clusters the points and finds the center for each cluster.
     mutating func fit(points: [[Double]]) {
-        guard points.count >= nClusters, let firstPoint = points.first else { return }
+        guard points.count >= nClusters else { return }
 
-        // Get the dimensionality of our data
-        let d = firstPoint.count
-        
-        // 1. Initialize cluster centers randomly.
+        // 1. Initialize cluster centers randomly from the data points.
         clusterCenters = Array(points.shuffled().prefix(nClusters))
 
-        // We need a place to store the assignments for each point.
-        var assignments = [Int](repeating: -1, count: points.count)
-        
         for _ in 0..<maxIterations {
-            
-            // 2. Assign each point to the nearest cluster (in parallel).
-            DispatchQueue.concurrentPerform(iterations: points.count) { i in
-                let point = points[i]
+            var clusters: [[Int]] = Array(repeating: [], count: nClusters)
+
+            // 2. Assign each point to the nearest cluster.
+            for (i, point) in points.enumerated() {
                 let clusterIndex = predict(point)
-                assignments[i] = clusterIndex
+                clusters[clusterIndex].append(i)
             }
 
-            // 3. Group the assignments
-            // This cleanly groups all indices by their assigned cluster
-            let clusters = Dictionary(grouping: 0..<points.count, by: { assignments[$0] })
-
-            // 4. Recalculate the center of each cluster.
+            // 3. Recalculate the center of each cluster.
             var newCenters: [[Double]] = []
             for i in 0..<nClusters {
-                // Get the point indices for this cluster, or an empty array
-                let clusterIndices = clusters[i, default: []]
-                
-                if let newCenter = calculateCenter(for: clusterIndices.map { points[$0] }, dimensions: d) {
+                let clusterPoints = clusters[i].map { points[$0] }
+                if let newCenter = calculateCenter(for: clusterPoints) {
                     newCenters.append(newCenter)
                 } else {
                     // If a cluster is empty, keep its old center.
@@ -80,30 +61,22 @@ struct SimpleKMeans {
                 }
             }
             
-            // 5. Check for convergence
+            // If centers haven't changed, we've converged.
             if newCenters == clusterCenters { break }
             clusterCenters = newCenters
         }
     }
     
-    /// Calculates the average point (center) of a cluster using vDSP.
-    private func calculateCenter(for points: [[Double]], dimensions: Int) -> [Double]? {
+    /// Calculates the average point (center) of a cluster.
+    private func calculateCenter(for points: [[Double]]) -> [Double]? {
         guard !points.isEmpty else { return nil }
-
-        // Create a sum vector initialized to zero
-        var sum = [Double](repeating: 0.0, count: dimensions)
-        
-        // Sum all vectors in the cluster
+        var sum: [Double] = [0.0, 0.0, 0.0]
         for point in points {
-            // sum = sum + point
-            vDSP_vaddD(sum, 1, point, 1, &sum, 1, vDSP_Length(dimensions))
+            sum[0] += point[0]
+            sum[1] += point[1]
+            sum[2] += point[2]
         }
-
-        // Divide the sum vector by the number of points
-        var count = Double(points.count)
-        var newCenter = [Double](repeating: 0.0, count: dimensions)
-        vDSP_vsdivD(sum, 1, &count, &newCenter, 1, vDSP_Length(dimensions))
-        
-        return newCenter
+        let count = Double(points.count)
+        return [sum[0] / count, sum[1] / count, sum[2] / count]
     }
 }
