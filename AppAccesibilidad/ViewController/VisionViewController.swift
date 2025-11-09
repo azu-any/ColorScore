@@ -1,207 +1,107 @@
+//
+//  VisionViewController.swift
+//  AppAccesibilidad
+//
+//  Created by Azuany Mila Cerón on 11/8/25.
+//
+
+
 import UIKit
 import AVFoundation
 import Vision
 import SwiftUI
 
-class VisionViewController: ViewController {
-    
-    private var currentState: DetectionState = .preTraining {
-        didSet {
-            updateUI(for: currentState)
-        }
-    }
+class VisionViewController: CameraViewController, VisionProcesorDelegate {
     
     // MARK: - Properties
-
-    private var visionProcessor: VisionProcessor!
-    private let trackerQueue = DispatchQueue(label: "Xcookers.trackerQueue", qos: .userInitiated)
-    private var trainingTimer: Timer?
-    private var trainingSecondsRemaining: Int = 0
-    private let trainingDuration: TimeInterval = 30.0
-    private var objectsToTrack = [TrackedPolyRect]()
-
+    var visionProcessor = VisionProcessor()
     
-    private func updateUI(for state: DetectionState) {
-        // Show/hide your overlay components based on state
-        switch state {
-        case .preTraining:
-            trainingOverlayView.showStartButton()
-        case .isTraining:
-            trainingOverlayView.showTrainingProgress(secondsRemaining: 30) // e.g., "Calibrating... 30s"
-        case .isDetecting:
-            trainingOverlayView.hide()
-        }
-    }
+    // ADD: A frame counter for periodic detection
+    private var frameCounter = 0
+    private let detectionStride = 10 // Run detection every 30 frames (adjust as needed)
+
+    /// A serial queue to protect access to our tracking dictionaries.
+    private let trackerQueue = DispatchQueue(label: "Xcookers.trackerQueue")
+    private var trackedObjects: [UUID: VNTrackObjectRequest] = [:]
+    private var trackedObjectInfo: [UUID: (box: CGRect, label: String, teamID: Int?)] = [:]
+//
+    // Team Classification
+    private let teamClassifier = TeamClassifier()
+    private var isClassifierFitted = false
+        private var calibrationCrops: [CGImage] = []
+    private let minCropsForCalibration = 20 // Threshold of crops to collect
+    private var isFittingModel = false      // Lock to prevent multiple fits at once
     
     // UI & Drawing
-    private var detectionOverlay: CALayer! = nil
-    private var trainingOverlayView: TrainingOverlayView!
+    var detectionOverlay: CALayer! = nil
     
     // Data Management
     private var latestPixelBuffer: CVPixelBuffer?
 
-    
-    override func viewDidLoad() {
-        super.viewDidLoad()
-        
-        setupOverlayView()
-        
-        // Initialize the processor
-        self.visionProcessor = VisionProcessor()
-        
-        // Set initial state
-        self.currentState = .preTraining
-    }
-    
-    private func setupOverlayView() {
-        // Add your new view over the camera feed
-        trainingOverlayView = TrainingOverlayView(frame: view.bounds)
-        view.addSubview(trainingOverlayView)
-        
-        // Add a target to the button in the overlay
-        trainingOverlayView.startButton.addTarget(self,
-               action: #selector(didTapStartTraining),
-               for: .touchUpInside)
-    }
+    // MARK: - Lifecycle & Setup
     
     override func setupAVCapture() {
         super.setupAVCapture()
+    
         setupLayers()
         updateLayerGeometry()
-        startCaptureSession()
+        
+        visionProcessor.delegate = self
+        
+        if let error = visionProcessor.setupVision() {
+            print("FATAL ERROR: Failed to setup Vision: \(error.localizedDescription)")
+            return
+        }
+        
+//        startCaptureSession()
     }
     
-    @objc private func didTapStartTraining() {
-        // --- STATE 1 -> 2 ---
-        currentState = .isTraining
+    
+    func visionService(_ service: VisionProcessor, didFind results: [VNRecognizedObjectObservation], on buffer: CVPixelBuffer) {
+        // We received results from the service.
+        // This is called on the main thread, so it's safe to update the UI.
+        self.drawVisionRequestResults(results)
         
-        trainingSecondsRemaining = Int(trainingDuration)
-        trainingOverlayView?.showTrainingProgress(secondsRemaining: trainingSecondsRemaining)
-
-        // Start the 1-second UI update timer
-        trainingTimer?.invalidate() // In case it's already running
-        trainingTimer = Timer.scheduledTimer(timeInterval: 1.0,
-                                             target: self,
-                                             selector: #selector(trainingTimerTick),
-                                             userInfo: nil,
-                                             repeats: true)
-        
-        // Schedule the *actual* end of training
-        DispatchQueue.main.asyncAfter(deadline: .now() + trainingDuration) { [weak self] in
-            // Using [weak self] is good practice for asyncAfter
-            self?.finishTraining()
-        }
     }
-
-    @objc private func trainingTimerTick() {
-        // --- FIX: Add countdown logic and UI update ---
-        if trainingSecondsRemaining > 0 {
-            trainingSecondsRemaining -= 1
-        } else {
-            // This is a safeguard, but 'finishTraining' should have
-            // already invalidated the timer.
-            trainingTimer?.invalidate()
-        }
-        
-        // Update the overlay UI with the new remaining time
-        trainingOverlayView?.showTrainingProgress(secondsRemaining: trainingSecondsRemaining)
-    }
-
-    private func finishTraining() {
-        // This function was logically correct, but I'll include it for completeness.
-        
-        // --- STATE 2 -> 3 ---
-        
-        // Stop the 1-second UI timer
-        trainingTimer?.invalidate()
-        
-        // 1. Tell the processor to train on the crops it collected
-        print("Training classifier...")
-        visionProcessor.trainClassifier { [weak self] success in
-            // Ensure we are still on the main thread for UI/state updates
-            DispatchQueue.main.async {
-                guard let self = self, success else {
-                    print("Training failed. Resetting.")
-                    self?.currentState = .preTraining // Go back to start
-                    return
-                }
-                
-                // 2. Move to live detection
-                print("Training complete. Going live.")
-                self.currentState = .isDetecting
-            }
-        }
+    
+    // In case, the vision service failed
+    func visionService(_ service: VisionProcessor, didFailWithError error: Error) {
+        print("Vision service failed with error: \(error.localizedDescription)")
     }
     
     // MARK: - Main Vision Pipeline
     
+    // Manage output of camera
     override func captureOutput(_ output: AVCaptureOutput, didOutput sampleBuffer: CMSampleBuffer, from connection: AVCaptureConnection) {
-        
-        // Obtain image from camera
         guard let pixelBuffer = CMSampleBufferGetImageBuffer(sampleBuffer) else { return }
         self.latestPixelBuffer = pixelBuffer
         let exifOrientation = exifOrientationFromDeviceOrientation()
         
-        visionProcessor.process(pixelBuffer, state: currentState)
-
-        updateDetectionOverlay()
+        // Call visionProcessor to process frames
+        visionProcessor.performRequest(on: pixelBuffer, orientation: exifOrientation)
     }
-    
-    
+            
     // MARK: - UI Drawing
     
-    private func updateDetectionOverlay() {
-//        DispatchQueue.main.async {
-//            CATransaction.begin()
-//            CATransaction.setValue(kCFBooleanTrue, forKey: kCATransactionDisableActions)
-//            
-//            self.detectionOverlay.sublayers = nil // Clear previous layers
-//            
-//            for (_, info) in self.trackedObjectInfo {
-//                let objectBounds = VNImageRectForNormalizedRect(info.box, Int(self.bufferSize.width), Int(self.bufferSize.height))
-//                
-//                let shapeLayer = self.createShapeLayerWithBounds(objectBounds, info.label, teamID: info.teamID)
-//                
-//                // Optional: Add a text label
-//                // let textLayer = self.createTextSubLayerInBounds(...)
-//                // shapeLayer.addSublayer(textLayer)
-//                
-//                self.detectionOverlay.addSublayer(shapeLayer)
-//            }
-//            
-//            self.updateLayerGeometry()
-//            CATransaction.commit()
-//        }
+    func drawVisionRequestResults(_ results: [VNRecognizedObjectObservation]) {
+        CATransaction.begin()
+        CATransaction.setValue(kCFBooleanTrue, forKey: kCATransactionDisableActions)
+        detectionOverlay.sublayers = nil // remove all the old recognized objects
+        
+        // The loop is now simpler since we know the type
+        for objectObservation in results {
+            // Select only the label with the highest confidence.
+            let topLabelObservation = objectObservation.labels[0]
+            let objectBounds = VNImageRectForNormalizedRect(objectObservation.boundingBox, Int(bufferSize.width), Int(bufferSize.height))
+            
+            let shapeLayer = self.createShapeLayerWithBounds(objectBounds, topLabelObservation.identifier)
+            
+            detectionOverlay.addSublayer(shapeLayer)
+        }
+        self.updateLayerGeometry()
+        CATransaction.commit()
     }
     
-//    func createShapeLayerWithBounds(_ bounds: CGRect, _ label: String, teamID: Int?) -> CAShapeLayer {
-//        let shapeLayer = CAShapeLayer()
-//        shapeLayer.name = label
-//        let path: UIBezierPath
-//
-//        switch label {
-//        case "ball":
-//            path = UIBezierPath(ovalIn: bounds)
-//            shapeLayer.fillColor = UIColor(Color.ball).withAlphaComponent(0.6).cgColor
-//        case "player":
-//            path = UIBezierPath(rect: bounds)
-//            if let id = teamID {
-//                let teamColor = (id == 0) ? Color.teamA : Color.blue
-//                shapeLayer.fillColor = UIColor(teamColor).withAlphaComponent(0.6).cgColor
-//            } else {
-//                shapeLayer.fillColor = UIColor.gray.withAlphaComponent(0.5).cgColor
-//            }
-//        default:
-//            path = UIBezierPath(rect: bounds)
-//            shapeLayer.fillColor = UIColor.yellow.withAlphaComponent(0.5).cgColor
-//        }
-//        
-//        shapeLayer.path = path.cgPath
-//        return shapeLayer
-//    }
-
-
-
     func setupLayers() {
         detectionOverlay = CALayer() // container layer that has all the renderings of the observations
         detectionOverlay.name = "DetectionOverlay"
@@ -218,6 +118,11 @@ class VisionViewController: ViewController {
         let bounds = rootLayer.bounds
         var scale: CGFloat
         
+        // **THE FIX:**
+        // The buffer is now landscape (e.g., 1920x1080).
+        // The bounds are also landscape (e.g., 812x375).
+        // We match width-to-width and height-to-height.
+        
         let xScale: CGFloat = bounds.size.width / bufferSize.width
         let yScale: CGFloat = bounds.size.height / bufferSize.height
         
@@ -229,6 +134,10 @@ class VisionViewController: ViewController {
         CATransaction.begin()
         CATransaction.setValue(kCFBooleanTrue, forKey: kCATransactionDisableActions)
         
+        // **THE FIX:**
+        // REMOVED: CGAffineTransform(rotationAngle: CGFloat(.pi / 2.0))
+        // We only need to scale and flip vertically (because Core Graphics
+        // and CALayer have different coordinate origins).
         detectionOverlay.setAffineTransform(CGAffineTransform(scaleX: scale, y: -scale))
         
         // center the layer
@@ -237,4 +146,32 @@ class VisionViewController: ViewController {
         CATransaction.commit()
     }
     
+    
+    
+    func createShapeLayerWithBounds(_ bounds: CGRect, _ label: String, teamID: Int? = nil) -> CAShapeLayer {
+        let shapeLayer = CAShapeLayer()
+        shapeLayer.name = label
+        var path: UIBezierPath
+
+        switch label {
+        case "ball":
+            path = UIBezierPath(ovalIn: bounds)
+            shapeLayer.fillColor = UIColor(Color.ball).withAlphaComponent(0.6).cgColor
+        case "player":
+            path = UIBezierPath(rect: bounds)
+            if let id = teamID {
+                let teamColor = (id == 0) ? Color.teamA : Color.blue
+                path = (id == 0) ? UIBezierPath(rect: bounds) : UIBezierPath(ovalIn: bounds)
+                shapeLayer.fillColor = UIColor(teamColor).withAlphaComponent(0.6).cgColor
+            } else {
+                shapeLayer.fillColor = UIColor.gray.withAlphaComponent(0.5).cgColor
+            }
+        default:
+            path = UIBezierPath(rect: bounds)
+            shapeLayer.fillColor = UIColor.yellow.withAlphaComponent(0.5).cgColor
+        }
+        
+        shapeLayer.path = path.cgPath
+        return shapeLayer
+    }
 }
