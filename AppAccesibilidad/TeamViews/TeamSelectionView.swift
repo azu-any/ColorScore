@@ -274,7 +274,7 @@ struct TeamSelectionView: View {
         }
         .sheet(isPresented: $showingNewTeamSheet) {
             NewTeamView()
-                .presentationDetents([.medium])
+                .presentationDetents([.large])
                 .presentationDragIndicator(.visible)
         }
     }

@@ -379,7 +379,7 @@ struct ColorButton: View {
                     .frame(width: 60, height: 60)
                     .overlay(
                         Circle()
-                            .strokeBorder(Color.white, lineWidth: 3)
+                            .strokeBorder(Color.white, lineWidth: 0)
                     )
                     .shadow(color: Color.black.opacity(0.2), radius: 4, x: 0, y: 2)
                 
