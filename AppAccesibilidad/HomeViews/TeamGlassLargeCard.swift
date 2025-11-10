@@ -105,8 +105,11 @@ struct TeamGlassLargeCard: View {
         .clipShape(RoundedRectangle(cornerRadius: 24, style: .continuous))
         .glassEffect(.regular.interactive(), in: .rect(cornerRadius: 24))
         .accessibilityElement(children: .ignore)
-        .accessibilityLabel("\(teamTitle): \(teamName)")
+        .accessibilityLabel(teamName == "Seleccionar equipo" ? "\(teamTitle), sin seleccionar" : "\(teamTitle): \(teamName) seleccionado")
+        .accessibilityValue(teamName == "Seleccionar equipo" ? "Sin equipo" : teamName)
+        .accessibilityHint("Toca para seleccionar este equipo")
         .accessibilityAddTraits(.isButton)
+        .accessibilityAction(named: "Seleccionar equipo") { }
     }
 }
 
@@ -123,3 +126,4 @@ struct TeamGlassLargeCard: View {
     .padding()
     .background(Color(.systemGroupedBackground))
 }
+
