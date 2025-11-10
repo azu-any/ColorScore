@@ -10,6 +10,7 @@ import SwiftUI
 @available(iOS 16.0, *)
 struct HomeView: View {
     @State private var showingCamera = false
+    @State private var showingHelp = false
     
     var body: some View {
         NavigationStack {
@@ -106,7 +107,7 @@ struct HomeView: View {
                     HStack {
                         Spacer()
                         Button {
-                            // TODO: acción de ayuda
+                            showingHelp = true
                         } label: {
                             Image(systemName: "questionmark.circle")
                                 .font(.title3.bold())
@@ -117,6 +118,11 @@ struct HomeView: View {
                         .padding(.top, 12)
                     }
                     Spacer()
+                }
+                .alert("Ayuda", isPresented: $showingHelp) {
+                    Button("Entendido", role: .cancel) { }
+                } message: {
+                    Text("Selecciona los equipos que participarán en el partido. Luego presiona 'Empezar partido' para comenzar el seguimiento en tiempo real con reconocimiento de gestos y estadísticas accesibles.")
                 }
             }
             .toolbar(.hidden, for: .navigationBar)
