@@ -30,7 +30,7 @@ class CalibrationViewController: VisionViewController {
     // MARK: - Properties
     private let classifier = TeamClassifier()
     private var collectedCrops: [CIImage] = []
-    private let context = CIContext()
+//    private let context = CIContext()
     
     var frameCount: Int = 0
     var frameSkip: Int = 10
@@ -67,6 +67,9 @@ class CalibrationViewController: VisionViewController {
         // Clean up the timer
         timer?.invalidate()
         timer = nil
+        
+        stopCaptureSession()
+        
     }
     
     
@@ -114,8 +117,6 @@ class CalibrationViewController: VisionViewController {
                 // Crop the CIImage
                 let croppedCIImage = ciImage.cropped(to: pixelRect)
                 
-                // Convert to CGImage
-//                if let cgImage = self.context.createCGImage(croppedCIImage, from: croppedCIImage.extent) {
                 newCrops.append(croppedCIImage)
 //                }
             }
@@ -194,6 +195,8 @@ class CalibrationViewController: VisionViewController {
             }
         }
     }
+
+    
     
     // MARK: - Capture & Cropping
     
@@ -211,6 +214,7 @@ class CalibrationViewController: VisionViewController {
         
         delegate?.calibrationDidCancel()
     }
+    
     
     private func showErrorAlert(message: String) {
         let alert = UIAlertController(title: "Calibration Failed",

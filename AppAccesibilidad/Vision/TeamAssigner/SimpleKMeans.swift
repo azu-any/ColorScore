@@ -100,7 +100,6 @@ struct SimpleKMeans {
         return newCenter
     }
     
-    // --- THIS IS NEW ---
     /// Initializes cluster centers using the K-Means++ algorithm.
     private func initCentersKMeansPlusPlus(points: [[Double]]) -> [[Double]] {
         var centers: [[Double]] = []

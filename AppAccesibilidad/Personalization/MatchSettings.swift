@@ -15,8 +15,8 @@ class MatchSettings {
     var team1Color: PlayerColor = .blue
     var goalkeeper1Shape: PlayerShape = .square
     var goalkeeper1Color: PlayerColor = .blue
-    var team2Shape: PlayerShape = .circle
-    var team2Color: PlayerColor = .red
+    var team2Shape: PlayerShape = .triangle
+    var team2Color: PlayerColor = .yellow
     var goalkeeper2Shape: PlayerShape = .square
     var goalkeeper2Color: PlayerColor = .red
     var ballShape: PlayerShape = .circle

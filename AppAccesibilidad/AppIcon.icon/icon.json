@@ -1,0 +1,349 @@
+{
+  "fill" : {
+    "solid" : "srgb:0.12984,0.12985,0.12984,1.00000"
+  },
+  "groups" : [
+    {
+      "hidden" : true,
+      "layers" : [
+        {
+          "blend-mode" : "overlay",
+          "image-name" : "triangle 3.png",
+          "name" : "triangle 3",
+          "position" : {
+            "scale" : 3,
+            "translation-in-points" : [
+              -493.5091734246939,
+              171
+            ]
+          }
+        },
+        {
+          "fill" : {
+            "solid" : "srgb:0.00000,0.31765,0.67843,1.00000"
+          },
+          "image-name" : "man.png",
+          "name" : "man",
+          "position" : {
+            "scale" : 1,
+            "translation-in-points" : [
+              -76.37823941350484,
+              105.43010383313299
+            ]
+          }
+        }
+      ],
+      "shadow" : {
+        "kind" : "neutral",
+        "opacity" : 0.5
+      },
+      "translucency" : {
+        "enabled" : true,
+        "value" : 0.5
+      }
+    },
+    {
+      "hidden" : true,
+      "layers" : [
+        {
+          "hidden" : false,
+          "image-name" : "arrowred.png",
+          "name" : "arrowred"
+        },
+        {
+          "blend-mode" : "lighten",
+          "fill" : {
+            "solid" : "srgb:1.00000,0.14913,0.00000,1.00000"
+          },
+          "hidden" : true,
+          "image-name" : "triangle 3.png",
+          "name" : "triangle 3",
+          "position" : {
+            "scale" : 1,
+            "translation-in-points" : [
+              -194.9453125,
+              348.5
+            ]
+          }
+        },
+        {
+          "blend-mode" : "lighten",
+          "fill" : "none",
+          "image-name" : "triangle 3.png",
+          "name" : "triangle 3"
+        },
+        {
+          "image-name" : "circle 3.png",
+          "name" : "circle 3",
+          "position" : {
+            "scale" : 1,
+            "translation-in-points" : [
+              -6.810696974237089,
+              -78.5
+            ]
+          }
+        }
+      ],
+      "name" : "Group",
+      "shadow" : {
+        "kind" : "neutral",
+        "opacity" : 0.5
+      },
+      "translucency" : {
+        "enabled" : true,
+        "value" : 0.5
+      }
+    },
+    {
+      "hidden" : false,
+      "layers" : [
+        {
+          "hidden" : false,
+          "image-name" : "arrowred.png",
+          "name" : "arrowred",
+          "position" : {
+            "scale" : 1,
+            "translation-in-points" : [
+              39.12176058649516,
+              -27.000000000000227
+            ]
+          }
+        },
+        {
+          "fill" : {
+            "solid" : "display-p3:0.95443,0.70324,0.24391,1.00000"
+          },
+          "image-name" : "triangle 2.png",
+          "name" : "triangle 2",
+          "position" : {
+            "scale" : 1,
+            "translation-in-points" : [
+              42.62176058649516,
+              -70
+            ]
+          }
+        },
+        {
+          "fill" : {
+            "solid" : "extended-srgb:0.00000,0.53333,1.00000,1.00000"
+          },
+          "image-name" : "circle 2.png",
+          "name" : "circle 2",
+          "opacity-specializations" : [
+            {
+              "appearance" : "dark",
+              "value" : 1
+            }
+          ],
+          "position" : {
+            "scale" : 1,
+            "translation-in-points" : [
+              -21,
+              288.7146234858579
+            ]
+          }
+        },
+        {
+          "blend-mode" : "normal",
+          "glass" : true,
+          "hidden" : true,
+          "image-name" : "canchablack.png",
+          "name" : "canchablack",
+          "position" : {
+            "scale" : 1,
+            "translation-in-points" : [
+              0,
+              -42
+            ]
+          }
+        },
+        {
+          "fill-specializations" : [
+            {
+              "value" : "none"
+            },
+            {
+              "appearance" : "dark",
+              "value" : "none"
+            }
+          ],
+          "glass-specializations" : [
+            {
+              "appearance" : "light",
+              "value" : true
+            }
+          ],
+          "hidden" : true,
+          "image-name" : "cancha 2.png",
+          "name" : "cancha 2",
+          "position" : {
+            "scale" : 1,
+            "translation-in-points" : [
+              3,
+              15
+            ]
+          }
+        },
+        {
+          "hidden" : false,
+          "image-name-specializations" : [
+            {
+              "value" : "board2.png"
+            },
+            {
+              "appearance" : "dark",
+              "value" : "board2.png"
+            }
+          ],
+          "name" : "board2",
+          "position" : {
+            "scale" : 1,
+            "translation-in-points" : [
+              -3,
+              -15.000000000000227
+            ]
+          }
+        },
+        {
+          "hidden" : true,
+          "image-name" : "SIDE.png",
+          "name" : "SIDE"
+        },
+        {
+          "fill" : "none",
+          "glass" : false,
+          "hidden" : false,
+          "image-name-specializations" : [
+            {
+              "value" : "saturatedyard.png"
+            },
+            {
+              "appearance" : "dark",
+              "value" : "aaaaaaaa.png"
+            }
+          ],
+          "name" : "aaaaaaaa",
+          "opacity-specializations" : [
+            {
+              "value" : 1
+            },
+            {
+              "appearance" : "dark",
+              "value" : 0
+            },
+            {
+              "appearance" : "tinted",
+              "value" : 0
+            }
+          ],
+          "position" : {
+            "scale" : 2.86,
+            "translation-in-points" : [
+              9.0546875,
+              -952.3199999999999
+            ]
+          }
+        },
+        {
+          "hidden" : true,
+          "image-name" : "back.png",
+          "name" : "back",
+          "position" : {
+            "scale" : 1,
+            "translation-in-points" : [
+              0,
+              0
+            ]
+          }
+        },
+        {
+          "hidden" : true,
+          "image-name" : "aaaaaaaa.png",
+          "name" : "aaaaaaaa",
+          "position" : {
+            "scale" : 1,
+            "translation-in-points" : [
+              0,
+              22.714623485857828
+            ]
+          }
+        }
+      ],
+      "shadow" : {
+        "kind" : "neutral",
+        "opacity" : 0.5
+      },
+      "translucency" : {
+        "enabled" : true,
+        "value" : 0.5
+      }
+    },
+    {
+      "blend-mode-specializations" : [
+        {
+          "appearance" : "dark",
+          "value" : "normal"
+        }
+      ],
+      "blur-material" : 0.5,
+      "hidden" : true,
+      "layers" : [
+        {
+          "blend-mode-specializations" : [
+            {
+              "appearance" : "dark",
+              "value" : "soft-light"
+            }
+          ],
+          "fill-specializations" : [
+            {
+              "appearance" : "dark",
+              "value" : "automatic"
+            }
+          ],
+          "glass-specializations" : [
+            {
+              "value" : false
+            },
+            {
+              "idiom" : "square",
+              "value" : true
+            }
+          ],
+          "hidden" : false,
+          "image-name" : "arrowred 2.png",
+          "name" : "arrowred 2",
+          "opacity-specializations" : [
+            {
+              "appearance" : "dark",
+              "value" : 0.8
+            }
+          ],
+          "position" : {
+            "scale" : 1,
+            "translation-in-points" : [
+              0,
+              -17.785376514142172
+            ]
+          }
+        }
+      ],
+      "lighting" : "combined",
+      "shadow" : {
+        "kind" : "layer-color",
+        "opacity" : 0
+      },
+      "specular" : true,
+      "translucency" : {
+        "enabled" : false,
+        "value" : 0.5
+      }
+    }
+  ],
+  "supported-platforms" : {
+    "circles" : [
+      "watchOS"
+    ],
+    "squares" : "shared"
+  }
+}

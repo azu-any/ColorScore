@@ -132,7 +132,7 @@ struct HomeView: View {
             }
             .toolbar(.hidden, for: .navigationBar)
             .fullScreenCover(isPresented: $showingCamera) {
-                CameraButtonsView()
+                CameraButtonsView(teamSelectionManager: $teamSelectionManager)
             }
         }
     }

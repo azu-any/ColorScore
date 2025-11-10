@@ -11,22 +11,42 @@ struct CameraButtonsView: View {
     // Score tracking
     @State private var leftScore = 0
     @State private var rightScore = 0
-    @State private var leftTeamName = "México"
-    @State private var rightTeamName = "Francia"
-    @State private var leftTeamColor: Color = .blue
-    @State private var rightTeamColor: Color = .red
     @State private var showScoreControls = false
     
     // Configuration
     @State private var showConfiguration = false
     
     // Team and goalkeeper customization
+    @Binding var teamSelectionManager: TeamSelectionManager
     @State var matchSettings = MatchSettings()
+    @State var isCalibrating: Bool = false
 
     var body: some View {
         ZStack {
-            CameraView(settings: matchSettings)
+            CameraView(
+                settings: matchSettings,
+                onCancel: {
+                    DispatchQueue.main.async {
+                        AppDelegate.orientationLock = .portrait
+                    }
+                    dismiss()
+                },
+                isCalibrating: $isCalibrating
+            )
                 .edgesIgnoringSafeArea(.all)
+            
+            Button {
+                isCalibrating = true
+            } label: {
+                VStack {
+                    Text("Empezar calibración")
+                        .font(.title)
+                    
+                    Text("Apunta a los jugadores")
+                        .font(.headline)
+                }
+            }
+            .buttonStyle(.glass)
             
             // Controls overlay
             VStack {
@@ -101,7 +121,7 @@ private extension CameraButtonsView {
                 VStack(spacing: 24) {
                     // Team 1
                     VStack(alignment: .leading, spacing: 12) {
-                        Text(leftTeamName)
+                        Text(teamSelectionManager.team1?.name ?? "Equipo 1")
                             .font(.system(.subheadline, design: .rounded, weight: .semibold))
                             .foregroundStyle(.secondary)
                         
@@ -123,7 +143,7 @@ private extension CameraButtonsView {
                     
                     // Team 2
                     VStack(alignment: .leading, spacing: 12) {
-                        Text(rightTeamName)
+                        Text(teamSelectionManager.team2?.name ?? "Equipo 2")
                             .font(.system(.subheadline, design: .rounded, weight: .semibold))
                             .foregroundStyle(.secondary)
                         
@@ -176,7 +196,7 @@ private extension CameraButtonsView {
                 HStack(spacing: 8) {
                     matchSettings.team1Shape.view(color: matchSettings.team1Color.color, size: 16)
                     
-                    Text(leftTeamName)
+                    Text(teamSelectionManager.team1?.name ?? "Equipo 1")
                         .lineLimit(1)
                         .fixedSize(horizontal: true, vertical: false)
                         .font(.system(.callout, design: .rounded, weight: .semibold))
@@ -210,7 +230,7 @@ private extension CameraButtonsView {
                 
                 // Right team
                 HStack(spacing: 8) {
-                    Text(rightTeamName)
+                    Text(teamSelectionManager.team2?.name ?? "Equipo 2")
                         .lineLimit(1)
                         .fixedSize(horizontal: true, vertical: false)
                         .font(.system(.callout, design: .rounded, weight: .semibold))
@@ -239,7 +259,7 @@ private extension CameraButtonsView {
                         }
                         .buttonStyle(ScoreControlButtonStyle(teamColor: matchSettings.team1Color.color, enabled: leftScore > 0))
                         .disabled(leftScore == 0)
-                        .accessibilityLabel("Decrease \(leftTeamName) score")
+                        .accessibilityLabel("Decrease \(teamSelectionManager.team1?.name ?? "Equipo 1") score")
                         
                         Button {
                             leftScore += 1
@@ -248,7 +268,7 @@ private extension CameraButtonsView {
                                 .font(.system(size: 26))
                         }
                         .buttonStyle(ScoreControlButtonStyle(teamColor: matchSettings.team1Color.color, enabled: true))
-                        .accessibilityLabel("Increase \(leftTeamName) score")
+                        .accessibilityLabel("Increase \(teamSelectionManager.team1?.name ?? "Equipo 1") score")
                     }
                     
                     Spacer()
@@ -265,7 +285,7 @@ private extension CameraButtonsView {
                         }
                         .buttonStyle(ScoreControlButtonStyle(teamColor: matchSettings.team2Color.color, enabled: rightScore > 0))
                         .disabled(rightScore == 0)
-                        .accessibilityLabel("Decrease \(rightTeamName) score")
+                        .accessibilityLabel("Decrease \(teamSelectionManager.team2?.name ?? "Equipo 2") score")
                         
                         Button {
                             rightScore += 1
@@ -274,7 +294,7 @@ private extension CameraButtonsView {
                                 .font(.system(size: 26))
                         }
                         .buttonStyle(ScoreControlButtonStyle(teamColor: matchSettings.team2Color.color, enabled: true))
-                        .accessibilityLabel("Increase \(rightTeamName) score")
+                        .accessibilityLabel("Increase \(teamSelectionManager.team2?.name ?? "Equipo 2") score")
                     }
                 }
                 .transition(.scale.combined(with: .opacity))
@@ -292,7 +312,7 @@ private extension CameraButtonsView {
             }
         }
         .accessibilityElement(children: .ignore)
-        .accessibilityLabel("Score: \(leftTeamName) \(leftScore), \(rightTeamName) \(rightScore). Tap to \(showScoreControls ? "hide" : "show") score controls.")
+        .accessibilityLabel("Score: \(teamSelectionManager.team1?.name ?? "Equipo 1") \(leftScore), \(teamSelectionManager.team2?.name ?? "Equipo 2") \(rightScore). Tap to \(showScoreControls ? "hide" : "show") score controls.")
         .accessibilityAddTraits(.isButton)
     }
     
@@ -378,7 +398,7 @@ private extension CameraButtonsView {
 }
 
 
-#Preview {
-    CameraButtonsView()
-        .preferredColorScheme(.light)
-}
+//#Preview {
+//    CameraButtonsView(teamSelectionManager: teamSelectionManager)
+//        .preferredColorScheme(.light)
+//}
