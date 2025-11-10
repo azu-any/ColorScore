@@ -80,7 +80,7 @@ struct CameraView: UIViewControllerRepresentable {
             
                 self.viewController?.dismiss(animated: true) {
                     self.isCalibrating = false
-//                    self.onCancel()
+                    self.onCancel()
                 }
             }
         }

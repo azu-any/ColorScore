@@ -278,7 +278,7 @@ class CalibrationViewController: VisionViewController {
         instructionLabel.textColor = .black
         instructionLabel.textAlignment = .center
         instructionLabel.numberOfLines = 0
-        instructionLabel.text = "Point camera at players to analyze teams."
+        instructionLabel.text = "Apunta la cámara a los jugadores para analizar a los equipos."
         contentView.addSubview(instructionLabel)
         
         // --- Timer ---
@@ -484,7 +484,7 @@ private class CalibrationUIPreviewController: UIViewController {
         instructionLabel.textColor = .black
         instructionLabel.textAlignment = .center
         instructionLabel.numberOfLines = 0
-        instructionLabel.text = "Point camera at players to analyze teams."
+        instructionLabel.text = "Apunta la cámara a los jugadores para analizar a los equipos."
         contentView.addSubview(instructionLabel)
         
         // --- Timer ---
@@ -503,7 +503,7 @@ private class CalibrationUIPreviewController: UIViewController {
         cancelGlassView.clipsToBounds = true
         
         cancelButton.translatesAutoresizingMaskIntoConstraints = false
-        cancelButton.setTitle("Cancel", for: .normal)
+        cancelButton.setTitle("Cancelar", for: .normal)
         cancelButton.titleLabel?.font = .systemFont(ofSize: 17, weight: .semibold)
         cancelButton.setTitleColor(.black, for: .normal)
         cancelButton.backgroundColor = .clear
@@ -522,7 +522,7 @@ private class CalibrationUIPreviewController: UIViewController {
         loadingLabel.translatesAutoresizingMaskIntoConstraints = false
         loadingLabel.font = .systemFont(ofSize: 20, weight: .semibold)
         loadingLabel.textColor = .white
-        loadingLabel.text = "Analyzing teams..."
+        loadingLabel.text = "Analizando a los equipos..."
 
         loadingGlassView.contentView.addSubview(loadingIndicator)
         loadingGlassView.contentView.addSubview(loadingLabel)
