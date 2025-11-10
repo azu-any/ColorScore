@@ -10,6 +10,7 @@ import SwiftUI
 @available(iOS 16.0, *)
 struct HomeView: View {
     @State private var showingCamera = false
+    @State private var showingHelp = false
     @State private var teamSelectionManager = TeamSelectionManager()
     
     var body: some View {
@@ -104,7 +105,7 @@ struct HomeView: View {
                                 OptionGlassCard(
                                     title: "Estadísticas de equipos",
                                     systemIcon: "chart.bar.fill",
-                                    tint: .orange
+                                    tint: .gray
                                 )
                                 .accessibilityLabel("Estadísticas de equipos")
                                 .accessibilityHint("Visualiza las estadísticas de los equipos.")
@@ -144,7 +145,7 @@ struct HomeView: View {
                     HStack {
                         Spacer()
                         Button {
-                            // TODO: acción de ayuda
+                            showingHelp = true
                         } label: {
                             Image(systemName: "questionmark.circle")
                                 .font(.title3.bold())
@@ -159,6 +160,11 @@ struct HomeView: View {
                         .accessibilitySortPriority(5)
                     }
                     Spacer()
+                }
+                .alert("Ayuda", isPresented: $showingHelp) {
+                    Button("Entendido", role: .cancel) { }
+                } message: {
+                    Text("Selecciona los equipos que participarán en el partido. Luego presiona 'Empezar partido' para comenzar el seguimiento en tiempo real con reconocimiento de gestos y estadísticas accesibles.")
                 }
             }
             .toolbar(.hidden, for: .navigationBar)
