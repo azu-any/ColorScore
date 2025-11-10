@@ -208,6 +208,9 @@ class CalibrationViewController: VisionViewController {
     // MARK: - UI & Actions
     
     @objc private func cancelButtonTapped() {
+        // Hide the instruction label
+        instructionLabel.isHidden = true
+        
         // Stop everything and tell the delegate we're cancelled.
         timer?.invalidate()
         timer = nil
@@ -265,14 +268,14 @@ class CalibrationViewController: VisionViewController {
         // --- Icon at the top ---
         let iconView = UIImageView(image: UIImage(systemName: "figure.run.circle.fill"))
         iconView.translatesAutoresizingMaskIntoConstraints = false
-        iconView.tintColor = .white
+        iconView.tintColor = .black
         iconView.contentMode = .scaleAspectFit
         contentView.addSubview(iconView)
 
         // --- Instructions ---
         instructionLabel.translatesAutoresizingMaskIntoConstraints = false
         instructionLabel.font = .systemFont(ofSize: 17, weight: .medium)
-        instructionLabel.textColor = .white
+        instructionLabel.textColor = .black
         instructionLabel.textAlignment = .center
         instructionLabel.numberOfLines = 0
         instructionLabel.text = "Point camera at players to analyze teams."
@@ -281,7 +284,7 @@ class CalibrationViewController: VisionViewController {
         // --- Timer ---
         timerLabel.translatesAutoresizingMaskIntoConstraints = false
         timerLabel.font = .monospacedDigitSystemFont(ofSize: 64, weight: .bold)
-        timerLabel.textColor = .white
+        timerLabel.textColor = .black
         timerLabel.textAlignment = .center
         contentView.addSubview(timerLabel)
         
@@ -296,7 +299,7 @@ class CalibrationViewController: VisionViewController {
         cancelButton.translatesAutoresizingMaskIntoConstraints = false
         cancelButton.setTitle("Cancel", for: .normal)
         cancelButton.titleLabel?.font = .systemFont(ofSize: 17, weight: .semibold)
-        cancelButton.setTitleColor(.white, for: .normal)
+        cancelButton.setTitleColor(.black, for: .normal)
         cancelButton.backgroundColor = .clear
         cancelButton.addTarget(self, action: #selector(cancelButtonTapped), for: .touchUpInside)
         
@@ -471,14 +474,14 @@ private class CalibrationUIPreviewController: UIViewController {
         // --- Icon at the top ---
         let iconView = UIImageView(image: UIImage(systemName: "figure.run.circle.fill"))
         iconView.translatesAutoresizingMaskIntoConstraints = false
-        iconView.tintColor = .white
+        iconView.tintColor = .black
         iconView.contentMode = .scaleAspectFit
         contentView.addSubview(iconView)
 
         // --- Instructions ---
         instructionLabel.translatesAutoresizingMaskIntoConstraints = false
         instructionLabel.font = .systemFont(ofSize: 17, weight: .medium)
-        instructionLabel.textColor = .white
+        instructionLabel.textColor = .black
         instructionLabel.textAlignment = .center
         instructionLabel.numberOfLines = 0
         instructionLabel.text = "Point camera at players to analyze teams."
@@ -487,7 +490,7 @@ private class CalibrationUIPreviewController: UIViewController {
         // --- Timer ---
         timerLabel.translatesAutoresizingMaskIntoConstraints = false
         timerLabel.font = .monospacedDigitSystemFont(ofSize: 64, weight: .bold)
-        timerLabel.textColor = .white
+        timerLabel.textColor = .black
         timerLabel.textAlignment = .center
         contentView.addSubview(timerLabel)
         
@@ -502,7 +505,7 @@ private class CalibrationUIPreviewController: UIViewController {
         cancelButton.translatesAutoresizingMaskIntoConstraints = false
         cancelButton.setTitle("Cancel", for: .normal)
         cancelButton.titleLabel?.font = .systemFont(ofSize: 17, weight: .semibold)
-        cancelButton.setTitleColor(.white, for: .normal)
+        cancelButton.setTitleColor(.black, for: .normal)
         cancelButton.backgroundColor = .clear
         
         cancelGlassView.contentView.addSubview(cancelButton)
