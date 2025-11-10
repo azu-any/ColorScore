@@ -43,26 +43,32 @@ struct HomeView: View {
                         .padding(.top, 16)
 
                         // MARK: - Team 1 Card
-                        NavigationLink(destination: TeamSelectionView()) {
+                        NavigationLink(destination: TeamSelectionView(
+                            selectionManager: teamSelectionManager,
+                            teamSlot: 1
+                        )) {
                             TeamGlassLargeCard(
                                 teamTitle: "Equipo 1",
-                                teamName: "Paris Saint-Germain",
-                                badge: "parisLogo",
-                                background: "parisTeam",
-                                overlayColor: .blue
+                                teamName: teamSelectionManager.team1?.name ?? "Seleccionar equipo",
+                                badge: teamSelectionManager.team1?.imageName ?? "",
+                                badgeData: teamSelectionManager.team1?.imageData,
+                                overlayColor: teamSelectionManager.team1?.teamColor ?? .blue
                             )
                         }
                         .buttonStyle(PlainButtonStyle())
                         .padding(.horizontal, 20)
 
                         // MARK: - Team 2 Card
-                        NavigationLink(destination: TeamSelectionView()) {
+                        NavigationLink(destination: TeamSelectionView(
+                            selectionManager: teamSelectionManager,
+                            teamSlot: 2
+                        )) {
                             TeamGlassLargeCard(
                                 teamTitle: "Equipo 2",
-                                teamName: "Selección Mexicana",
-                                badge: "mexicoLogo",
-                                background: "mexicoTeam",
-                                overlayColor: .green
+                                teamName: teamSelectionManager.team2?.name ?? "Seleccionar equipo",
+                                badge: teamSelectionManager.team2?.imageName ?? "",
+                                badgeData: teamSelectionManager.team2?.imageData,
+                                overlayColor: teamSelectionManager.team2?.teamColor ?? .green
                             )
                         }
                         .buttonStyle(PlainButtonStyle())
@@ -89,7 +95,11 @@ struct HomeView: View {
 
                         // MARK: - CTA Inferior
                         Button(action: {
-                            showingCamera = true
+                            DispatchQueue.main.async {
+                                AppDelegate.orientationLock = .landscapeRight
+                                print("cambiando a landscape")
+                                showingCamera = true
+                            }
                             // TODO: acción “Empezar partido”
                         }) {
                             Text("Empezar partido")

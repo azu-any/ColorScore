@@ -16,14 +16,24 @@ final class CustomTeam {
     var country: String
     var division: String
     var logoImageData: Data?
+    var teamColorHex: String? // Store color as hex string
     var createdDate: Date
     
-    init(name: String, country: String, division: String, logoImageData: Data? = nil) {
+    init(name: String, country: String, division: String, logoImageData: Data? = nil, teamColorHex: String? = nil) {
         self.id = UUID()
         self.name = name
         self.country = country
         self.division = division
         self.logoImageData = logoImageData
+        self.teamColorHex = teamColorHex
         self.createdDate = Date()
+    }
+    
+    // Helper to get Color from hex
+    var teamColor: Color {
+        if let hex = teamColorHex {
+            return Color(hex: hex)
+        }
+        return Color.blue // Default color
     }
 }

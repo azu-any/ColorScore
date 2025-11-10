@@ -10,10 +10,12 @@ import SwiftUI
 struct TeamRowComponentView: View {
     let teams: [Team]
     let sectionColor: Color
+    var onTeamSelected: ((Team) -> Void)? = nil
     
-    init(teams: [Team], sectionColor: Color = .primary) {
+    init(teams: [Team], sectionColor: Color = .primary, onTeamSelected: ((Team) -> Void)? = nil) {
         self.teams = teams
         self.sectionColor = sectionColor
+        self.onTeamSelected = onTeamSelected
     }
     
     var body: some View {
@@ -21,6 +23,9 @@ struct TeamRowComponentView: View {
             HStack(spacing: 12) {
                 ForEach(teams) { team in
                     TeamCardView(team: team, sectionColor: sectionColor)
+                        .onTapGesture {
+                            onTeamSelected?(team)
+                        }
                 }
             }
             .padding(.horizontal)
@@ -39,52 +44,56 @@ struct TeamCardView: View {
     
     var body: some View {
         VStack(spacing: 12) {
-            // Team Logo Container
-            RoundedRectangle(cornerRadius: 12)
-                .fill(backgroundColor)
-                .frame(width: 140, height: 140)
-                .overlay(
-                    Image(systemName: logoSystemImage)
+            // Team Logo Container with team color background
+            ZStack {
+                // Team color background
+                RoundedRectangle(cornerRadius: 12)
+                    .fill(teamColor)
+                    .frame(width: 140, height: 140)
+                    .overlay(
+                        // Subtle gradient for depth
+                        LinearGradient(
+                            colors: [
+                                Color.black.opacity(0.1),
+                                Color.black.opacity(0.2)
+                            ],
+                            startPoint: .top,
+                            endPoint: .bottom
+                        )
+                    )
+                
+                // Team Logo
+                if UIImage(named: team.imageName) != nil {
+                    Image(team.imageName)
                         .resizable()
                         .scaledToFit()
-                        .frame(width: 80, height: 80)
-                        .foregroundColor(logoColor)
-                )
+                        .frame(width: 100, height: 100)
+                        .shadow(color: Color.black.opacity(0.3), radius: 4, x: 0, y: 2)
+                } else {
+                    // Fallback icon if image doesn't exist
+                    Image(systemName: "shield.fill")
+                        .resizable()
+                        .scaledToFit()
+                        .frame(width: 60, height: 60)
+                        .foregroundColor(.white)
+                        .shadow(color: Color.black.opacity(0.3), radius: 4, x: 0, y: 2)
+                }
+            }
+            .shadow(color: Color.black.opacity(0.15), radius: 8, x: 0, y: 4)
             
             // Team Name
             Text(team.name)
-                .font(.system(size: 13, weight: .regular))
+                .font(.system(size: 13, weight: .medium))
                 .multilineTextAlignment(.center)
                 .frame(width: 140)
                 .lineLimit(2)
+                .foregroundColor(.primary)
         }
     }
     
-    // Helper computed properties for demo purposes
-    private var backgroundColor: Color {
-        // Generate a random color based on the team's ID for consistency
-        let colors: [Color] = [
-            .red, .blue, .green, .orange, .purple, .pink,
-            .indigo, .teal, .mint, .cyan, .brown,
-            Color(red: 0.0, green: 0.2, blue: 0.4), // Dark blue
-            Color(red: 0.6, green: 0.0, blue: 0.4), // Dark purple
-            Color(red: 0.8, green: 0.4, blue: 0.0), // Dark orange
-            Color(red: 0.2, green: 0.6, blue: 0.0), // Dark green
-            Color(red: 0.4, green: 0.0, blue: 0.6), // Dark magenta
-            .black
-        ]
-        
-        // Use the team name's hash to get consistent random color
-        let index = abs(team.name.hashValue) % colors.count
-        return colors[index]
-    }
-    
-    private var logoColor: Color {
-        return .white
-    }
-    
-    private var logoSystemImage: String {
-        return "sportscourt.fill"
+    // Get the official team color
+    private var teamColor: Color {
+        return TeamColors.color(for: team.name)
     }
 }
 
