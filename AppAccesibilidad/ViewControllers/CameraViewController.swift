@@ -161,6 +161,27 @@ class CameraViewController: UIViewController, AVCaptureVideoDataOutputSampleBuff
         }
     }
     
+    func stopCaptureSession() {
+        // Stop the session
+        if session.isRunning {
+            session.stopRunning()
+        }
+        
+//        // Remove the video preview layer
+//        previewLayer?.removeFromSuperlayer()
+//        previewLayer = nil
+    }
+    
+    deinit {
+        // Now we can safely stop and remove everything
+        if session.isRunning {
+            session.stopRunning()
+        }
+        previewLayer?.removeFromSuperlayer()
+        previewLayer = nil
+        print("VisionViewController deallocated and capture session torn down.")
+    }
+    
     // Clean up capture setup
     func teardownAVCapture() {
         previewLayer.removeFromSuperlayer()
@@ -175,25 +196,6 @@ class CameraViewController: UIViewController, AVCaptureVideoDataOutputSampleBuff
         // print("frame dropped")
     }
     
-    
-//    public func exifOrientationFromDeviceOrientation() -> CGImagePropertyOrientation {
-////        let curDeviceOrientation = UIDevice.current.orientation
-////        let exifOrientation: CGImagePropertyOrientation
-////        
-////        switch curDeviceOrientation {
-////        case UIDeviceOrientation.portraitUpsideDown:  // Device oriented vertically, home button on the top
-////            exifOrientation = .left
-////        case UIDeviceOrientation.landscapeLeft:       // Device oriented horizontally, home button on the right
-////            exifOrientation = .upMirrored
-////        case UIDeviceOrientation.landscapeRight:      // Device oriented horizontally, home button on the left
-////            exifOrientation = .down
-////        case UIDeviceOrientation.portrait:            // Device oriented vertically, home button on the bottom
-////            exifOrientation = .up
-////        default:
-////            exifOrientation = .up
-////        }
-////        return exifOrientation
-//    }
     
     public func exifOrientationFromDeviceOrientation() -> CGImagePropertyOrientation {
         // We get the PHYSICAL device orientation,

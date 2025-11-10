@@ -28,9 +28,9 @@ class VisionViewController: CameraViewController, VisionProcesorDelegate {
     private var trackedObjectInfo: [UUID: (box: CGRect, label: String, teamID: Int?)] = [:]
 //
     // Team Classification
-    private let teamClassifier = TeamClassifier()
+    var teamClassifier = TeamClassifier()
     private var isClassifierFitted = false
-        private var calibrationCrops: [CGImage] = []
+    private var calibrationCrops: [CGImage] = []
     private let minCropsForCalibration = 20 // Threshold of crops to collect
     private var isFittingModel = false      // Lock to prevent multiple fits at once
     
@@ -189,4 +189,6 @@ class VisionViewController: CameraViewController, VisionProcesorDelegate {
 //        shapeLayer.path = path.cgPath
 //        return shapeLayer
     }
+    
+    
 }

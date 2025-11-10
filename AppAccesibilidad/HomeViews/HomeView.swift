@@ -34,11 +34,13 @@ struct HomeView: View {
                         VStack(alignment: .leading, spacing: 6) {
                             Text("Nuevo partido")
                                 .font(.largeTitle.bold())
+                                .accessibilityAddTraits(.isHeader) // MARK: - Accesibilidad
 
                             Text("Configura tu partido")
                                 .font(.subheadline)
                                 .foregroundStyle(.secondary)
                         }
+                        .accessibilityElement(children: .combine) // MARK: - Accesibilidad
                         .padding(.horizontal, 20)
                         .padding(.top, 16)
 
@@ -57,7 +59,14 @@ struct HomeView: View {
                         }
                         .buttonStyle(PlainButtonStyle())
                         .padding(.horizontal, 20)
-
+                        // MARK: - Accesibilidad
+                        .accessibilityElement(children: .ignore) // Ignora los textos internos
+                        .accessibilityLabel("Equipo 1") // Etiqueta principal
+                        .accessibilityValue(teamSelectionManager.team1?.name ?? "Seleccionar equipo") // Valor (estado)
+                        .accessibilityHint("Toca para seleccionar el equipo 1.") // Acción
+                        .accessibilityAddTraits(.isButton) // Trátalo como un botón
+                        
+                        
                         // MARK: - Team 2 Card
                         NavigationLink(destination: TeamSelectionView(
                             selectionManager: teamSelectionManager,
@@ -73,6 +82,12 @@ struct HomeView: View {
                         }
                         .buttonStyle(PlainButtonStyle())
                         .padding(.horizontal, 20)
+                        // MARK: - Accesibilidad
+                        .accessibilityElement(children: .ignore) // Ignora los textos internos
+                        .accessibilityLabel("Equipo 2") // Etiqueta principal
+                        .accessibilityValue(teamSelectionManager.team2?.name ?? "Seleccionar equipo") // Valor (estado)
+                        .accessibilityHint("Toca para seleccionar el equipo 2.") // Acción
+                        .accessibilityAddTraits(.isButton) // Trátalo como un botón
 
                         // MARK: - Grid inferior
                         VStack(spacing: 18) {
@@ -137,7 +152,7 @@ struct HomeView: View {
             }
             .toolbar(.hidden, for: .navigationBar)
             .fullScreenCover(isPresented: $showingCamera) {
-                CameraButtonsView()
+                CameraButtonsView(teamSelectionManager: $teamSelectionManager)
             }
         }
     }
