@@ -41,7 +41,8 @@ struct HomeView: View {
                                 .font(.subheadline)
                                 .foregroundStyle(.secondary)
                         }
-                        .accessibilityElement(children: .combine) // MARK: - Accesibilidad
+                        .accessibilityElement(children: .contain) // MARK: - Accesibilidad
+                        .accessibilitySortPriority(10)
                         .padding(.horizontal, 20)
                         .padding(.top, 16)
 
@@ -66,6 +67,7 @@ struct HomeView: View {
                         .accessibilityValue(teamSelectionManager.team1?.name ?? "Seleccionar equipo") // Valor (estado)
                         .accessibilityHint("Toca para seleccionar el equipo 1.") // Acción
                         .accessibilityAddTraits(.isButton) // Trátalo como un botón
+                        .accessibilitySortPriority(9)
                         
                         
                         // MARK: - Team 2 Card
@@ -89,14 +91,15 @@ struct HomeView: View {
                         .accessibilityValue(teamSelectionManager.team2?.name ?? "Seleccionar equipo") // Valor (estado)
                         .accessibilityHint("Toca para seleccionar el equipo 2.") // Acción
                         .accessibilityAddTraits(.isButton) // Trátalo como un botón
+                        .accessibilitySortPriority(8)
 
                         // MARK: - Grid inferior
                         VStack(spacing: 18) {
-//                            OptionGlassCard(
-//                                title: "Configuración del partido",
-//                                systemIcon: "gearshape.fill",
-//                                tint: .gray
-//                            )
+                            // OptionGlassCard(
+                            //    title: "Configuración del partido",
+                            //    systemIcon: "gearshape.fill",
+                            //    tint: .gray
+                            // )
                             NavigationLink(destination: StatisticsMainView()
                                 .navigationBarBackButtonHidden(true)) {
                                 OptionGlassCard(
@@ -104,10 +107,15 @@ struct HomeView: View {
                                     systemIcon: "chart.bar.fill",
                                     tint: .gray
                                 )
+                                .accessibilityLabel("Estadísticas de equipos")
+                                .accessibilityHint("Visualiza las estadísticas de los equipos.")
                             }
                             .buttonStyle(PlainButtonStyle())
+                            .accessibilityAddTraits(.isButton)
+                            .accessibilitySortPriority(7)
                         }
                         .padding(.horizontal, 20)
+                        .accessibilityElement(children: .contain)
 
                         // MARK: - CTA Inferior
                         Button(action: {
@@ -125,6 +133,10 @@ struct HomeView: View {
                         .buttonStyle(GlassCapsuleButton(tint: .blue, prominent: true))
                         .padding(.horizontal, 24)
                         .padding(.bottom, 30)
+                        .accessibilityAddTraits(.isButton)
+                        .accessibilityHint("Inicia el partido y abre la cámara en modo horizontal.")
+                        .accessibilitySortPriority(6)
+                        .accessibilityElement(children: .contain)
                     }
                 }
 
@@ -142,6 +154,10 @@ struct HomeView: View {
                         .buttonStyle(GlassCircleButton())
                         .padding(.trailing, 16)
                         .padding(.top, 12)
+                        .accessibilityLabel("Ayuda")
+                        .accessibilityHint("Obtén ayuda para configurar el partido.")
+                        .accessibilityAddTraits(.isButton)
+                        .accessibilitySortPriority(5)
                     }
                     Spacer()
                 }
@@ -219,3 +235,4 @@ struct GlassCircleButton: ButtonStyle {
     HomeView()
         .environment(\.locale, .init(identifier: "es"))
 }
+

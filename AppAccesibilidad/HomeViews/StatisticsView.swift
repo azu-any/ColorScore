@@ -219,6 +219,8 @@ struct StatisticsMainView: View {
                                 )
                                 .shadow(color: .black.opacity(0.1), radius: 6, x: 0, y: 3)
                         }
+                        .accessibilityLabel("Volver")
+                        .accessibilityHint("Regresa al selector de equipos o sale de estadísticas")
                         
                         Spacer()
                         
@@ -246,6 +248,9 @@ struct StatisticsMainView: View {
                                 )
                                 .shadow(color: (selectedTeam?.teamColor ?? .blue).opacity(0.3), radius: 8, x: 0, y: 4)
                             }
+                            .accessibilityLabel("Filtrar partidos")
+                            .accessibilityHint("Abre opciones de filtro para los partidos del equipo")
+                            .accessibilityAddTraits(.isButton)
                         }
                     }
                     .padding(.horizontal)
@@ -260,6 +265,8 @@ struct StatisticsMainView: View {
                                     Text("Estadísticas")
                                         .font(.system(size: 36, weight: .bold))
                                         .foregroundColor(.primary)
+                                        .accessibilityAddTraits(.isHeader)
+                                        .accessibilitySortPriority(9)
                                     Spacer()
                                 }
                                 .padding(.horizontal)
@@ -277,6 +284,8 @@ struct StatisticsMainView: View {
                                 Text("Estadísticas")
                                     .font(.system(size: 36, weight: .bold))
                                     .foregroundColor(.primary)
+                                    .accessibilityAddTraits(.isHeader)
+                                    .accessibilitySortPriority(9)
                                 Spacer()
                             }
                             .padding(.horizontal)
@@ -325,10 +334,16 @@ struct StatisticsMainView: View {
                                                     y: 3
                                                 )
                                         }
+                                        .accessibilityLabel(view.rawValue)
+                                        .accessibilityValue(selectedView == view ? "Seleccionado" : "")
+                                        .accessibilityHint("Muestra la vista de \(view.rawValue)")
+                                        .accessibilityAddTraits(.isButton)
                                     }
                                 }
                                 .padding(.horizontal)
                                 .padding(.vertical, 12)
+                                .accessibilityElement(children: .contain)
+                                .accessibilitySortPriority(8)
                             }
                             
                             // Content based on selected view
@@ -351,12 +366,16 @@ struct StatisticsMainView: View {
                                         removal: .move(edge: .leading).combined(with: .opacity)
                                     ))
                                     .id(selectedView) // Force view recreation for smooth transition
+                                    .accessibilityElement(children: .contain)
+                                    .accessibilitySortPriority(7)
                                 }
                             }
                         }
                         .transition(.move(edge: .trailing).combined(with: .opacity))
                     }
                 }
+                .accessibilityElement(children: .contain)
+                .accessibilitySortPriority(10)
             }
             .navigationBarHidden(true)
         }
@@ -556,11 +575,16 @@ struct TeamSelectorContent: View {
                             }
                         }
                         .buttonStyle(GlassButtonStyle())
+                        .accessibilityLabel(team.teamName)
+                        .accessibilityValue(selectedTeam?.id == team.id ? "Seleccionado" : "")
+                        .accessibilityHint("Toca para mostrar estadísticas de este equipo")
                     }
                 }
                 .padding()
             }
         }
+        .accessibilityElement(children: .contain)
+        .accessibilityLabel("Selector de equipo")
     }
 }
 
@@ -1532,6 +1556,9 @@ struct FilterSheet: View {
                                         )
                                     }
                                     .buttonStyle(.plain)
+                                    .accessibilityLabel(filter.rawValue)
+                                    .accessibilityValue(selectedFilter == filter ? "Seleccionado" : "")
+                                    .accessibilityHint("Filtra la lista de partidos según este criterio")
                                     
                                     if filter != StatisticsFilter.allCases.last {
                                         Divider()
@@ -1588,6 +1615,8 @@ struct FilterSheet: View {
                                         )
                                     }
                                     .buttonStyle(.plain)
+                                    .accessibilityLabel(team.teamName)
+                                    .accessibilityValue(selectedTeam?.id == team.id ? "Seleccionado" : "")
                                     
                                     if team.id != teams.last?.id {
                                         Divider()
@@ -1612,6 +1641,8 @@ struct FilterSheet: View {
                     }
                     .foregroundColor(.blue)
                     .fontWeight(.semibold)
+                    .accessibilityLabel("Cerrar filtros")
+                    .accessibilityHint("Cierra las opciones de filtro")
                 }
             }
         }
