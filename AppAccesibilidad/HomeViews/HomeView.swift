@@ -11,6 +11,7 @@ import SwiftUI
 struct HomeView: View {
     @State private var showingCamera = false
     @State private var showingHelp = false
+    @State private var teamSelectionManager = TeamSelectionManager()
     
     var body: some View {
         NavigationStack {
@@ -101,7 +102,7 @@ struct HomeView: View {
                                 OptionGlassCard(
                                     title: "Estadísticas de equipos",
                                     systemIcon: "chart.bar.fill",
-                                    tint: .orange
+                                    tint: .gray
                                 )
                             }
                             .buttonStyle(PlainButtonStyle())
