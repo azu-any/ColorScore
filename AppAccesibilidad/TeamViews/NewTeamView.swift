@@ -35,7 +35,8 @@ struct NewTeamView: View {
         "Liga MX",
         "Liga de Expansión MX",
         "Segunda División",
-        "Tercera División"
+        "Tercera División",
+        "Otro"
     ]
     
     // Team colors - Popular football team colors
