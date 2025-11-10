@@ -67,7 +67,7 @@ struct CameraButtonsView: View {
                             Text("Empezar calibración")
                                 .font(.system(.title2, design: .rounded, weight: .bold))
                             
-                            Text("Apunta a los jugadores durante 10 segundos")
+                            Text("Apunta a los jugadores durante 10 segundos. Haz click aquí cuando estés listo.")
                                 .font(.system(.subheadline, design: .rounded, weight: .medium))
                                 .multilineTextAlignment(.center)
                                 .opacity(0.9)
@@ -235,7 +235,7 @@ private extension CameraButtonsView {
                         .fixedSize(horizontal: true, vertical: false)
                         .font(.system(.callout, design: .rounded, weight: .semibold))
                 }
-                .foregroundStyle(matchSettings.team1Color.color)
+//                .foregroundStyle(matchSettings.team1Color.color)
                 
                 Spacer()
                     .frame(width: 12)
@@ -488,7 +488,7 @@ struct TranslucentGlassButtonStyle: ButtonStyle {
                     Text("Empezar calibración")
                         .font(.system(.title2, design: .rounded, weight: .bold))
                     
-                    Text("Apunta a los jugadores durante 10 segundos")
+                    Text("Apunta a los jugadores durante 10 segundos. Haz click aquí cuando estés listo.")
                         .font(.system(.subheadline, design: .rounded, weight: .medium))
                         .multilineTextAlignment(.center)
                         .opacity(0.9)
@@ -513,7 +513,7 @@ struct TranslucentGlassButtonStyle: ButtonStyle {
         .edgesIgnoringSafeArea(.all)
         
         VStack(spacing: 50) {
-            // New translucent style (recommended)
+            // New translucent style
             VStack(spacing: 8) {
                 VStack(spacing: 20) {
                     ZStack {
@@ -534,7 +534,7 @@ struct TranslucentGlassButtonStyle: ButtonStyle {
                             Text("Empezar calibración")
                                 .font(.system(.title2, design: .rounded, weight: .bold))
                             
-                            Text("Apunta a los jugadores durante 10 segundos")
+                            Text("Apunta a los jugadores durante 10 segundos. Haz click aquí cuando estés listo.")
                                 .font(.system(.subheadline, design: .rounded, weight: .medium))
                                 .multilineTextAlignment(.center)
                                 .opacity(0.9)
@@ -601,7 +601,7 @@ struct TranslucentGlassButtonStyle: ButtonStyle {
             previewButtonSeparated(
                 icon: "figure.run.circle.fill",
                 title: "Empezar calibración",
-                subtitle: "Apunta a los jugadores durante 10 segundos",
+                subtitle: "Apunta a los jugadores durante 10 segundos. Haz click aquí cuando estés listo.",
                 label: "Running Figure (Current)"
             )
             
@@ -609,7 +609,7 @@ struct TranslucentGlassButtonStyle: ButtonStyle {
             previewButtonSeparated(
                 icon: "camera.metering.matrix",
                 title: "Empezar calibración",
-                subtitle: "Apunta a los jugadores durante 10 segundos",
+                subtitle: "Apunta a los jugadores durante 10 segundos. Haz click aquí cuando estés listo.",
                 label: "Camera Matrix"
             )
             
@@ -617,7 +617,7 @@ struct TranslucentGlassButtonStyle: ButtonStyle {
             previewButtonSeparated(
                 icon: "viewfinder.circle.fill",
                 title: "Empezar calibración",
-                subtitle: "Apunta a los jugadores durante 10 segundos",
+                subtitle: "Apunta a los jugadores durante 10 segundos. Haz click aquí cuando estés listo.",
                 label: "Viewfinder"
             )
             
@@ -625,7 +625,7 @@ struct TranslucentGlassButtonStyle: ButtonStyle {
             previewButtonSeparated(
                 icon: "play.circle.fill",
                 title: "Empezar calibración",
-                subtitle: "Apunta a los jugadores durante 10 segundos",
+                subtitle: "Apunta a los jugadores durante 10 segundos. Haz click aquí cuando estés listo.",
                 label: "Play Button"
             )
             
