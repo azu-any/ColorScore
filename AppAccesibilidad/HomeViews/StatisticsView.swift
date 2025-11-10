@@ -446,81 +446,222 @@ struct GlassButtonStyle: ButtonStyle {
 struct TeamSelectorContent: View {
     let teams: [TeamStatistics]
     @Binding var selectedTeam: TeamStatistics?
+    @State private var searchText = ""
+    @State private var showSearchHelp = false
+    @State private var isSearchFocused = false
+    
+    var filteredTeams: [TeamStatistics] {
+        if searchText.isEmpty {
+            return teams
+        } else {
+            return teams.filter { $0.teamName.localizedCaseInsensitiveContains(searchText) }
+        }
+    }
     
     var body: some View {
-        VStack(spacing: 16) {
-            Text("Selecciona un equipo")
-                .font(.title3)
-                .fontWeight(.semibold)
-                .foregroundColor(.secondary)
-                .padding(.top, 20)
+        VStack(spacing: 0) {
+            // Floating Liquid Glass Search Bar at Top
+            LiquidGlassSearchBar(
+                searchText: $searchText,
+                isSearchFocused: $isSearchFocused,
+                showSearchHelp: $showSearchHelp
+            )
             
-            ForEach(teams) { team in
-                Button(action: {
-                    withAnimation(.spring(response: 0.4, dampingFraction: 0.8)) {
-                        selectedTeam = team
-                    }
-                }) {
-                    GlassCard(cornerRadius: 20, tintColor: team.teamColor) {
-                        HStack(spacing: 16) {
-                            // Team Logo
-                            ZStack {
-                                Circle()
-                                    .fill(team.teamColor.opacity(0.15))
-                                    .frame(width: 70, height: 70)
-                                    .overlay(
-                                        Circle()
-                                            .stroke(team.teamColor.opacity(0.3), lineWidth: 2)
-                                    )
-                                
-                                Image(systemName: team.teamLogo)
-                                    .font(.system(size: 32))
-                                    .foregroundColor(team.teamColor)
-                            }
-                            
-                            VStack(alignment: .leading, spacing: 6) {
-                                Text(team.teamName)
-                                    .font(.title2)
-                                    .fontWeight(.bold)
-                                    .foregroundColor(.primary)
-                                
-                                HStack(spacing: 16) {
-                                    Label("\(team.totalMatches) PJ", systemImage: "sportscourt.fill")
-                                        .font(.caption)
-                                        .foregroundColor(.secondary)
-                                    
-                                    Label("\(team.wins) G", systemImage: "checkmark.circle.fill")
-                                        .font(.caption)
-                                        .foregroundColor(.green)
-                                    
-                                    Label("\(team.points) Pts", systemImage: "star.fill")
-                                        .font(.caption)
-                                        .foregroundColor(.orange)
-                                }
-                            }
-                            
-                            Spacer()
-                            
-                            Image(systemName: "chevron.right")
+            // Teams List
+            ScrollView {
+                VStack(spacing: 16) {
+                    Text("Selecciona un equipo")
+                        .font(.title3)
+                        .fontWeight(.semibold)
+                        .foregroundColor(.secondary)
+                        .padding(.top, 20)
+                    
+                    if filteredTeams.isEmpty {
+                        VStack(spacing: 12) {
+                            Image(systemName: "magnifyingglass")
+                                .font(.system(size: 48))
                                 .foregroundColor(.secondary)
-                                .font(.title3)
-                                .padding(8)
-                                .background(
-                                    Circle()
-                                        .fill(.ultraThinMaterial)
-                                )
-                                .overlay(
-                                    Circle()
-                                        .strokeBorder(.white.opacity(0.2), lineWidth: 1)
-                                )
+                            
+                            Text("No se encontraron equipos")
+                                .font(.headline)
+                                .foregroundColor(.primary)
+                            
+                            Text("Intenta con otro término de búsqueda")
+                                .font(.subheadline)
+                                .foregroundColor(.secondary)
                         }
-                        .padding(20)
+                        .padding(.vertical, 60)
+                    }
+                    
+                    ForEach(filteredTeams) { team in
+                        Button(action: {
+                            withAnimation(.spring(response: 0.4, dampingFraction: 0.8)) {
+                                selectedTeam = team
+                            }
+                        }) {
+                            GlassCard(cornerRadius: 20, tintColor: team.teamColor) {
+                                HStack(spacing: 16) {
+                                    // Team Logo
+                                    ZStack {
+                                        Circle()
+                                            .fill(team.teamColor.opacity(0.15))
+                                            .frame(width: 70, height: 70)
+                                            .overlay(
+                                                Circle()
+                                                    .stroke(team.teamColor.opacity(0.3), lineWidth: 2)
+                                            )
+                                        
+                                        Image(systemName: team.teamLogo)
+                                            .font(.system(size: 32))
+                                            .foregroundColor(team.teamColor)
+                                    }
+                                    
+                                    VStack(alignment: .leading, spacing: 6) {
+                                        Text(team.teamName)
+                                            .font(.title2)
+                                            .fontWeight(.bold)
+                                            .foregroundColor(.primary)
+                                        
+                                        HStack(spacing: 16) {
+                                            Label("\(team.totalMatches) PJ", systemImage: "sportscourt.fill")
+                                                .font(.caption)
+                                                .foregroundColor(.secondary)
+                                            
+                                            Label("\(team.wins) G", systemImage: "checkmark.circle.fill")
+                                                .font(.caption)
+                                                .foregroundColor(.green)
+                                            
+                                            Label("\(team.points) Pts", systemImage: "star.fill")
+                                                .font(.caption)
+                                                .foregroundColor(.orange)
+                                        }
+                                    }
+                                    
+                                    Spacer()
+                                    
+                                    Image(systemName: "chevron.right")
+                                        .foregroundColor(.secondary)
+                                        .font(.title3)
+                                        .padding(8)
+                                        .background(
+                                            Circle()
+                                                .fill(.ultraThinMaterial)
+                                        )
+                                        .overlay(
+                                            Circle()
+                                                .strokeBorder(.white.opacity(0.2), lineWidth: 1)
+                                        )
+                                }
+                                .padding(20)
+                            }
+                        }
+                        .buttonStyle(GlassButtonStyle())
                     }
                 }
-                .buttonStyle(GlassButtonStyle())
+                .padding()
             }
         }
-        .padding()
+    }
+}
+
+// MARK: - Liquid Glass Search Bar Component
+@available(iOS 16.0, *)
+struct LiquidGlassSearchBar: View {
+    @Binding var searchText: String
+    @Binding var isSearchFocused: Bool
+    @Binding var showSearchHelp: Bool
+    @FocusState private var isFocused: Bool
+    
+    var body: some View {
+        VStack(spacing: 0) {
+            // Main Search Field with Liquid Glass - More Rounded
+            Group {
+                if #available(iOS 18.0, *) {
+                    LiquidGlassCard(cornerRadius: 28, tintColor: isFocused ? .blue : nil) {
+                        searchFieldContent
+                    }
+                } else {
+                    GlassCard(cornerRadius: 28, tintColor: isFocused ? .blue : nil) {
+                        searchFieldContent
+                    }
+                }
+            }
+            .padding(.horizontal, 20)
+            .padding(.top, 16)
+            .padding(.bottom, 16)
+            .background(
+                Color(.systemBackground)
+                    .shadow(color: .black.opacity(0.05), radius: 8, x: 0, y: 2)
+            )
+            
+            // Subtle gradient fade effect below
+            LinearGradient(
+                colors: [
+                    Color(.systemBackground),
+                    Color(.systemBackground).opacity(0.5),
+                    Color(.systemBackground).opacity(0)
+                ],
+                startPoint: .top,
+                endPoint: .bottom
+            )
+            .frame(height: 12)
+        }
+        .alert("Ayuda de búsqueda", isPresented: $showSearchHelp) {
+            Button("Entendido", role: .cancel) { }
+        } message: {
+            Text("Escribe el nombre de cualquier equipo para filtrar la lista. Puedes buscar equipos mexicanos como 'América', 'Chivas', 'Cruz Azul', o equipos españoles como 'Real Madrid', 'Barcelona', 'Atlético'.")
+        }
+        .onChange(of: isFocused) { newValue in
+            withAnimation(.spring(response: 0.3, dampingFraction: 0.7)) {
+                isSearchFocused = newValue
+            }
+        }
+    }
+    
+    private var searchFieldContent: some View {
+        HStack(spacing: 16) {
+            // Search Icon with animation
+            Image(systemName: isFocused ? "magnifyingglass.circle.fill" : "magnifyingglass")
+                .foregroundColor(isFocused ? .blue : .secondary)
+                .font(.title2)
+                .animation(.spring(response: 0.3, dampingFraction: 0.7), value: isFocused)
+            
+            // Text Field
+            TextField("Buscar equipo...", text: $searchText)
+                .textFieldStyle(.plain)
+                .autocorrectionDisabled()
+                .focused($isFocused)
+                .submitLabel(.search)
+                .font(.body)
+            
+            // Action Buttons
+            HStack(spacing: 12) {
+                // Clear Button
+                if !searchText.isEmpty {
+                    Button(action: {
+                        withAnimation(.spring(response: 0.3, dampingFraction: 0.7)) {
+                            searchText = ""
+                        }
+                    }) {
+                        Image(systemName: "xmark.circle.fill")
+                            .foregroundColor(.secondary)
+                            .font(.title3)
+                    }
+                    .transition(.scale.combined(with: .opacity))
+                }
+                
+                // Help Button
+                Button(action: {
+                    showSearchHelp = true
+                }) {
+                    Image(systemName: "questionmark.circle.fill")
+                        .foregroundColor(.gray)
+                        .font(.title3)
+                }
+            }
+        }
+        .padding(.horizontal, 20)
+        .padding(.vertical, 16)
     }
 }
 
