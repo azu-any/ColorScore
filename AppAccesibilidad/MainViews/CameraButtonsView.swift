@@ -37,24 +37,30 @@ struct CameraButtonsView: View {
             
             // Enhanced calibration button
             if !isCalibrating {
-                Button {
-                    withAnimation(.spring(response: 0.5, dampingFraction: 0.7)) {
-                        isCalibrating = true
-                    }
-                } label: {
-                    VStack(spacing: 16) {
-                        // Icon with animated gradient background
-                        ZStack {
-                            Circle()
-                                .fill(.white.opacity(0.15))
-                                .frame(width: 80, height: 80)
-                            
-                            Image(systemName: "figure.run.circle.fill")
-                                .font(.system(size: 44, weight: .medium))
-                                .symbolRenderingMode(.hierarchical)
-                                .foregroundStyle(.white)
-                        }
+                VStack(spacing: 20) {
+                    // Icon above button (not tappable)
+                    ZStack {
+                        Circle()
+                            .fill(.white.opacity(0.1))
+                            .frame(width: 80, height: 80)
                         
+                        Image(systemName: "figure.run.circle.fill")
+                            .font(.system(size: 44, weight: .medium))
+                            .symbolRenderingMode(.hierarchical)
+                            .foregroundStyle(.white.opacity(0.95))
+                    }
+                    .shadow(color: .black.opacity(0.15), radius: 12, x: 0, y: 6)
+                    
+                    // Button with just text
+                    Button {
+                        // Haptic feedback
+                        let impact = UIImpactFeedbackGenerator(style: .medium)
+                        impact.impactOccurred()
+                        
+                        withAnimation(.spring(response: 0.5, dampingFraction: 0.7)) {
+                            isCalibrating = true
+                        }
+                    } label: {
                         VStack(spacing: 8) {
                             Text("Empezar calibración")
                                 .font(.system(.title2, design: .rounded, weight: .bold))
@@ -64,13 +70,13 @@ struct CameraButtonsView: View {
                                 .multilineTextAlignment(.center)
                                 .opacity(0.9)
                         }
+                        .padding(.vertical, 20)
+                        .padding(.horizontal, 32)
+                        .frame(maxWidth: 400)
                     }
-                    .padding(.vertical, 32)
-                    .padding(.horizontal, 40)
-                    .frame(maxWidth: 400)
+                    .buttonStyle(TranslucentGlassButtonStyle())
+                    .shadow(color: .black.opacity(0.2), radius: 20, x: 0, y: 10)
                 }
-                .buttonStyle(.glassProminent)
-                .shadow(color: .black.opacity(0.2), radius: 20, x: 0, y: 10)
                 .transition(.scale(scale: 0.8).combined(with: .opacity))
             }
             
@@ -424,6 +430,27 @@ private extension CameraButtonsView {
 }
 
 
+// MARK: - Custom Button Style
+
+/// Translucent glass button style with press animation
+struct TranslucentGlassButtonStyle: ButtonStyle {
+    func makeBody(configuration: Configuration) -> some View {
+        configuration.label
+            .background(
+                RoundedRectangle(cornerRadius: 32, style: .continuous)
+                    .fill(.ultraThinMaterial)
+                    .opacity(configuration.isPressed ? 0.7 : 0.9)
+            )
+            .overlay(
+                RoundedRectangle(cornerRadius: 32, style: .continuous)
+                    .stroke(.white.opacity(0.2), lineWidth: 1)
+            )
+            .scaleEffect(configuration.isPressed ? 0.95 : 1.0)
+            .animation(.spring(response: 0.3, dampingFraction: 0.6), value: configuration.isPressed)
+    }
+}
+
+
 // MARK: - Previews
 
 #Preview("Enhanced Calibration Button") {
@@ -436,23 +463,25 @@ private extension CameraButtonsView {
         )
         .edgesIgnoringSafeArea(.all)
         
-        // The new enhanced calibration button
-        Button {
-            // Preview action
-        } label: {
-            VStack(spacing: 16) {
-                // Icon with background circle
-                ZStack {
-                    Circle()
-                        .fill(.white.opacity(0.15))
-                        .frame(width: 80, height: 80)
-                    
-                    Image(systemName: "figure.run.circle.fill")
-                        .font(.system(size: 44, weight: .medium))
-                        .symbolRenderingMode(.hierarchical)
-                        .foregroundStyle(.white)
-                }
+        // The new enhanced calibration layout
+        VStack(spacing: 20) {
+            // Icon above button (not tappable)
+            ZStack {
+                Circle()
+                    .fill(.white.opacity(0.1))
+                    .frame(width: 80, height: 80)
                 
+                Image(systemName: "figure.run.circle.fill")
+                    .font(.system(size: 44, weight: .medium))
+                    .symbolRenderingMode(.hierarchical)
+                    .foregroundStyle(.white.opacity(0.95))
+            }
+            .shadow(color: .black.opacity(0.15), radius: 12, x: 0, y: 6)
+            
+            // Button with just text
+            Button {
+                // Preview action
+            } label: {
                 VStack(spacing: 8) {
                     Text("Empezar calibración")
                         .font(.system(.title2, design: .rounded, weight: .bold))
@@ -462,13 +491,13 @@ private extension CameraButtonsView {
                         .multilineTextAlignment(.center)
                         .opacity(0.9)
                 }
+                .padding(.vertical, 20)
+                .padding(.horizontal, 32)
+                .frame(maxWidth: 400)
             }
-            .padding(.vertical, 32)
-            .padding(.horizontal, 40)
-            .frame(maxWidth: 400)
+            .buttonStyle(TranslucentGlassButtonStyle())
+            .shadow(color: .black.opacity(0.2), radius: 20, x: 0, y: 10)
         }
-        .buttonStyle(.glassProminent)
-        .shadow(color: .black.opacity(0.2), radius: 20, x: 0, y: 10)
     }
 }
 
@@ -481,23 +510,24 @@ private extension CameraButtonsView {
         )
         .edgesIgnoringSafeArea(.all)
         
-        VStack(spacing: 40) {
-            // New prominent style
+        VStack(spacing: 50) {
+            // New translucent style (recommended)
             VStack(spacing: 8) {
-                Button {
-                } label: {
-                    VStack(spacing: 16) {
-                        ZStack {
-                            Circle()
-                                .fill(.white.opacity(0.15))
-                                .frame(width: 80, height: 80)
-                            
-                            Image(systemName: "figure.run.circle.fill")
-                                .font(.system(size: 44, weight: .medium))
-                                .symbolRenderingMode(.hierarchical)
-                                .foregroundStyle(.white)
-                        }
+                VStack(spacing: 20) {
+                    ZStack {
+                        Circle()
+                            .fill(.white.opacity(0.1))
+                            .frame(width: 80, height: 80)
                         
+                        Image(systemName: "figure.run.circle.fill")
+                            .font(.system(size: 44, weight: .medium))
+                            .symbolRenderingMode(.hierarchical)
+                            .foregroundStyle(.white.opacity(0.95))
+                    }
+                    .shadow(color: .black.opacity(0.15), radius: 12, x: 0, y: 6)
+                    
+                    Button {
+                    } label: {
                         VStack(spacing: 8) {
                             Text("Empezar calibración")
                                 .font(.system(.title2, design: .rounded, weight: .bold))
@@ -507,43 +537,54 @@ private extension CameraButtonsView {
                                 .multilineTextAlignment(.center)
                                 .opacity(0.9)
                         }
+                        .padding(.vertical, 20)
+                        .padding(.horizontal, 32)
+                        .frame(maxWidth: 400)
                     }
-                    .padding(.vertical, 32)
-                    .padding(.horizontal, 40)
-                    .frame(maxWidth: 400)
+                    .buttonStyle(TranslucentGlassButtonStyle())
+                    .shadow(color: .black.opacity(0.2), radius: 20, x: 0, y: 10)
                 }
-                .buttonStyle(.glassProminent)
-                .shadow(color: .black.opacity(0.2), radius: 20, x: 0, y: 10)
                 
-                Text("Prominent Glass (Recommended)")
+                Text("Translucent Glass (Recommended)")
                     .font(.caption)
                     .foregroundStyle(.white.opacity(0.7))
             }
             
-            // Regular glass style
+            // Glass prominent for comparison
             VStack(spacing: 8) {
-                Button {
-                } label: {
-                    VStack(spacing: 16) {
-                        Image(systemName: "figure.run.circle.fill")
-                            .font(.system(size: 40))
-                            .symbolRenderingMode(.hierarchical)
+                VStack(spacing: 20) {
+                    ZStack {
+                        Circle()
+                            .fill(.white.opacity(0.15))
+                            .frame(width: 80, height: 80)
                         
-                        VStack(spacing: 6) {
+                        Image(systemName: "figure.run.circle.fill")
+                            .font(.system(size: 44, weight: .medium))
+                            .symbolRenderingMode(.hierarchical)
+                            .foregroundStyle(.white)
+                    }
+                    .shadow(color: .black.opacity(0.15), radius: 12, x: 0, y: 6)
+                    
+                    Button {
+                    } label: {
+                        VStack(spacing: 8) {
                             Text("Empezar calibración")
-                                .font(.system(.title3, design: .rounded, weight: .semibold))
+                                .font(.system(.title2, design: .rounded, weight: .bold))
                             
                             Text("Apunta a los jugadores")
-                                .font(.system(.caption, design: .rounded))
-                                .opacity(0.8)
+                                .font(.system(.subheadline, design: .rounded, weight: .medium))
+                                .multilineTextAlignment(.center)
+                                .opacity(0.9)
                         }
+                        .padding(.vertical, 20)
+                        .padding(.horizontal, 32)
+                        .frame(maxWidth: 400)
                     }
-                    .padding(.vertical, 24)
-                    .padding(.horizontal, 32)
+                    .buttonStyle(.glassProminent)
+                    .shadow(color: .black.opacity(0.2), radius: 20, x: 0, y: 10)
                 }
-                .buttonStyle(.glass)
                 
-                Text("Regular Glass")
+                Text("Glass Prominent")
                     .font(.caption)
                     .foregroundStyle(.white.opacity(0.7))
             }
@@ -555,15 +596,15 @@ private extension CameraButtonsView {
     ScrollView {
         VStack(spacing: 40) {
             // Style 1: Running figure (current)
-            previewButton(
+            previewButtonSeparated(
                 icon: "figure.run.circle.fill",
                 title: "Empezar calibración",
                 subtitle: "Apunta a los jugadores durante 10 segundos",
-                label: "Running Figure"
+                label: "Running Figure (Current)"
             )
             
             // Style 2: Camera scanning
-            previewButton(
+            previewButtonSeparated(
                 icon: "camera.metering.matrix",
                 title: "Empezar calibración",
                 subtitle: "Apunta a los jugadores durante 10 segundos",
@@ -571,7 +612,7 @@ private extension CameraButtonsView {
             )
             
             // Style 3: Viewfinder
-            previewButton(
+            previewButtonSeparated(
                 icon: "viewfinder.circle.fill",
                 title: "Empezar calibración",
                 subtitle: "Apunta a los jugadores durante 10 segundos",
@@ -579,7 +620,7 @@ private extension CameraButtonsView {
             )
             
             // Style 4: Play circle
-            previewButton(
+            previewButtonSeparated(
                 icon: "play.circle.fill",
                 title: "Empezar calibración",
                 subtitle: "Apunta a los jugadores durante 10 segundos",
@@ -587,11 +628,19 @@ private extension CameraButtonsView {
             )
             
             // Style 5: Waveform
-            previewButton(
+            previewButtonSeparated(
                 icon: "waveform.circle.fill",
                 title: "Empezar calibración",
-                subtitle: "Analizando movimiento",
+                subtitle: "Analizando movimiento en tiempo real",
                 label: "Waveform (Analysis)"
+            )
+            
+            // Style 6: Sparkles (AI/Processing)
+            previewButtonSeparated(
+                icon: "sparkles",
+                title: "Empezar calibración",
+                subtitle: "Detección inteligente de jugadores",
+                label: "Sparkles (AI)"
             )
         }
         .padding(40)
@@ -605,23 +654,24 @@ private extension CameraButtonsView {
     )
 }
 
-// Helper function for preview
-private func previewButton(icon: String, title: String, subtitle: String, label: String) -> some View {
+// Helper function for separated preview
+private func previewButtonSeparated(icon: String, title: String, subtitle: String, label: String) -> some View {
     VStack(spacing: 12) {
-        Button {
-        } label: {
-            VStack(spacing: 16) {
-                ZStack {
-                    Circle()
-                        .fill(.white.opacity(0.15))
-                        .frame(width: 80, height: 80)
-                    
-                    Image(systemName: icon)
-                        .font(.system(size: 44, weight: .medium))
-                        .symbolRenderingMode(.hierarchical)
-                        .foregroundStyle(.white)
-                }
+        VStack(spacing: 20) {
+            ZStack {
+                Circle()
+                    .fill(.white.opacity(0.1))
+                    .frame(width: 80, height: 80)
                 
+                Image(systemName: icon)
+                    .font(.system(size: 44, weight: .medium))
+                    .symbolRenderingMode(.hierarchical)
+                    .foregroundStyle(.white.opacity(0.95))
+            }
+            .shadow(color: .black.opacity(0.15), radius: 12, x: 0, y: 6)
+            
+            Button {
+            } label: {
                 VStack(spacing: 8) {
                     Text(title)
                         .font(.system(.title2, design: .rounded, weight: .bold))
@@ -631,13 +681,13 @@ private func previewButton(icon: String, title: String, subtitle: String, label:
                         .multilineTextAlignment(.center)
                         .opacity(0.9)
                 }
+                .padding(.vertical, 20)
+                .padding(.horizontal, 32)
+                .frame(maxWidth: 400)
             }
-            .padding(.vertical, 32)
-            .padding(.horizontal, 40)
-            .frame(maxWidth: 400)
+            .buttonStyle(TranslucentGlassButtonStyle())
+            .shadow(color: .black.opacity(0.2), radius: 20, x: 0, y: 10)
         }
-        .buttonStyle(.glassProminent)
-        .shadow(color: .black.opacity(0.2), radius: 20, x: 0, y: 10)
         
         Text(label)
             .font(.caption)
