@@ -200,27 +200,28 @@ class CameraViewController: UIViewController, AVCaptureVideoDataOutputSampleBuff
     public func exifOrientationFromDeviceOrientation() -> CGImagePropertyOrientation {
         // We get the PHYSICAL device orientation,
         // even if the UI is locked in landscape.
-        let curDeviceOrientation = UIDevice.current.orientation
-        
-        let exifOrientation: CGImagePropertyOrientation
-        
-        switch curDeviceOrientation {
-        case .portraitUpsideDown:  // Device oriented vertically, home button on the top
-            exifOrientation = .left
-        case .landscapeLeft:       // Device oriented horizontally, home button on the right
-            // CORRECTED: This should be .upMirrored or .left
-            exifOrientation = .left
-        case .landscapeRight:      // Device oriented horizontally, home button on the left
-            // CORRECTED: This should be .downMirrored or .right
-            exifOrientation = .right
-        case .portrait:            // Device oriented vertically, home button on the bottom
-            exifOrientation = .up
-        default:
-            // Use the last known valid orientation, or default to .up.
-            // For a landscape-locked app, .right is a good default.
-            exifOrientation = .right
-        }
-        return exifOrientation
+//        let curDeviceOrientation = UIDevice.current.orientation
+//        
+//        let exifOrientation: CGImagePropertyOrientation
+//        
+//        switch curDeviceOrientation {
+//        case .portraitUpsideDown:  // Device oriented vertically, home button on the top
+//            exifOrientation = .left
+//        case .landscapeLeft:       // Device oriented horizontally, home button on the right
+//            // CORRECTED: This should be .upMirrored or .left
+//            exifOrientation = .left
+//        case .landscapeRight:      // Device oriented horizontally, home button on the left
+//            // CORRECTED: This should be .downMirrored or .right
+//            exifOrientation = .right
+//        case .portrait:            // Device oriented vertically, home button on the bottom
+//            exifOrientation = .up
+//        default:
+//            // Use the last known valid orientation, or default to .up.
+//            // For a landscape-locked app, .right is a good default.
+//            exifOrientation = .right
+//        }
+//        return exifOrientation
+        return .up
     }
 }
 

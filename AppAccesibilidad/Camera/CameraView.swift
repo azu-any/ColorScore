@@ -65,7 +65,7 @@ struct CameraView: UIViewControllerRepresentable {
                     // 2. Set the 'classifier' property on that specific class
                     liveVC.classifier = classifier
                 }
-//                self.viewController?.teamClassifier = classifier
+                self.viewController?.teamClassifier = classifier
                 
                 // Dismiss the modal
                 self.viewController?.dismiss(animated: true) {

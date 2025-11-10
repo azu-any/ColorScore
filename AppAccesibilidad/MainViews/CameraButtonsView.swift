@@ -271,7 +271,7 @@ private extension CameraButtonsView {
                     
                     matchSettings.team2Shape.view(color: matchSettings.team2Color.color, size: 16)
                 }
-                .foregroundStyle(matchSettings.team2Color.color)
+//                .foregroundStyle(matchSettings.team2Color.color)
             }
             
             // Score controls - only show when toggled
