@@ -20,6 +20,7 @@ struct CameraButtonsView: View {
     @Binding var teamSelectionManager: TeamSelectionManager
     @State var matchSettings = MatchSettings()
     @State var isCalibrating: Bool = false
+    @State private var hasStartedCalibration: Bool = false
 
     var body: some View {
         ZStack {
@@ -36,7 +37,7 @@ struct CameraButtonsView: View {
                 .edgesIgnoringSafeArea(.all)
             
             // Enhanced calibration button
-            if !isCalibrating {
+            if !isCalibrating && !hasStartedCalibration {
                 VStack(spacing: 20) {
                     // Icon above button (not tappable)
                     ZStack {
@@ -47,7 +48,7 @@ struct CameraButtonsView: View {
                         Image(systemName: "figure.run.circle.fill")
                             .font(.system(size: 44, weight: .medium))
                             .symbolRenderingMode(.hierarchical)
-                            .foregroundStyle(.white.opacity(0.95))
+                            .foregroundStyle(.black)
                     }
                     .shadow(color: .black.opacity(0.15), radius: 12, x: 0, y: 6)
                     
@@ -59,6 +60,7 @@ struct CameraButtonsView: View {
                         
                         withAnimation(.spring(response: 0.5, dampingFraction: 0.7)) {
                             isCalibrating = true
+                            hasStartedCalibration = true
                         }
                     } label: {
                         VStack(spacing: 8) {
@@ -516,13 +518,13 @@ struct TranslucentGlassButtonStyle: ButtonStyle {
                 VStack(spacing: 20) {
                     ZStack {
                         Circle()
-                            .fill(.white.opacity(0.1))
+                            .fill(.black.opacity(0.1))
                             .frame(width: 80, height: 80)
                         
                         Image(systemName: "figure.run.circle.fill")
                             .font(.system(size: 44, weight: .medium))
                             .symbolRenderingMode(.hierarchical)
-                            .foregroundStyle(.white.opacity(0.95))
+                            .foregroundStyle(.black.opacity(0.95))
                     }
                     .shadow(color: .black.opacity(0.15), radius: 12, x: 0, y: 6)
                     
