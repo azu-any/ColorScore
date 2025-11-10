@@ -35,18 +35,44 @@ struct CameraButtonsView: View {
             )
                 .edgesIgnoringSafeArea(.all)
             
-            Button {
-                isCalibrating = true
-            } label: {
-                VStack {
-                    Text("Empezar calibración")
-                        .font(.title)
-                    
-                    Text("Apunta a los jugadores")
-                        .font(.headline)
+            // Enhanced calibration button
+            if !isCalibrating {
+                Button {
+                    withAnimation(.spring(response: 0.5, dampingFraction: 0.7)) {
+                        isCalibrating = true
+                    }
+                } label: {
+                    VStack(spacing: 16) {
+                        // Icon with animated gradient background
+                        ZStack {
+                            Circle()
+                                .fill(.white.opacity(0.15))
+                                .frame(width: 80, height: 80)
+                            
+                            Image(systemName: "figure.run.circle.fill")
+                                .font(.system(size: 44, weight: .medium))
+                                .symbolRenderingMode(.hierarchical)
+                                .foregroundStyle(.white)
+                        }
+                        
+                        VStack(spacing: 8) {
+                            Text("Empezar calibración")
+                                .font(.system(.title2, design: .rounded, weight: .bold))
+                            
+                            Text("Apunta a los jugadores durante 10 segundos")
+                                .font(.system(.subheadline, design: .rounded, weight: .medium))
+                                .multilineTextAlignment(.center)
+                                .opacity(0.9)
+                        }
+                    }
+                    .padding(.vertical, 32)
+                    .padding(.horizontal, 40)
+                    .frame(maxWidth: 400)
                 }
+                .buttonStyle(.glassProminent)
+                .shadow(color: .black.opacity(0.2), radius: 20, x: 0, y: 10)
+                .transition(.scale(scale: 0.8).combined(with: .opacity))
             }
-            .buttonStyle(.glass)
             
             // Controls overlay
             VStack {
@@ -397,6 +423,227 @@ private extension CameraButtonsView {
     }
 }
 
+
+// MARK: - Previews
+
+#Preview("Enhanced Calibration Button") {
+    ZStack {
+        // Simulate camera background with gradient
+        LinearGradient(
+            colors: [.gray.opacity(0.8), .gray],
+            startPoint: .top,
+            endPoint: .bottom
+        )
+        .edgesIgnoringSafeArea(.all)
+        
+        // The new enhanced calibration button
+        Button {
+            // Preview action
+        } label: {
+            VStack(spacing: 16) {
+                // Icon with background circle
+                ZStack {
+                    Circle()
+                        .fill(.white.opacity(0.15))
+                        .frame(width: 80, height: 80)
+                    
+                    Image(systemName: "figure.run.circle.fill")
+                        .font(.system(size: 44, weight: .medium))
+                        .symbolRenderingMode(.hierarchical)
+                        .foregroundStyle(.white)
+                }
+                
+                VStack(spacing: 8) {
+                    Text("Empezar calibración")
+                        .font(.system(.title2, design: .rounded, weight: .bold))
+                    
+                    Text("Apunta a los jugadores durante 10 segundos")
+                        .font(.system(.subheadline, design: .rounded, weight: .medium))
+                        .multilineTextAlignment(.center)
+                        .opacity(0.9)
+                }
+            }
+            .padding(.vertical, 32)
+            .padding(.horizontal, 40)
+            .frame(maxWidth: 400)
+        }
+        .buttonStyle(.glassProminent)
+        .shadow(color: .black.opacity(0.2), radius: 20, x: 0, y: 10)
+    }
+}
+
+#Preview("Button Style Comparison") {
+    ZStack {
+        LinearGradient(
+            colors: [.gray.opacity(0.8), .gray],
+            startPoint: .top,
+            endPoint: .bottom
+        )
+        .edgesIgnoringSafeArea(.all)
+        
+        VStack(spacing: 40) {
+            // New prominent style
+            VStack(spacing: 8) {
+                Button {
+                } label: {
+                    VStack(spacing: 16) {
+                        ZStack {
+                            Circle()
+                                .fill(.white.opacity(0.15))
+                                .frame(width: 80, height: 80)
+                            
+                            Image(systemName: "figure.run.circle.fill")
+                                .font(.system(size: 44, weight: .medium))
+                                .symbolRenderingMode(.hierarchical)
+                                .foregroundStyle(.white)
+                        }
+                        
+                        VStack(spacing: 8) {
+                            Text("Empezar calibración")
+                                .font(.system(.title2, design: .rounded, weight: .bold))
+                            
+                            Text("Apunta a los jugadores durante 10 segundos")
+                                .font(.system(.subheadline, design: .rounded, weight: .medium))
+                                .multilineTextAlignment(.center)
+                                .opacity(0.9)
+                        }
+                    }
+                    .padding(.vertical, 32)
+                    .padding(.horizontal, 40)
+                    .frame(maxWidth: 400)
+                }
+                .buttonStyle(.glassProminent)
+                .shadow(color: .black.opacity(0.2), radius: 20, x: 0, y: 10)
+                
+                Text("Prominent Glass (Recommended)")
+                    .font(.caption)
+                    .foregroundStyle(.white.opacity(0.7))
+            }
+            
+            // Regular glass style
+            VStack(spacing: 8) {
+                Button {
+                } label: {
+                    VStack(spacing: 16) {
+                        Image(systemName: "figure.run.circle.fill")
+                            .font(.system(size: 40))
+                            .symbolRenderingMode(.hierarchical)
+                        
+                        VStack(spacing: 6) {
+                            Text("Empezar calibración")
+                                .font(.system(.title3, design: .rounded, weight: .semibold))
+                            
+                            Text("Apunta a los jugadores")
+                                .font(.system(.caption, design: .rounded))
+                                .opacity(0.8)
+                        }
+                    }
+                    .padding(.vertical, 24)
+                    .padding(.horizontal, 32)
+                }
+                .buttonStyle(.glass)
+                
+                Text("Regular Glass")
+                    .font(.caption)
+                    .foregroundStyle(.white.opacity(0.7))
+            }
+        }
+    }
+}
+
+#Preview("Alternative Icon Styles") {
+    ScrollView {
+        VStack(spacing: 40) {
+            // Style 1: Running figure (current)
+            previewButton(
+                icon: "figure.run.circle.fill",
+                title: "Empezar calibración",
+                subtitle: "Apunta a los jugadores durante 10 segundos",
+                label: "Running Figure"
+            )
+            
+            // Style 2: Camera scanning
+            previewButton(
+                icon: "camera.metering.matrix",
+                title: "Empezar calibración",
+                subtitle: "Apunta a los jugadores durante 10 segundos",
+                label: "Camera Matrix"
+            )
+            
+            // Style 3: Viewfinder
+            previewButton(
+                icon: "viewfinder.circle.fill",
+                title: "Empezar calibración",
+                subtitle: "Apunta a los jugadores durante 10 segundos",
+                label: "Viewfinder"
+            )
+            
+            // Style 4: Play circle
+            previewButton(
+                icon: "play.circle.fill",
+                title: "Empezar calibración",
+                subtitle: "Apunta a los jugadores durante 10 segundos",
+                label: "Play Button"
+            )
+            
+            // Style 5: Waveform
+            previewButton(
+                icon: "waveform.circle.fill",
+                title: "Empezar calibración",
+                subtitle: "Analizando movimiento",
+                label: "Waveform (Analysis)"
+            )
+        }
+        .padding(40)
+    }
+    .background(
+        LinearGradient(
+            colors: [.gray.opacity(0.8), .gray],
+            startPoint: .top,
+            endPoint: .bottom
+        )
+    )
+}
+
+// Helper function for preview
+private func previewButton(icon: String, title: String, subtitle: String, label: String) -> some View {
+    VStack(spacing: 12) {
+        Button {
+        } label: {
+            VStack(spacing: 16) {
+                ZStack {
+                    Circle()
+                        .fill(.white.opacity(0.15))
+                        .frame(width: 80, height: 80)
+                    
+                    Image(systemName: icon)
+                        .font(.system(size: 44, weight: .medium))
+                        .symbolRenderingMode(.hierarchical)
+                        .foregroundStyle(.white)
+                }
+                
+                VStack(spacing: 8) {
+                    Text(title)
+                        .font(.system(.title2, design: .rounded, weight: .bold))
+                    
+                    Text(subtitle)
+                        .font(.system(.subheadline, design: .rounded, weight: .medium))
+                        .multilineTextAlignment(.center)
+                        .opacity(0.9)
+                }
+            }
+            .padding(.vertical, 32)
+            .padding(.horizontal, 40)
+            .frame(maxWidth: 400)
+        }
+        .buttonStyle(.glassProminent)
+        .shadow(color: .black.opacity(0.2), radius: 20, x: 0, y: 10)
+        
+        Text(label)
+            .font(.caption)
+            .foregroundStyle(.white.opacity(0.7))
+    }
+}
 
 //#Preview {
 //    CameraButtonsView(teamSelectionManager: teamSelectionManager)
