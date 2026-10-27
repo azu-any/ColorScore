@@ -210,9 +210,15 @@
           "name" : "SIDE"
         },
         {
+          "blend-mode-specializations" : [
+            {
+              "appearance" : "dark",
+              "value" : "lighten"
+            }
+          ],
           "fill" : "none",
           "glass" : false,
-          "hidden" : false,
+          "hidden" : true,
           "image-name-specializations" : [
             {
               "value" : "saturatedyard.png"
@@ -245,9 +251,28 @@
           }
         },
         {
-          "hidden" : true,
+          "blend-mode-specializations" : [
+            {
+              "appearance" : "dark",
+              "value" : "soft-light"
+            }
+          ],
+          "fill-specializations" : [
+            {
+              "appearance" : "dark",
+              "value" : "automatic"
+            }
+          ],
+          "glass" : true,
+          "hidden" : false,
           "image-name" : "back.png",
           "name" : "back",
+          "opacity-specializations" : [
+            {
+              "appearance" : "dark",
+              "value" : 0.2
+            }
+          ],
           "position" : {
             "scale" : 1,
             "translation-in-points" : [
