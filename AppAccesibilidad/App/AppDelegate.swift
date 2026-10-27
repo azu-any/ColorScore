@@ -14,16 +14,16 @@ class AppDelegate: NSObject, UIApplicationDelegate {
             if #available(iOS 16.0, *) {
                 UIApplication.shared.connectedScenes.forEach { scene in
                     if let windowScene = scene as? UIWindowScene {
-                        windowScene.requestGeometryUpdate(.iOS(interfaceOrientations: orientationLock))
-                        UIView.performWithoutAnimation {
-                            windowScene.windows.forEach { window in
-                                window.rootViewController?.setNeedsUpdateOfSupportedInterfaceOrientations()
-                            }
+                        windowScene.windows.forEach { window in
+                            window.rootViewController?.setNeedsUpdateOfSupportedInterfaceOrientations()
+                        }
+                        windowScene.requestGeometryUpdate(.iOS(interfaceOrientations: orientationLock)) { error in
+                            print("Geometry update error: \(error.localizedDescription)")
                         }
                     }
                 }
             } else {
-                if orientationLock == .landscape {
+                if orientationLock == .landscape || orientationLock == .landscapeRight {
                     UIDevice.current.setValue(UIInterfaceOrientation.landscapeRight.rawValue, forKey: "orientation")
                 } else {
                     UIDevice.current.setValue(UIInterfaceOrientation.portrait.rawValue, forKey: "orientation")

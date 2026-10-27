@@ -19,8 +19,9 @@ struct CircularButtonStyle: ButtonStyle {
     func makeBody(configuration: Configuration) -> some View {
         Image(systemName: icon)
             .font(.system(size: 20, weight: .semibold))
-            .foregroundStyle(Color.black)
-            .frame(width: 44, height: 44)
+            .foregroundStyle(.primary)
+            .contentTransition(.symbolEffect(.replace))
+            .frame(minWidth: 44, minHeight: 44)
             .background {
                 if usesGlass {
                     Circle().glassEffect(.regular.interactive())
@@ -39,10 +40,11 @@ struct ScoreButtonStyle: ButtonStyle {
         configuration.label
             .font(.system(.caption, weight: .bold))
             .foregroundStyle(Color.black)
-            .frame(width: 24, height: 24)
+            .frame(minWidth: 44, minHeight: 44)
             .background {
                 Circle()
                     .fill(Color.white.opacity(0.8))
+                    .frame(width: 28, height: 28)
                     .overlay {
                         Circle()
                             .strokeBorder(Color.black.opacity(0.2), lineWidth: 0.5)
@@ -60,10 +62,11 @@ struct LargeScoreButtonStyle: ButtonStyle {
         configuration.label
             .font(.system(.title2, weight: .bold))
             .foregroundStyle(Color.white)
-            .frame(width: 40, height: 40)
+            .frame(minWidth: 44, minHeight: 44)
             .background {
                 Circle()
                     .fill(teamColor)
+                    .frame(width: 40, height: 40)
                     .overlay {
                         Circle()
                             .strokeBorder(Color.white.opacity(0.3), lineWidth: 1)
@@ -81,7 +84,9 @@ struct ScoreControlButtonStyle: ButtonStyle {
     
     func makeBody(configuration: Configuration) -> some View {
         configuration.label
-            .foregroundStyle(enabled ? teamColor : teamColor.opacity(0.3))
+//            .foregroundStyle(.primary)
+            .frame(minWidth: 32, minHeight: 32)
+            .contentShape(Rectangle())
             .scaleEffect(configuration.isPressed ? 0.85 : 1.0)
             .animation(.spring(response: 0.3, dampingFraction: 0.6), value: configuration.isPressed)
     }
