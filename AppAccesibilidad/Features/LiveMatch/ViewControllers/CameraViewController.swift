@@ -9,76 +9,111 @@
 import UIKit
 import AVFoundation
 import Vision
+import CoreImage
 
 class CameraViewController: UIViewController, AVCaptureVideoDataOutputSampleBufferDelegate {
     
-    var bufferSize: CGSize = .zero
+    var bufferSize: CGSize = CGSize(width: 640, height: 480)
     var rootLayer: CALayer! = nil
     
     private var previewView = UIView()
     private let session = AVCaptureSession()
     private var previewLayer: AVCaptureVideoPreviewLayer! = nil
+    private let filteredPreviewLayer = CALayer()
+    private let ciContext = CIContext(options: [.useSoftwareRenderer: false, .cacheIntermediates: false])
+    private(set) var currentFilter: CameraFilter = .none
+    private var currentInterfaceOrientation: UIInterfaceOrientation = .landscapeRight
     private let videoDataOutput = AVCaptureVideoDataOutput()
     
     private let videoDataOutputQueue = DispatchQueue(label: "VideoDataOutput", qos: .userInitiated, attributes: [], autoreleaseFrequency: .workItem)
     
     func captureOutput(_ output: AVCaptureOutput, didOutput sampleBuffer: CMSampleBuffer, from connection: AVCaptureConnection) {
-        // to be implemented in the subclass
+        renderFilteredFrame(from: sampleBuffer)
+    }
+    
+    func setCameraFilter(_ filter: CameraFilter) {
+        guard currentFilter != filter else { return }
+        currentFilter = filter
+        DispatchQueue.main.async { [weak self] in
+            guard let self = self else { return }
+            CATransaction.begin()
+            CATransaction.setDisableActions(true)
+            self.filteredPreviewLayer.isHidden = (filter == .none)
+            if filter == .none {
+                self.filteredPreviewLayer.contents = nil
+            }
+            CATransaction.commit()
+        }
+    }
+    
+    func renderFilteredFrame(from sampleBuffer: CMSampleBuffer) {
+        let filter = currentFilter
+        guard filter != .none,
+              let pixelBuffer = CMSampleBufferGetImageBuffer(sampleBuffer) else {
+            return
+        }
+        
+        var ciImage = CIImage(cvPixelBuffer: pixelBuffer)
+        if currentInterfaceOrientation == .landscapeLeft {
+            ciImage = ciImage.oriented(.down)
+        }
+        
+        let filteredImage = filter.apply(to: ciImage)
+        guard let cgImage = ciContext.createCGImage(filteredImage, from: ciImage.extent) else {
+            return
+        }
+        
+        DispatchQueue.main.async { [weak self] in
+            guard let self = self, self.currentFilter != .none else { return }
+            CATransaction.begin()
+            CATransaction.setDisableActions(true)
+            self.filteredPreviewLayer.isHidden = false
+            self.filteredPreviewLayer.contents = cgImage
+            CATransaction.commit()
+        }
     }
     
     override func viewDidLoad() {
         super.viewDidLoad()
         self.view.addSubview(previewView)
         self.previewView.frame = self.view.bounds
+        self.rootLayer = self.previewView.layer
         setupAVCapture()
     }
     
     override func viewDidLayoutSubviews() {
         super.viewDidLayoutSubviews()
         
+        CATransaction.begin()
+        CATransaction.setDisableActions(true)
         // Ensure the previewView itself fills the entire screen
         previewView.frame = self.view.bounds
         
         // Ensure the camera preview layer fills the previewView
         previewLayer?.frame = previewView.bounds
+        filteredPreviewLayer.frame = previewView.bounds
+        CATransaction.commit()
+        
+        let interfaceOrientation = self.view.window?.windowScene?.effectiveGeometry.interfaceOrientation ?? .landscapeRight
+        self.currentInterfaceOrientation = interfaceOrientation
         
         // This fixes the rotated camera preview.
-        if let connection = self.previewLayer?.connection, connection.isVideoOrientationSupported {
-            let interfaceOrientation = self.view.window?.windowScene?.interfaceOrientation ?? .landscapeRight
-            
+        if let connection = self.previewLayer?.connection {
             // Set the preview layer's orientation to match the interface
+            let rotationAngle: CGFloat
             switch interfaceOrientation {
             case .landscapeLeft:
-                connection.videoOrientation = .landscapeLeft
+                rotationAngle = 180
             case .landscapeRight:
-                connection.videoOrientation = .landscapeRight
+                rotationAngle = 0
             default:
                 // Default to landscape right if in portrait (which it shouldn't be)
-                connection.videoOrientation = .landscapeRight
+                rotationAngle = 0
+            }
+            if connection.isVideoRotationAngleSupported(rotationAngle) {
+                connection.videoRotationAngle = rotationAngle
             }
         }
-        
-//        THIS DOES NOT WORK
-//        if let connection = self.previewLayer?.connection {
-//            let interfaceOrientation = self.view.window?.windowScene?.effectiveGeometry.interfaceOrientation ?? .landscapeRight
-//            let rotationAngle: CGFloat
-//
-//            // Determine the correct rotation angle based on the UI's orientation
-//            switch interfaceOrientation {
-//            case .landscapeLeft:
-//                rotationAngle = -90 // or 270
-//            case .landscapeRight:
-//                rotationAngle = 90
-//            default:
-//                // Default to landscape right as per your app's setup
-//                rotationAngle = 90
-//            }
-//            
-//            // Set the rotation angle on the preview layer's connection
-//            if connection.isVideoRotationAngleSupported(rotationAngle) {
-//                connection.videoRotationAngle = rotationAngle
-//            }
-//        }
     }
     
     override var supportedInterfaceOrientations: UIInterfaceOrientationMask {
@@ -100,12 +135,21 @@ class CameraViewController: UIViewController, AVCaptureVideoDataOutputSampleBuff
     }
     
     func setupAVCapture() {
-        var deviceInput: AVCaptureDeviceInput!
+        rootLayer = previewView.layer
         
-        // Select a video device, make an input
-        let videoDevice = AVCaptureDevice.DiscoverySession(deviceTypes: [.builtInWideAngleCamera], mediaType: .video, position: .back).devices.first
+        // Safely select a video device without force-unwrapping
+        guard let videoDevice = AVCaptureDevice.DiscoverySession(
+            deviceTypes: [.builtInWideAngleCamera],
+            mediaType: .video,
+            position: .back
+        ).devices.first else {
+            print("No back video camera device available.")
+            return
+        }
+        
+        let deviceInput: AVCaptureDeviceInput
         do {
-            deviceInput = try AVCaptureDeviceInput(device: videoDevice!)
+            deviceInput = try AVCaptureDeviceInput(device: videoDevice)
         } catch {
             print("Could not create video device input: \(error)")
             return
@@ -137,22 +181,26 @@ class CameraViewController: UIViewController, AVCaptureVideoDataOutputSampleBuff
         // Always process the frames
         captureConnection?.isEnabled = true
         do {
-            try  videoDevice!.lockForConfiguration()
-            let dimensions = CMVideoFormatDescriptionGetDimensions((videoDevice?.activeFormat.formatDescription)!)
+            try videoDevice.lockForConfiguration()
+            let dimensions = CMVideoFormatDescriptionGetDimensions(videoDevice.activeFormat.formatDescription)
             bufferSize.width = CGFloat(dimensions.width)
             bufferSize.height = CGFloat(dimensions.height)
-            videoDevice!.unlockForConfiguration()
+            videoDevice.unlockForConfiguration()
         } catch {
             print(error)
         }
         
         session.commitConfiguration()
-        previewLayer = AVCaptureVideoPreviewLayer(session: session)
+        let layer = AVCaptureVideoPreviewLayer(session: session)
+        layer.videoGravity = AVLayerVideoGravity.resizeAspectFill
+        layer.frame = rootLayer.bounds
+        rootLayer.addSublayer(layer)
+        previewLayer = layer
         
-        previewLayer.videoGravity = AVLayerVideoGravity.resizeAspectFill
-        rootLayer = previewView.layer
-        previewLayer.frame = rootLayer.bounds
-        rootLayer.addSublayer(previewLayer)
+        filteredPreviewLayer.contentsGravity = .resizeAspectFill
+        filteredPreviewLayer.frame = rootLayer.bounds
+        filteredPreviewLayer.isHidden = (currentFilter == .none)
+        rootLayer.addSublayer(filteredPreviewLayer)
     }
     
     func startCaptureSession() {
@@ -162,21 +210,16 @@ class CameraViewController: UIViewController, AVCaptureVideoDataOutputSampleBuff
     }
     
     func stopCaptureSession() {
-        // Stop the session
         if session.isRunning {
             session.stopRunning()
         }
-        
-//        // Remove the video preview layer
-//        previewLayer?.removeFromSuperlayer()
-//        previewLayer = nil
     }
     
     deinit {
-        // Now we can safely stop and remove everything
         if session.isRunning {
             session.stopRunning()
         }
+        filteredPreviewLayer.removeFromSuperlayer()
         previewLayer?.removeFromSuperlayer()
         previewLayer = nil
         print("VisionViewController deallocated and capture session torn down.")
@@ -184,7 +227,8 @@ class CameraViewController: UIViewController, AVCaptureVideoDataOutputSampleBuff
     
     // Clean up capture setup
     func teardownAVCapture() {
-        previewLayer.removeFromSuperlayer()
+        filteredPreviewLayer.removeFromSuperlayer()
+        previewLayer?.removeFromSuperlayer()
         previewLayer = nil
         
         DispatchQueue.global(qos: .userInitiated).async { [weak self] in
@@ -198,31 +242,6 @@ class CameraViewController: UIViewController, AVCaptureVideoDataOutputSampleBuff
     
     
     public func exifOrientationFromDeviceOrientation() -> CGImagePropertyOrientation {
-        // We get the PHYSICAL device orientation,
-        // even if the UI is locked in landscape.
-//        let curDeviceOrientation = UIDevice.current.orientation
-//        
-//        let exifOrientation: CGImagePropertyOrientation
-//        
-//        switch curDeviceOrientation {
-//        case .portraitUpsideDown:  // Device oriented vertically, home button on the top
-//            exifOrientation = .left
-//        case .landscapeLeft:       // Device oriented horizontally, home button on the right
-//            // CORRECTED: This should be .upMirrored or .left
-//            exifOrientation = .left
-//        case .landscapeRight:      // Device oriented horizontally, home button on the left
-//            // CORRECTED: This should be .downMirrored or .right
-//            exifOrientation = .right
-//        case .portrait:            // Device oriented vertically, home button on the bottom
-//            exifOrientation = .up
-//        default:
-//            // Use the last known valid orientation, or default to .up.
-//            // For a landscape-locked app, .right is a good default.
-//            exifOrientation = .right
-//        }
-//        return exifOrientation
         return .up
     }
 }
-
-

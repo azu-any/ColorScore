@@ -23,6 +23,7 @@ class MatchSettings {
     var ballColor: PlayerColor = .orange
     
     var zoom: Double = 1.0
+    var cameraFilter: CameraFilter = .none
     
     struct Style {
         let shape: PlayerShape

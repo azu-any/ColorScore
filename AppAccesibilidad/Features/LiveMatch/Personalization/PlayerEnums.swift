@@ -18,6 +18,17 @@ enum PlayerShape: String, CaseIterable, Identifiable {
     
     var id: String { rawValue }
     
+    /// Localized Spanish name for VoiceOver and UI
+    var localizedName: String {
+        switch self {
+        case .circle: return "Círculo"
+        case .square: return "Cuadrado"
+        case .triangle: return "Triángulo"
+        case .diamond: return "Diamante"
+        case .star: return "Estrella"
+        }
+    }
+    
     @ViewBuilder
     func view(color: Color, size: CGFloat = 24) -> some View {
         switch self {
@@ -130,16 +141,30 @@ enum PlayerColor: String, CaseIterable, Identifiable {
     
     var id: String { rawValue }
     
+    /// Localized Spanish name for VoiceOver and UI
+    var localizedName: String {
+        switch self {
+        case .blue: return "Azul"
+        case .red: return "Rojo"
+        case .green: return "Verde"
+        case .orange: return "Naranja"
+        case .purple: return "Morado"
+        case .yellow: return "Amarillo"
+        case .cyan: return "Cian"
+        case .pink: return "Rosa"
+        }
+    }
+    
     var color: Color {
         switch self {
-        case .blue: return Color(red: 0.0, green: 0.48, blue: 0.8)      // Colorblind-friendly blue
-        case .red: return Color(red: 0.9, green: 0.27, blue: 0.23)      // Colorblind-friendly red
-        case .green: return Color(red: 0.0, green: 0.62, blue: 0.45)    // Colorblind-friendly green
-        case .orange: return Color(red: 0.9, green: 0.6, blue: 0.0)     // High contrast orange
-        case .purple: return Color(red: 0.58, green: 0.4, blue: 0.74)   // Distinct purple
-        case .yellow: return Color(red: 0.95, green: 0.9, blue: 0.25)   // High visibility yellow
-        case .cyan: return Color(red: 0.2, green: 0.73, blue: 0.87)     // Light cyan
-        case .pink: return Color(red: 0.96, green: 0.51, blue: 0.69)    // Distinct pink
+        case .blue: return Color("PlayerBlue")      // Colorblind-friendly blue
+        case .red: return Color("PlayerRed")        // Colorblind-friendly red
+        case .green: return Color("PlayerGreen")    // Colorblind-friendly green
+        case .orange: return Color("PlayerOrange")  // High contrast orange
+        case .purple: return Color("PlayerPurple")  // Distinct purple
+        case .yellow: return Color("PlayerYellow")  // High visibility yellow
+        case .cyan: return Color("PlayerCyan")      // Light cyan
+        case .pink: return Color("PlayerPink")      // Distinct pink
         }
     }
     

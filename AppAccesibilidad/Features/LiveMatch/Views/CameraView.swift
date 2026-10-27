@@ -20,16 +20,22 @@ struct CameraView: UIViewControllerRepresentable {
         let viewController = LiveAnalysisViewController()
         viewController.settings = settings
         viewController.setZoom(factor: settings.zoom)
+        viewController.setCameraFilter(settings.cameraFilter)
         viewController.coordinator = context.coordinator
         context.coordinator.viewController = viewController
         return viewController
     }
     
     // This function is for passing data from SwiftUI to the ViewController.
-    // Since our camera view is self-contained, we can leave this empty.
     func updateUIViewController(_ uiViewController: LiveAnalysisViewController, context: Context) {
         uiViewController.settings = settings
         uiViewController.setZoom(factor: settings.zoom)
+        uiViewController.setCameraFilter(settings.cameraFilter)
+        
+        if let calibrationVC = uiViewController.presentedViewController as? CalibrationViewController {
+            calibrationVC.settings = settings
+            calibrationVC.setCameraFilter(settings.cameraFilter)
+        }
         
         if isCalibrating {
             uiViewController.presentCalibrationViewIfNeeded()

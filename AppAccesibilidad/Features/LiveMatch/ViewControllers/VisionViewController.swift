@@ -26,7 +26,7 @@ class VisionViewController: CameraViewController, VisionProcesorDelegate {
     private let trackerQueue = DispatchQueue(label: "Xcookers.trackerQueue")
     private var trackedObjects: [UUID: VNTrackObjectRequest] = [:]
     private var trackedObjectInfo: [UUID: (box: CGRect, label: String, teamID: Int?)] = [:]
-//
+
     // Team Classification
     var teamClassifier = TeamClassifier()
     private var isClassifierFitted = false
@@ -54,8 +54,6 @@ class VisionViewController: CameraViewController, VisionProcesorDelegate {
             print("FATAL ERROR: Failed to setup Vision: \(error.localizedDescription)")
             return
         }
-        
-//        startCaptureSession()
     }
     
     
@@ -75,6 +73,7 @@ class VisionViewController: CameraViewController, VisionProcesorDelegate {
     
     // Manage output of camera
     override func captureOutput(_ output: AVCaptureOutput, didOutput sampleBuffer: CMSampleBuffer, from connection: AVCaptureConnection) {
+        super.captureOutput(output, didOutput: sampleBuffer, from: connection)
         guard let pixelBuffer = CMSampleBufferGetImageBuffer(sampleBuffer) else { return }
         self.latestPixelBuffer = pixelBuffer
         let exifOrientation = exifOrientationFromDeviceOrientation()
@@ -86,14 +85,13 @@ class VisionViewController: CameraViewController, VisionProcesorDelegate {
     // MARK: - UI Drawing
     
     func drawVisionRequestResults(_ results: [VNRecognizedObjectObservation]) {
+        guard detectionOverlay != nil else { return }
         CATransaction.begin()
         CATransaction.setValue(kCFBooleanTrue, forKey: kCATransactionDisableActions)
         detectionOverlay.sublayers = nil // remove all the old recognized objects
         
-        // The loop is now simpler since we know the type
         for objectObservation in results {
-            // Select only the label with the highest confidence.
-            let topLabelObservation = objectObservation.labels[0]
+            guard let topLabelObservation = objectObservation.labels.first else { continue }
             let objectBounds = VNImageRectForNormalizedRect(objectObservation.boundingBox, Int(bufferSize.width), Int(bufferSize.height))
             
             let shapeLayer = self.createShapeLayerWithBounds(objectBounds, topLabelObservation.identifier)
@@ -105,6 +103,9 @@ class VisionViewController: CameraViewController, VisionProcesorDelegate {
     }
     
     func setupLayers() {
+        if rootLayer == nil {
+            rootLayer = view.layer
+        }
         detectionOverlay = CALayer() // container layer that has all the renderings of the observations
         detectionOverlay.name = "DetectionOverlay"
         detectionOverlay.bounds = CGRect(x: 0.0,
@@ -117,6 +118,7 @@ class VisionViewController: CameraViewController, VisionProcesorDelegate {
     
     
     func updateLayerGeometry() {
+        guard rootLayer != nil, detectionOverlay != nil, bufferSize.width > 0, bufferSize.height > 0 else { return }
         let bounds = rootLayer.bounds
         var scale: CGFloat
         
@@ -124,7 +126,7 @@ class VisionViewController: CameraViewController, VisionProcesorDelegate {
         let yScale: CGFloat = bounds.size.height / bufferSize.height
         
         scale = fmax(xScale, yScale)
-        if scale.isInfinite {
+        if scale.isInfinite || scale.isNaN {
             scale = 1.0
         }
         
@@ -141,14 +143,25 @@ class VisionViewController: CameraViewController, VisionProcesorDelegate {
     
     
     func createShapeLayerWithBounds(_ bounds: CGRect, _ label: String, teamID: Int? = nil) -> CAShapeLayer {
+        // Compute a small square marker positioned just above the player's head
+        let markerSize = min(max(bounds.width * 0.45, 10.0), 22.0)
+        let verticalSpacing: CGFloat = 4.0
+        let markerRect = CGRect(
+            x: bounds.midX - markerSize / 2.0,
+            y: bounds.maxY + verticalSpacing,
+            width: markerSize,
+            height: markerSize
+        )
         
         // Safely unwrap the settings. If they're not ready,
-        // draw a default gray box and exit the function.
+        // draw a default gray marker above the player and exit the function.
         guard let settings = self.settings else {
             let defaultLayer = CAShapeLayer()
             defaultLayer.name = label
-            defaultLayer.path = UIBezierPath(rect: bounds).cgPath
-            defaultLayer.fillColor = UIColor.gray.withAlphaComponent(0.4).cgColor
+            defaultLayer.path = UIBezierPath(ovalIn: markerRect).cgPath
+            defaultLayer.fillColor = UIColor.gray.withAlphaComponent(0.75).cgColor
+            defaultLayer.lineWidth = 1.5
+            defaultLayer.strokeColor = UIColor.white.cgColor
             return defaultLayer
         }
         
@@ -157,38 +170,19 @@ class VisionViewController: CameraViewController, VisionProcesorDelegate {
         let shapeLayer = CAShapeLayer()
         shapeLayer.name = label
         
-        // 4. Use the new enum helpers to apply the style
-        shapeLayer.path = style.shape.path(in: bounds).cgPath
-        shapeLayer.fillColor = style.color.withAlphaComponent(0.6).cgColor
-        shapeLayer.lineWidth = 1.0
-        shapeLayer.strokeColor = UIColor.black.cgColor
+        // High-contrast rendering for low-vision & colorblind accessibility
+        let fillAlpha: CGFloat = UIAccessibility.isReduceTransparencyEnabled ? 0.95 : 0.9
+        let strokeWidth: CGFloat = UIAccessibility.shouldDifferentiateWithoutColor ? 2.5 : 1.5
+        
+        shapeLayer.path = style.shape.path(in: markerRect).cgPath
+        shapeLayer.fillColor = style.color.withAlphaComponent(fillAlpha).cgColor
+        shapeLayer.lineWidth = strokeWidth
+        shapeLayer.strokeColor = UIColor.white.cgColor
+        shapeLayer.shadowColor = UIColor.black.cgColor
+        shapeLayer.shadowOpacity = 0.6
+        shapeLayer.shadowRadius = 2.0
+        shapeLayer.shadowOffset = .zero
         
         return shapeLayer
-//        let shapeLayer = CAShapeLayer()
-//        shapeLayer.name = label
-//        var path: UIBezierPath
-//
-//        switch label {
-//        case "ball":
-//            path = UIBezierPath(ovalIn: bounds)
-//            shapeLayer.fillColor = UIColor(Color.ball).withAlphaComponent(0.6).cgColor
-//        case "player":
-//            path = UIBezierPath(rect: bounds)
-//            if let id = teamID {
-//                let teamColor = (id == 0) ? Color.teamA : Color.blue
-//                path = (id == 0) ? UIBezierPath(rect: bounds) : UIBezierPath(ovalIn: bounds)
-//                shapeLayer.fillColor = UIColor(teamColor).withAlphaComponent(0.6).cgColor
-//            } else {
-//                shapeLayer.fillColor = UIColor.gray.withAlphaComponent(0.5).cgColor
-//            }
-//        default:
-//            path = UIBezierPath(rect: bounds)
-//            shapeLayer.fillColor = UIColor.yellow.withAlphaComponent(0.5).cgColor
-//        }
-//        
-//        shapeLayer.path = path.cgPath
-//        return shapeLayer
     }
-    
-    
 }

@@ -19,18 +19,6 @@ class LiveAnalysisViewController: VisionViewController {
     
     weak var coordinator: CameraView.Coordinator?
     
-//    override func viewDidAppear(_ animated: Bool) {
-////        super.viewDidAppear(animated)
-//        
-//        // If we don't have a classifier, we must run calibration
-//        if self.classifier == nil {
-//            presentCalibrationView()
-//        } else {
-//            // Start camera for detection and classification
-//            startCaptureSession()
-//        }
-//    }
-    
     override func visionService(_ service: VisionProcessor, didFind results: [VNRecognizedObjectObservation], on buffer: CVPixelBuffer) {
             
         guard let classifier = self.classifier else {
@@ -101,6 +89,10 @@ class LiveAnalysisViewController: VisionViewController {
             guard self.presentedViewController == nil else { return }
             
             let calibrationVC = CalibrationViewController()
+            calibrationVC.settings = self.settings
+            if let filter = self.settings?.cameraFilter {
+                calibrationVC.setCameraFilter(filter)
+            }
             calibrationVC.delegate = self.coordinator
             calibrationVC.modalPresentationStyle = .fullScreen
             self.present(calibrationVC, animated: true)
@@ -110,16 +102,20 @@ class LiveAnalysisViewController: VisionViewController {
     // MARK: - Capture Output (For Prediction)
     
     override func captureOutput(_ output: AVCaptureOutput, didOutput sampleBuffer: CMSampleBuffer, from connection: AVCaptureConnection) {
-        // If we don't have a classifier, don't do anything.
+        // If we don't have a classifier, still render the filtered preview frame
         guard self.classifier != nil else {
+            renderFilteredFrame(from: sampleBuffer)
             return
         }
         
         if frameCount == 0 {
             super.captureOutput(output, didOutput: sampleBuffer, from: connection)
         } else if frameCount == frameSkip {
+            renderFilteredFrame(from: sampleBuffer)
             frameCount = 0
             return
+        } else {
+            renderFilteredFrame(from: sampleBuffer)
         }
         frameCount += 1
         
