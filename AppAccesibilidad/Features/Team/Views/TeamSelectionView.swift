@@ -200,11 +200,12 @@ struct TeamSelectionView: View {
                 // Header
                 VStack(alignment: .leading, spacing: 8) {
                     Text("Selecciona tu equipo")
-                        .font(.system(size: 34, weight: .bold))
+                        .font(.largeTitle.bold())
+                        .accessibilityAddTraits(.isHeader)
                     
                     Text("Configura tu partido")
-                        .font(.system(size: 17, weight: .regular))
-                        .foregroundColor(.secondary)
+                        .font(.body)
+                        .foregroundStyle(.secondary)
                 }
                 .padding(.horizontal)
                 .padding(.top, 16)
@@ -267,9 +268,12 @@ struct TeamSelectionView: View {
                     showingNewTeamSheet = true
                 }) {
                     Image(systemName: "plus")
-                        .font(.system(size: 22, weight: .medium))
-                        .foregroundColor(.primary)
+                        .font(.title3.weight(.medium))
+                        .foregroundStyle(.primary)
+                        .frame(minWidth: 44, minHeight: 44)
                 }
+                .accessibilityLabel("Crear nuevo equipo")
+                .accessibilityHint("Abre el formulario para personalizar y agregar un equipo")
             }
         }
         .sheet(isPresented: $showingNewTeamSheet) {
@@ -282,18 +286,20 @@ struct TeamSelectionView: View {
     // MARK: - Helper Views
     private func continentHeader(_ title: String) -> some View {
         Text(title)
-            .font(.system(size: 28, weight: .bold))
-            .foregroundColor(.primary)
+            .font(.title.bold())
+            .foregroundStyle(.primary)
             .padding(.horizontal)
             .padding(.top, 8)
+            .accessibilityAddTraits(.isHeader)
     }
     
     private func leagueSection(title: String, teams: [Team], color: Color) -> some View {
         VStack(alignment: .leading, spacing: 12) {
             Text(title)
-                .font(.system(size: 20, weight: .semibold))
-                .foregroundColor(.black)
+                .font(.title3.weight(.semibold))
+                .foregroundStyle(.primary)
                 .padding(.horizontal)
+                .accessibilityAddTraits(.isHeader)
             
             TeamRowComponentView(teams: teams, sectionColor: color) { team in
                 selectTeam(team)
@@ -307,8 +313,9 @@ struct TeamSelectionView: View {
         VStack(alignment: .leading, spacing: 12) {
             HStack {
                 Text("⚽️ Mis Equipos Creados")
-                    .font(.system(size: 28, weight: .bold))
-                    .foregroundColor(.primary)
+                    .font(.title.bold())
+                    .foregroundStyle(.primary)
+                    .accessibilityAddTraits(.isHeader)
                 
                 Spacer()
             }
@@ -363,86 +370,105 @@ struct CustomTeamCard: View {
     @State private var showDeleteAlert = false
     
     var body: some View {
-        Button(action: {
-            onTeamSelected?()
-        }) {
-            VStack(spacing: 12) {
-                // Logo with color background
-                ZStack {
-                    // Team color background
-                    RoundedRectangle(cornerRadius: 12)
-                        .fill(team.teamColor)
-                        .frame(width: 140, height: 140)
-                        .overlay(
-                            // Subtle gradient for depth
-                            LinearGradient(
-                                colors: [
-                                    Color.black.opacity(0.1),
-                                    Color.black.opacity(0.2)
-                                ],
-                                startPoint: .top,
-                                endPoint: .bottom
+        VStack(spacing: 8) {
+            Button(action: {
+                onTeamSelected?()
+            }) {
+                VStack(spacing: 12) {
+                    // Logo with color background
+                    ZStack {
+                        // Team color background
+                        RoundedRectangle(cornerRadius: 12)
+                            .fill(team.teamColor)
+                            .frame(width: 140, height: 140)
+                            .overlay(
+                                // Subtle gradient for depth
+                                LinearGradient(
+                                    colors: [
+                                        Color.black.opacity(0.1),
+                                        Color.black.opacity(0.2)
+                                    ],
+                                    startPoint: .top,
+                                    endPoint: .bottom
+                                )
                             )
-                        )
-                    
-                    // Logo overlay
-                    if let imageData = team.logoImageData,
-                       let uiImage = UIImage(data: imageData) {
-                        Image(uiImage: uiImage)
-                            .resizable()
-                            .scaledToFit()
-                            .frame(width: 100, height: 100)
-                            .shadow(color: Color.black.opacity(0.3), radius: 4, x: 0, y: 2)
-                    } else {
-                        Image(systemName: "shield.fill")
-                            .resizable()
-                            .scaledToFit()
-                            .frame(width: 60, height: 60)
-                            .foregroundColor(.white)
-                            .shadow(color: Color.black.opacity(0.3), radius: 4, x: 0, y: 2)
-                    }
-                }
-                .shadow(color: Color.black.opacity(0.15), radius: 8, x: 0, y: 4)
-                
-                // Team Info
-                VStack(spacing: 4) {
-                    Text(team.name)
-                        .font(.system(size: 13, weight: .medium))
-                        .lineLimit(2)
-                        .multilineTextAlignment(.center)
-                        .foregroundColor(.primary)
-                    
-                    HStack(spacing: 4) {
-                        Text(team.country)
-                            .font(.system(size: 11))
-                            .foregroundColor(.secondary)
                         
-                        Text("•")
-                            .font(.system(size: 11))
-                            .foregroundColor(.secondary)
-                        
-                        Text(team.division)
-                            .font(.system(size: 11))
-                            .foregroundColor(.secondary)
-                            .lineLimit(1)
+                        // Logo overlay
+                        if let imageData = team.logoImageData,
+                           let uiImage = UIImage(data: imageData) {
+                            Image(uiImage: uiImage)
+                                .resizable()
+                                .scaledToFit()
+                                .frame(width: 100, height: 100)
+                                .shadow(color: Color.black.opacity(0.3), radius: 4, x: 0, y: 2)
+                                .accessibilityHidden(true)
+                        } else {
+                            Image(systemName: "shield.fill")
+                                .resizable()
+                                .scaledToFit()
+                                .frame(width: 60, height: 60)
+                                .foregroundColor(.white)
+                                .shadow(color: Color.black.opacity(0.3), radius: 4, x: 0, y: 2)
+                                .accessibilityHidden(true)
+                        }
                     }
-                }
-                .frame(width: 140)
-                
-                // Delete button
-                Button(action: {
-                    showDeleteAlert = true
-                }) {
-                    Image(systemName: "trash")
-                        .font(.system(size: 12))
-                        .foregroundColor(.red)
-                        .padding(6)
-                        .background(Color(uiColor: .systemGray6))
-                        .clipShape(Circle())
+                    .shadow(color: Color.black.opacity(0.15), radius: 8, x: 0, y: 4)
+                    
+                    // Team Info
+                    VStack(spacing: 4) {
+                        Text(team.name)
+                            .font(.footnote.weight(.medium))
+                            .lineLimit(2)
+                            .multilineTextAlignment(.center)
+                            .foregroundStyle(.primary)
+                        
+                        HStack(spacing: 4) {
+                            Text(team.country)
+                                .font(.caption2)
+                                .foregroundStyle(.secondary)
+                            
+                            Text("•")
+                                .font(.caption2)
+                                .foregroundStyle(.secondary)
+                            
+                            Text(team.division)
+                                .font(.caption2)
+                                .foregroundStyle(.secondary)
+                                .lineLimit(1)
+                        }
+                    }
+                    .frame(width: 140)
                 }
             }
+            .buttonStyle(.plain)
+            
+            // Delete button with 44x44 minimum touch target
+            Button(action: {
+                showDeleteAlert = true
+            }) {
+                Image(systemName: "trash")
+                    .font(.subheadline)
+                    .foregroundStyle(.red)
+                    .frame(width: 36, height: 36)
+                    .background(Color(uiColor: .systemGray6))
+                    .clipShape(Circle())
+                    .frame(minWidth: 44, minHeight: 44)
+                    .contentShape(Rectangle())
+            }
+            .buttonStyle(.plain)
+            .accessibilityLabel("Eliminar \(team.name)")
+            .accessibilityHint("Muestra una alerta para confirmar la eliminación del equipo")
         }
-        .buttonStyle(PlainButtonStyle())
+        .accessibilityElement(children: .ignore)
+        .accessibilityLabel("\(team.name), \(team.country), \(team.division)")
+        .accessibilityHint("Toca dos veces para seleccionar este equipo")
+        .accessibilityAddTraits(.isButton)
+        .accessibilityAction {
+            onTeamSelected?()
+        }
+        .accessibilityAction(named: "Eliminar equipo") {
+            showDeleteAlert = true
+        }
         .alert("Eliminar equipo", isPresented: $showDeleteAlert) {
             Button("Cancelar", role: .cancel) { }
             Button("Eliminar", role: .destructive) {

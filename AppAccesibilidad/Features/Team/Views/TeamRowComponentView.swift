@@ -22,10 +22,16 @@ struct TeamRowComponentView: View {
         ScrollView(.horizontal, showsIndicators: false) {
             HStack(spacing: 12) {
                 ForEach(teams) { team in
-                    TeamCardView(team: team, sectionColor: sectionColor)
-                        .onTapGesture {
-                            onTeamSelected?(team)
-                        }
+                    Button(action: {
+                        onTeamSelected?(team)
+                    }) {
+                        TeamCardView(team: team, sectionColor: sectionColor)
+                    }
+                    .buttonStyle(.plain)
+                    .accessibilityElement(children: .ignore)
+                    .accessibilityLabel(team.name)
+                    .accessibilityHint("Toca dos veces para seleccionar este equipo")
+                    .accessibilityAddTraits(.isButton)
                 }
             }
             .padding(.horizontal)
@@ -69,6 +75,7 @@ struct TeamCardView: View {
                         .scaledToFit()
                         .frame(width: 100, height: 100)
                         .shadow(color: Color.black.opacity(0.3), radius: 4, x: 0, y: 2)
+                        .accessibilityHidden(true)
                 } else {
                     // Fallback icon if image doesn't exist
                     Image(systemName: "shield.fill")
@@ -77,17 +84,18 @@ struct TeamCardView: View {
                         .frame(width: 60, height: 60)
                         .foregroundColor(.white)
                         .shadow(color: Color.black.opacity(0.3), radius: 4, x: 0, y: 2)
+                        .accessibilityHidden(true)
                 }
             }
             .shadow(color: Color.black.opacity(0.15), radius: 8, x: 0, y: 4)
             
             // Team Name
             Text(team.name)
-                .font(.system(size: 13, weight: .medium))
+                .font(.footnote.weight(.medium))
                 .multilineTextAlignment(.center)
                 .frame(width: 140)
                 .lineLimit(2)
-                .foregroundColor(.primary)
+                .foregroundStyle(.primary)
         }
     }
     
