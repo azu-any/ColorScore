@@ -10,7 +10,7 @@ import SwiftUI
 @available(iOS 16.0, *)
 struct HomeView: View {
     @State private var showingCamera = false
-    @State private var showingHelp = false
+    @State private var isTransitioningToCamera = false
     @State private var teamSelectionManager = TeamSelectionManager()
     
     var body: some View {
@@ -31,21 +31,6 @@ struct HomeView: View {
                 ScrollView(.vertical, showsIndicators: false) {
                     VStack(alignment: .leading, spacing: 24) {
 
-                        // MARK: - Header
-                        VStack(alignment: .leading, spacing: 6) {
-                            Text("Nuevo partido")
-                                .font(.largeTitle.bold())
-                                .accessibilityAddTraits(.isHeader) // MARK: - Accesibilidad
-
-                            Text("Configura tu partido")
-                                .font(.subheadline)
-                                .foregroundStyle(.secondary)
-                        }
-                        .accessibilityElement(children: .contain) // MARK: - Accesibilidad
-                        .accessibilitySortPriority(10)
-                        .padding(.horizontal, 20)
-                        .padding(.top, 16)
-
                         // MARK: - Team 1 Card
                         NavigationLink(destination: TeamSelectionView(
                             selectionManager: teamSelectionManager,
@@ -64,8 +49,8 @@ struct HomeView: View {
                         // MARK: - Accesibilidad
                         .accessibilityElement(children: .ignore) // Ignora los textos internos
                         .accessibilityLabel("Equipo 1") // Etiqueta principal
-                        .accessibilityValue(teamSelectionManager.team1?.name ?? "Seleccionar equipo") // Valor (estado)
-                        .accessibilityHint("Toca para seleccionar el equipo 1.") // Acción
+                        .accessibilityValue(teamSelectionManager.team1?.name ?? "Sin seleccionar") // Valor (estado)
+                        .accessibilityHint("Toca dos veces para seleccionar el equipo 1.") // Acción
                         .accessibilityAddTraits(.isButton) // Trátalo como un botón
                         .accessibilitySortPriority(9)
                         
@@ -88,87 +73,84 @@ struct HomeView: View {
                         // MARK: - Accesibilidad
                         .accessibilityElement(children: .ignore) // Ignora los textos internos
                         .accessibilityLabel("Equipo 2") // Etiqueta principal
-                        .accessibilityValue(teamSelectionManager.team2?.name ?? "Seleccionar equipo") // Valor (estado)
-                        .accessibilityHint("Toca para seleccionar el equipo 2.") // Acción
+                        .accessibilityValue(teamSelectionManager.team2?.name ?? "Sin seleccionar") // Valor (estado)
+                        .accessibilityHint("Toca dos veces para seleccionar el equipo 2.") // Acción
                         .accessibilityAddTraits(.isButton) // Trátalo como un botón
                         .accessibilitySortPriority(8)
 
-                        // MARK: - Grid inferior
-                        VStack(spacing: 18) {
-                            // OptionGlassCard(
-                            //    title: "Configuración del partido",
-                            //    systemIcon: "gearshape.fill",
-                            //    tint: .gray
-                            // )
-                            NavigationLink(destination: StatisticsMainView()
-                                .navigationBarBackButtonHidden(true)) {
-                                OptionGlassCard(
-                                    title: "Estadísticas de equipos",
-                                    systemIcon: "chart.bar.fill",
-                                    tint: .gray
-                                )
-                                .accessibilityLabel("Estadísticas de equipos")
-                                .accessibilityHint("Visualiza las estadísticas de los equipos.")
-                            }
-                            .buttonStyle(PlainButtonStyle())
-                            .accessibilityAddTraits(.isButton)
-                            .accessibilitySortPriority(7)
-                        }
-                        .padding(.horizontal, 20)
-                        .accessibilityElement(children: .contain)
-
-                        // MARK: - CTA Inferior
-                        Button(action: {
-                            DispatchQueue.main.async {
-                                AppDelegate.orientationLock = .landscapeRight
-                                print("cambiando a landscape")
-                                showingCamera = true
-                            }
-                            // TODO: acción “Empezar partido”
-                        }) {
-                            Text("Empezar partido")
-                                .font(.headline.bold())
-                                .frame(maxWidth: .infinity)
-                        }
-                        .buttonStyle(GlassCapsuleButton(tint: .blue, prominent: true))
-                        .padding(.horizontal, 24)
-                        .padding(.bottom, 30)
-                        .accessibilityAddTraits(.isButton)
-                        .accessibilityHint("Inicia el partido y abre la cámara en modo horizontal.")
-                        .accessibilitySortPriority(6)
-                        .accessibilityElement(children: .contain)
+                        
                     }
                 }
 
-                // MARK: - Botón de ayuda flotante
-                VStack {
-                    HStack {
-                        Spacer()
-                        Button {
-                            showingHelp = true
-                        } label: {
-                            Image(systemName: "questionmark.circle")
-                                .font(.title3.bold())
-                                .padding(10)
-                        }
-                        .buttonStyle(GlassCircleButton())
-                        .padding(.trailing, 16)
-                        .padding(.top, 12)
-                        .accessibilityLabel("Ayuda")
-                        .accessibilityHint("Obtén ayuda para configurar el partido.")
-                        .accessibilityAddTraits(.isButton)
-                        .accessibilitySortPriority(5)
-                    }
-                    Spacer()
-                }
-                .alert("Ayuda", isPresented: $showingHelp) {
-                    Button("Entendido", role: .cancel) { }
-                } message: {
-                    Text("Selecciona los equipos que participarán en el partido. Luego presiona 'Empezar partido' para comenzar el seguimiento en tiempo real con reconocimiento de gestos y estadísticas accesibles.")
+                
+                
+                if isTransitioningToCamera {
+                    Color.black
+                        .ignoresSafeArea()
+                        .transition(.opacity)
+                        .zIndex(10)
                 }
             }
-            .toolbar(.hidden, for: .navigationBar)
-            .fullScreenCover(isPresented: $showingCamera) {
+            .navigationTitle("Nuevo partido")
+            .toolbar {
+                // MARK: - Botón de créditos
+                ToolbarItem(placement: .topBarLeading) {
+                    NavigationLink(destination: CreditsView()) {
+                        Image(systemName: "info.circle")
+                            .font(.title3.bold())
+                    }
+                    .accessibilityLabel("Créditos")
+                    .accessibilityHint("Muestra la información y los créditos de desarrollo de la aplicación.")
+                    .accessibilityAddTraits(.isButton)
+                    .accessibilitySortPriority(5)
+                }
+                
+                // MARK: - Botón de tutorial / ayuda
+                ToolbarItem(placement: .topBarTrailing) {
+                    NavigationLink(destination: TutorialView()) {
+                        Image(systemName: "questionmark.circle")
+                            .font(.title3.bold())
+                    }
+                    .accessibilityLabel("Ayuda y tutorial")
+                    .accessibilityHint("Abre el tutorial paso a paso sobre cómo configurar e iniciar el partido.")
+                    .accessibilityAddTraits(.isButton)
+                    .accessibilitySortPriority(5)
+                }
+                
+            }
+            .overlay(alignment: .bottom) {
+                Button(action: {
+                    withAnimation(.easeInOut(duration: 0.2)) {
+                        isTransitioningToCamera = true
+                    }
+                    AppDelegate.orientationLock = .landscapeRight
+                    DispatchQueue.main.asyncAfter(deadline: .now() + 0.28) {
+                        var transaction = Transaction()
+                        transaction.disablesAnimations = false
+                        withTransaction(transaction) {
+                            showingCamera = true
+                        }
+                    }
+                }) {
+                    Text("Empezar partido")
+                        .font(.headline.bold())
+                        .frame(maxWidth: .infinity)
+                }
+                .buttonStyle(GlassCapsuleButton(tint: .blue, prominent: true))
+                .padding(.horizontal, 24)
+                .padding(.top, 8)
+                .padding(.bottom, 30)
+                .accessibilityLabel("Empezar partido")
+                .accessibilityHint("Inicia el partido y abre la cámara en modo horizontal.")
+                .accessibilityAddTraits(.isButton)
+                .accessibilitySortPriority(6)
+            }
+            .fullScreenCover(isPresented: $showingCamera, onDismiss: {
+                AppDelegate.orientationLock = .portrait
+                withAnimation(.easeOut(duration: 0.25)) {
+                    isTransitioningToCamera = false
+                }
+            }) {
                 CameraButtonsView(teamSelectionManager: $teamSelectionManager)
             }
         }
@@ -235,4 +217,3 @@ struct GlassCircleButton: ButtonStyle {
     HomeView()
         .environment(\.locale, .init(identifier: "es"))
 }
-

@@ -20,13 +20,12 @@ struct TeamGlassLargeCard: View {
             // Use solid color background for all teams
             RoundedRectangle(cornerRadius: 24, style: .continuous)
                 .fill(overlayColor)
-                .frame(height: 170)
                 .overlay(
                     // Add subtle gradient for depth
                     LinearGradient(
                         colors: [
                             Color.black.opacity(0.2),
-                            Color.black.opacity(0.4)
+                            Color.black.opacity(0.45)
                         ],
                         startPoint: .top,
                         endPoint: .bottom
@@ -38,8 +37,8 @@ struct TeamGlassLargeCard: View {
                 )
                 .shadow(color: .black.opacity(0.15), radius: 12, x: 0, y: 8)
             
-            // Logo placeholder en la esquina superior izquierda
-            VStack {
+            VStack(alignment: .leading, spacing: 12) {
+                // Logo placeholder en la esquina superior izquierda
                 HStack {
                     // Logo o badge del equipo
                     if let badgeData = badgeData, let uiImage = UIImage(data: badgeData) {
@@ -49,67 +48,61 @@ struct TeamGlassLargeCard: View {
                             .scaledToFit()
                             .frame(width: 65, height: 65)
                             .clipShape(RoundedRectangle(cornerRadius: 8))
+                            .accessibilityHidden(true)
                     } else if !badge.isEmpty, UIImage(named: badge) != nil {
                         // Predefined team logo from assets
                         Image(badge)
                             .resizable()
                             .scaledToFit()
                             .frame(width: 65, height: 65)
+                            .accessibilityHidden(true)
                     } else {
                         // Placeholder icon if no image
                         Image(systemName: "shield.fill")
-                            .font(.system(size: 24, weight: .medium))
+                            .font(.title2.weight(.medium))
                             .foregroundStyle(.white.opacity(0.9))
+                            .accessibilityHidden(true)
                     }
                     
                     Spacer()
                     
                     // Indicador de navegación
                     Image(systemName: "chevron.right")
-                        .font(.system(size: 16, weight: .semibold))
+                        .font(.callout.weight(.semibold))
                         .foregroundStyle(.white.opacity(0.8))
                         .padding(8)
                         .background(
                             Circle()
                                 .fill(.ultraThinMaterial)
                         )
+                        .accessibilityHidden(true)
                 }
-                .padding([.top, .horizontal], 20)
                 
-                Spacer()
-            }
-            
-            // Información del equipo en la parte inferior
-            VStack {
-                Spacer()
+                Spacer(minLength: 8)
                 
-                HStack {
-                    VStack(alignment: .leading, spacing: 4) {
-                        Text(teamTitle)
-                            .font(.subheadline.bold())
-                            .foregroundStyle(.white.opacity(0.85))
-                        Text(teamName)
-                            .font(.title3.bold())
-                            .foregroundStyle(.white)
-                            .multilineTextAlignment(.leading)
-                    }
-                    
-                    Spacer()
+                // Información del equipo en la parte inferior
+                VStack(alignment: .leading, spacing: 4) {
+                    Text(teamTitle)
+                        .font(.subheadline.bold())
+                        .foregroundStyle(.white.opacity(0.9))
+                    Text(teamName)
+                        .font(.title3.bold())
+                        .foregroundStyle(.white)
+                        .multilineTextAlignment(.leading)
+                        .fixedSize(horizontal: false, vertical: true)
                 }
-                .padding(.horizontal, 20)
-                .padding(.bottom, 20)
             }
+            .padding(20)
         }
         .frame(maxWidth: .infinity)
-        .frame(height: 170)
+        .frame(minHeight: 170)
         .clipShape(RoundedRectangle(cornerRadius: 24, style: .continuous))
         .glassEffect(.regular.interactive(), in: .rect(cornerRadius: 24))
         .accessibilityElement(children: .ignore)
-        .accessibilityLabel(teamName == "Seleccionar equipo" ? "\(teamTitle), sin seleccionar" : "\(teamTitle): \(teamName) seleccionado")
-        .accessibilityValue(teamName == "Seleccionar equipo" ? "Sin equipo" : teamName)
-        .accessibilityHint("Toca para seleccionar este equipo")
+        .accessibilityLabel(teamTitle)
+        .accessibilityValue(teamName == "Seleccionar equipo" ? "Sin seleccionar" : teamName)
+        .accessibilityHint("Toca dos veces para seleccionar este equipo")
         .accessibilityAddTraits(.isButton)
-        .accessibilityAction(named: "Seleccionar equipo") { }
     }
 }
 
@@ -126,4 +119,3 @@ struct TeamGlassLargeCard: View {
     .padding()
     .background(Color(.systemGroupedBackground))
 }
-
