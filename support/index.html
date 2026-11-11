@@ -1,0 +1,343 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Support & Help Center - ColorScore</title>
+  <style>
+    :root {
+      --bg-color: #ffffff;
+      --text-color: #1a1a1a;
+      --text-secondary: #555555;
+      --card-bg: #f8f9fa;
+      --border-color: #e5e7eb;
+      --accent-color: #0066cc;
+      --toggle-bg: #e5e7eb;
+      --toggle-active-bg: #ffffff;
+      --toggle-active-text: #111111;
+    }
+
+    @media (prefers-color-scheme: dark) {
+      :root {
+        --bg-color: #121212;
+        --text-color: #f3f4f6;
+        --text-secondary: #9ca3af;
+        --card-bg: #1e1e1e;
+        --border-color: #2e2e2e;
+        --accent-color: #3b82f6;
+        --toggle-bg: #2a2a2a;
+        --toggle-active-bg: #3a3a3a;
+        --toggle-active-text: #ffffff;
+      }
+    }
+
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+    }
+
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+      background-color: var(--bg-color);
+      color: var(--text-color);
+      line-height: 1.65;
+      padding: 40px 20px;
+    }
+
+    .container {
+      max-width: 760px;
+      margin: 0 auto;
+    }
+
+    .header-bar {
+      display: flex;
+      justify-content: space-between;
+      align-items: flex-start;
+      border-bottom: 1px solid var(--border-color);
+      padding-bottom: 24px;
+      margin-bottom: 32px;
+      gap: 16px;
+    }
+
+    .header-titles {
+      flex: 1;
+    }
+
+    h1 {
+      font-size: 2rem;
+      font-weight: 700;
+      margin-bottom: 8px;
+      letter-spacing: -0.02em;
+    }
+
+    .meta {
+      color: var(--text-secondary);
+      font-size: 0.95rem;
+    }
+
+    .lang-switcher {
+      display: inline-flex;
+      background-color: var(--toggle-bg);
+      border-radius: 8px;
+      padding: 3px;
+      user-select: none;
+    }
+
+    .lang-btn {
+      border: none;
+      background: transparent;
+      color: var(--text-secondary);
+      font-size: 0.85rem;
+      font-weight: 600;
+      padding: 6px 14px;
+      border-radius: 6px;
+      cursor: pointer;
+      transition: all 0.15s ease-in-out;
+    }
+
+    .lang-btn.active {
+      background-color: var(--toggle-active-bg);
+      color: var(--toggle-active-text);
+      box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+    }
+
+    h2 {
+      font-size: 1.3rem;
+      font-weight: 600;
+      margin-top: 36px;
+      margin-bottom: 14px;
+      letter-spacing: -0.01em;
+    }
+
+    p {
+      margin-bottom: 14px;
+      color: var(--text-color);
+    }
+
+    .contact-card {
+      background-color: var(--card-bg);
+      border: 1px solid var(--border-color);
+      border-radius: 10px;
+      padding: 24px;
+      margin: 24px 0;
+    }
+
+    .contact-card h3 {
+      font-size: 1.15rem;
+      margin-bottom: 8px;
+    }
+
+    .contact-card p {
+      margin-bottom: 16px;
+      color: var(--text-secondary);
+    }
+
+    .btn-contact {
+      display: inline-block;
+      background-color: var(--accent-color);
+      color: #ffffff !important;
+      padding: 10px 20px;
+      border-radius: 6px;
+      font-weight: 600;
+      font-size: 0.95rem;
+      text-decoration: none;
+      transition: opacity 0.15s ease;
+    }
+
+    .btn-contact:hover {
+      opacity: 0.9;
+      text-decoration: none;
+    }
+
+    .faq-item {
+      border-bottom: 1px solid var(--border-color);
+      padding: 18px 0;
+    }
+
+    .faq-item:first-of-type {
+      border-top: 1px solid var(--border-color);
+    }
+
+    .faq-question {
+      font-weight: 600;
+      font-size: 1.05rem;
+      margin-bottom: 6px;
+    }
+
+    .faq-answer {
+      color: var(--text-secondary);
+      margin-bottom: 0;
+    }
+
+    a {
+      color: var(--accent-color);
+      text-decoration: none;
+    }
+
+    a:hover {
+      text-decoration: underline;
+    }
+
+    footer {
+      margin-top: 48px;
+      padding-top: 24px;
+      border-top: 1px solid var(--border-color);
+      font-size: 0.85rem;
+      color: var(--text-secondary);
+      text-align: center;
+    }
+
+    footer a {
+      margin: 0 8px;
+    }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <div class="header-bar">
+      <div class="header-titles">
+        <h1 id="title-text">Support Center</h1>
+        <p class="meta" id="meta-text">App: <strong>ColorScore</strong> &bull; Version 1.0</p>
+      </div>
+
+      <div class="lang-switcher" role="group" aria-label="Language selection">
+        <button id="btn-en" class="lang-btn active" onclick="setLanguage('en')">English</button>
+        <button id="btn-es" class="lang-btn" onclick="setLanguage('es')">Español</button>
+      </div>
+    </div>
+
+    <!-- ENGLISH SECTION -->
+    <div id="content-en" class="lang-content">
+      <div class="contact-card">
+        <h3>Need direct assistance?</h3>
+        <p>Whether you found a bug, have an accessibility suggestion, or need help setting up markers, reach out directly:</p>
+        <a class="btn-contact" href="mailto:azuany.mila@gmail.com?subject=ColorScore%20Support%20Request">Email Support Team</a>
+      </div>
+
+      <h2>Frequently Asked Questions</h2>
+
+      <div class="faq-item">
+        <div class="faq-question">Why does the camera screen show as black or blank?</div>
+        <p class="faq-answer">ColorScore requires camera access to detect soccer players in real time. If the feed is blank, go to your iPhone's <strong>Settings > ColorScore</strong> and make sure the <strong>Camera</strong> toggle is switched ON.</p>
+      </div>
+
+      <div class="faq-item">
+        <div class="faq-question">How does ColorScore work on TV screens vs. live stadium viewing?</div>
+        <p class="faq-answer">ColorScore is calibrated for both environments. For TV screens, ensure your phone is held steady and pointed straight at the broadcast display without direct room glare or reflections. In a live stadium, optimal detection occurs from elevated or general pitch viewing angles.</p>
+      </div>
+
+      <div class="faq-item">
+        <div class="faq-question">Can I customize the shapes and contrast colors?</div>
+        <p class="faq-answer">Yes. Navigate to the in-app <strong>Settings / Overlay</strong> menu to select the geometric markers (e.g., circles, triangles, diamonds) and color combinations that best match your specific type of color vision deficiency (protanopia, deuteranopia, or tritanopia).</p>
+      </div>
+
+      <div class="faq-item">
+        <div class="faq-question">Does ColorScore record or save any match video?</div>
+        <p class="faq-answer">No. In accordance with our Privacy Policy, all computer vision and machine learning calculations run volatilely in RAM directly on your iPhone. No video feeds or images are ever saved, stored, or uploaded.</p>
+      </div>
+
+      <div class="faq-item">
+        <div class="faq-question">What devices are supported?</div>
+        <p class="faq-answer">ColorScore requires an iPhone running <strong>iOS 17.0 or later</strong> with Apple Neural Engine support for real-time Core ML inference.</p>
+      </div>
+
+      <h2>Developer &amp; Open Source Community</h2>
+      <p>
+        Encountered a technical defect or want to submit an enhancement proposal? Track or open an issue on our public repository:
+      </p>
+      <p>
+        <a href="https://github.com/azu-any/ColorScore/issues" target="_blank" rel="noopener noreferrer">Visit GitHub Issues &rarr;</a>
+      </p>
+    </div>
+
+    <!-- SPANISH SECTION -->
+    <div id="content-es" class="lang-content" style="display: none;">
+      <div class="contact-card">
+        <h3>¿Necesitas ayuda directa?</h3>
+        <p>Si encontraste un problema técnico, tienes sugerencias de accesibilidad o necesitas ayuda para calibrar los marcadores, escríbenos directamente:</p>
+        <a class="btn-contact" href="mailto:azuany.mila@gmail.com?subject=ColorScore%20Soporte%20Tecnico">Contactar Soporte</a>
+      </div>
+
+      <h2>Preguntas Frecuentes</h2>
+
+      <div class="faq-item">
+        <div class="faq-question">¿Por qué la pantalla de la cámara se ve en negro?</div>
+        <p class="faq-answer">ColorScore necesita permisos de cámara para clasificar los equipos en vivo. Si no muestra imagen, ve a <strong>Ajustes > ColorScore</strong> en tu iPhone y activa la casilla de <strong>Cámara</strong>.</p>
+      </div>
+
+      <div class="faq-item">
+        <div class="faq-question">¿Cómo se usa en televisión comparado con el estadio en vivo?</div>
+        <p class="faq-answer">ColorScore funciona en ambos casos. Si apuntas a una pantalla de TV, mantén el teléfono estable y evita reflejos intensos de luces ambientales. En el estadio, la detección opera de forma óptima desde tomas o asientos con visibilidad general del campo.</p>
+      </div>
+
+      <div class="faq-item">
+        <div class="faq-question">¿Puedo cambiar las figuras y los colores de contraste?</div>
+        <p class="faq-answer">Sí. Dentro del menú de <strong>Ajustes / Marcadores</strong> puedes seleccionar las figuras geométricas (círculos, triángulos, rombos) y paletas de color con alto contraste adaptadas a tu tipo de daltonismo (protanopía, deuteranopía o tritanopía).</p>
+      </div>
+
+      <div class="faq-item">
+        <div class="faq-question">¿La aplicación guarda o transmite video del partido?</div>
+        <p class="faq-answer">No. Toda la inferencia de inteligencia artificial se realiza en el procesador local (Neural Engine/RAM) de tu iPhone. No se graban, guardan ni transmiten imágenes o videos a servidores externos.</p>
+      </div>
+
+      <div class="faq-item">
+        <div class="faq-question">¿Cuáles son los requisitos de dispositivo?</div>
+        <p class="faq-answer">ColorScore requiere un iPhone con <strong>iOS 17.0 o superior</strong> para soportar la ejecución en tiempo real de los modelos Core ML.</p>
+      </div>
+
+      <h2>Comunidad y Seguimiento Técnico</h2>
+      <p>
+        ¿Quieres reportar un fallo en el código o proponer una mejora? Puedes registrarlo directamente en el repositorio público del proyecto:
+      </p>
+      <p>
+        <a href="https://github.com/azu-any/ColorScore/issues" target="_blank" rel="noopener noreferrer">Ir al seguimiento en GitHub &rarr;</a>
+      </p>
+    </div>
+
+    <footer>
+      <p>&copy; 2026 ColorScore.</p>
+      <p style="margin-top: 6px;">
+        <a href="/privacy">Privacy Policy / Política de Privacidad</a> &bull; 
+        <a href="https://github.com/azu-any/ColorScore" target="_blank" rel="noopener noreferrer">GitHub</a>
+      </p>
+    </footer>
+  </div>
+
+  <script>
+    function setLanguage(lang) {
+      const enContent = document.getElementById('content-en');
+      const esContent = document.getElementById('content-es');
+      const btnEn = document.getElementById('btn-en');
+      const btnEs = document.getElementById('btn-es');
+      const title = document.getElementById('title-text');
+      const meta = document.getElementById('meta-text');
+
+      if (lang === 'es') {
+        enContent.style.display = 'none';
+        esContent.style.display = 'block';
+        btnEn.classList.remove('active');
+        btnEs.classList.add('active');
+        title.textContent = 'Centro de Soporte';
+        meta.innerHTML = 'App: <strong>ColorScore</strong> &bull; Versión 1.0';
+        document.documentElement.lang = 'es';
+      } else {
+        esContent.style.display = 'none';
+        enContent.style.display = 'block';
+        btnEs.classList.remove('active');
+        btnEn.classList.add('active');
+        title.textContent = 'Support Center';
+        meta.innerHTML = 'App: <strong>ColorScore</strong> &bull; Version 1.0';
+        document.documentElement.lang = 'en';
+      }
+    }
+
+    document.addEventListener('DOMContentLoaded', () => {
+      const browserLang = (navigator.language || navigator.userLanguage || '').toLowerCase();
+      if (browserLang.startsWith('es')) {
+        setLanguage('es');
+      }
+    });
+  </script>
+</body>
+</html>
