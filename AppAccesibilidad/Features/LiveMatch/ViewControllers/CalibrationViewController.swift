@@ -44,7 +44,6 @@ class CalibrationViewController: VisionViewController {
     // --- UI Elements ---
     private let instructionLabel = UILabel()
     private let timerLabel = UILabel()
-    private let cancelButton = UIButton(type: .system)
     private let loadingIndicator = UIActivityIndicatorView(style: .large)
     private let loadingLabel = UILabel()
 
@@ -129,7 +128,7 @@ class CalibrationViewController: VisionViewController {
         startTime = Date()
         
         // Setup timer
-        timerLabel.text = String(format: "%.1f", calibrationDuration)
+        timerLabel.text = String(format: "%.1f s", calibrationDuration)
         timerLabel.accessibilityValue = "10 segundos restantes"
         timer = Timer.scheduledTimer(timeInterval: 0.1, target: self, selector: #selector(updateTimer), userInfo: nil, repeats: true)
         
@@ -151,12 +150,12 @@ class CalibrationViewController: VisionViewController {
         let remaining = calibrationDuration - elapsed
         
         if remaining > 0 {
-            timerLabel.text = String(format: "%.1f", remaining)
+            timerLabel.text = String(format: "%.1f s", remaining)
             let wholeSeconds = Int(ceil(remaining))
             timerLabel.accessibilityValue = "\(wholeSeconds) segundos restantes"
         } else {
             // Time's up!
-            timerLabel.text = "0.0"
+            timerLabel.text = "0.0 s"
             timerLabel.accessibilityValue = "0 segundos restantes"
             timer?.invalidate()
             timer = nil
@@ -243,6 +242,16 @@ class CalibrationViewController: VisionViewController {
     // MARK: - UI Setup
     
     private func setupUI() {
+        // --- Modal Close Button in Navigation Bar ---
+        let closeBarButton = UIBarButtonItem(
+            barButtonSystemItem: .close,
+            target: self,
+            action: #selector(cancelButtonTapped)
+        )
+        closeBarButton.accessibilityLabel = "Cancelar calibración"
+        closeBarButton.accessibilityHint = "Detiene la calibración y regresa a la vista de cámara"
+        navigationItem.leftBarButtonItem = closeBarButton
+        
         // --- HUD Panel with Liquid Glass Effect ---
         let glassEffect = UIGlassEffect()
         let hudPanel = UIVisualEffectView(effect: glassEffect)
@@ -267,13 +276,6 @@ class CalibrationViewController: VisionViewController {
         
         let contentView = hudPanel.contentView
         
-        // --- Icon at the top ---
-        let iconView = UIImageView(image: UIImage(systemName: "camera.viewfinder"))
-        iconView.translatesAutoresizingMaskIntoConstraints = false
-        iconView.tintColor = .systemBlue
-        iconView.contentMode = .scaleAspectFit
-        iconView.isAccessibilityElement = false
-        contentView.addSubview(iconView)
 
         // --- Instructions ---
         instructionLabel.translatesAutoresizingMaskIntoConstraints = false
@@ -282,7 +284,7 @@ class CalibrationViewController: VisionViewController {
         instructionLabel.textColor = .label
         instructionLabel.textAlignment = .center
         instructionLabel.numberOfLines = 0
-        instructionLabel.text = "Apunta la cámara a los jugadores para analizar a los equipos."
+        instructionLabel.text = "Continúa apuntando la cámara a los jugadores y la cancha"
         contentView.addSubview(instructionLabel)
         
         // --- Timer ---
@@ -293,27 +295,6 @@ class CalibrationViewController: VisionViewController {
         timerLabel.accessibilityLabel = "Tiempo restante de calibración"
         timerLabel.accessibilityTraits = .updatesFrequently
         contentView.addSubview(timerLabel)
-        
-        // --- Cancel Button with Liquid Glass ---
-        let cancelGlassEffect = UIGlassEffect()
-        cancelGlassEffect.isInteractive = true
-        let cancelGlassView = UIVisualEffectView(effect: cancelGlassEffect)
-        cancelGlassView.translatesAutoresizingMaskIntoConstraints = false
-        cancelGlassView.layer.cornerRadius = 16
-        cancelGlassView.clipsToBounds = true
-        
-        cancelButton.translatesAutoresizingMaskIntoConstraints = false
-        cancelButton.setTitle("Cancelar", for: .normal)
-        cancelButton.titleLabel?.font = UIFont.preferredFont(forTextStyle: .headline)
-        cancelButton.titleLabel?.adjustsFontForContentSizeCategory = true
-        cancelButton.setTitleColor(.label, for: .normal)
-        cancelButton.backgroundColor = .clear
-        cancelButton.accessibilityLabel = "Cancelar calibración"
-        cancelButton.accessibilityHint = "Detiene la calibración y regresa a la vista de cámara"
-        cancelButton.addTarget(self, action: #selector(cancelButtonTapped), for: .touchUpInside)
-        
-        cancelGlassView.contentView.addSubview(cancelButton)
-        view.addSubview(cancelGlassView)
         
         // --- Full-Screen Loading UI with Liquid Glass ---
         let loadingGlassEffect = UIGlassEffect()
@@ -349,34 +330,16 @@ class CalibrationViewController: VisionViewController {
             hudPanel.leadingAnchor.constraint(equalTo: hudContainer.leadingAnchor),
             hudPanel.trailingAnchor.constraint(equalTo: hudContainer.trailingAnchor),
             hudPanel.bottomAnchor.constraint(equalTo: hudContainer.bottomAnchor),
-            
-            // Icon at top
-            iconView.topAnchor.constraint(equalTo: contentView.topAnchor, constant: 20),
-            iconView.centerXAnchor.constraint(equalTo: contentView.centerXAnchor),
-            iconView.widthAnchor.constraint(equalToConstant: 44),
-            iconView.heightAnchor.constraint(equalToConstant: 44),
-            
+
             // Instruction label
-            instructionLabel.topAnchor.constraint(equalTo: iconView.bottomAnchor, constant: 12),
-            instructionLabel.leadingAnchor.constraint(equalTo: contentView.leadingAnchor, constant: 24),
-            instructionLabel.trailingAnchor.constraint(equalTo: contentView.trailingAnchor, constant: -24),
+            instructionLabel.topAnchor.constraint(equalTo: contentView.topAnchor, constant: 20),
+            instructionLabel.leadingAnchor.constraint(equalTo: contentView.leadingAnchor, constant: 20),
+            instructionLabel.trailingAnchor.constraint(equalTo: contentView.trailingAnchor, constant: -20),
             
             // Timer label
-            timerLabel.topAnchor.constraint(equalTo: instructionLabel.bottomAnchor, constant: 16),
+            timerLabel.topAnchor.constraint(equalTo: instructionLabel.bottomAnchor, constant: 6),
             timerLabel.centerXAnchor.constraint(equalTo: contentView.centerXAnchor),
-            timerLabel.bottomAnchor.constraint(equalTo: contentView.bottomAnchor, constant: -20),
-            
-            // Cancel button glass container
-            cancelGlassView.bottomAnchor.constraint(equalTo: view.safeAreaLayoutGuide.bottomAnchor, constant: -24),
-            cancelGlassView.centerXAnchor.constraint(equalTo: view.centerXAnchor),
-            cancelGlassView.widthAnchor.constraint(greaterThanOrEqualToConstant: 160),
-            cancelGlassView.heightAnchor.constraint(greaterThanOrEqualToConstant: 56),
-            
-            // Cancel button fills glass view
-            cancelButton.topAnchor.constraint(equalTo: cancelGlassView.contentView.topAnchor),
-            cancelButton.leadingAnchor.constraint(equalTo: cancelGlassView.contentView.leadingAnchor, constant: 16),
-            cancelButton.trailingAnchor.constraint(equalTo: cancelGlassView.contentView.trailingAnchor, constant: -16),
-            cancelButton.bottomAnchor.constraint(equalTo: cancelGlassView.contentView.bottomAnchor),
+            timerLabel.bottomAnchor.constraint(equalTo: contentView.bottomAnchor, constant: -6),
             
             // Full-screen loading UI
             loadingGlassView.topAnchor.constraint(equalTo: view.topAnchor),
@@ -395,18 +358,13 @@ class CalibrationViewController: VisionViewController {
         showLoadingUI(false)
     }
     private func showCollectingUI(_ show: Bool) {
+        navigationController?.setNavigationBarHidden(!show, animated: true)
+        navigationItem.leftBarButtonItem?.isHidden = !show
+        
         view.subviews.forEach { subview in
             if let effectView = subview.subviews.first as? UIVisualEffectView,
                effectView.tag != 100 {
                 subview.isHidden = !show
-            }
-        }
-        
-        view.subviews.forEach { subview in
-            if let glassView = subview as? UIVisualEffectView,
-               glassView.tag != 100,
-               glassView.contentView.subviews.contains(cancelButton) {
-                glassView.isHidden = !show
             }
         }
     }
@@ -428,171 +386,172 @@ class CalibrationViewController: VisionViewController {
 
 // MARK: - SwiftUI Preview
 
-#if DEBUG
-
-private class CalibrationUIPreviewController: UIViewController {
-    private let instructionLabel = UILabel()
-    private let timerLabel = UILabel()
-    private let cancelButton = UIButton(type: .system)
-    private let loadingIndicator = UIActivityIndicatorView(style: .large)
-    private let loadingLabel = UILabel()
-    
-    var showLoadingState = false
-    
-    override func viewDidLoad() {
-        super.viewDidLoad()
-        view.backgroundColor = .darkGray
-        setupUI()
-        
-        timerLabel.text = "10.0"
-        
-        if showLoadingState {
-            DispatchQueue.main.asyncAfter(deadline: .now() + 0.1) {
-                self.showLoadingUI(true)
-            }
-        }
-    }
-    
-    private func setupUI() {
-        let glassEffect = UIGlassEffect()
-        let hudPanel = UIVisualEffectView(effect: glassEffect)
-        hudPanel.translatesAutoresizingMaskIntoConstraints = false
-        hudPanel.layer.cornerRadius = 24
-        hudPanel.clipsToBounds = true
-        
-        let hudContainer = UIView()
-        hudContainer.translatesAutoresizingMaskIntoConstraints = false
-        hudContainer.layer.shadowColor = UIColor.black.cgColor
-        hudContainer.layer.shadowOpacity = 0.15
-        hudContainer.layer.shadowOffset = CGSize(width: 0, height: 4)
-        hudContainer.layer.shadowRadius = 12
-        hudContainer.addSubview(hudPanel)
-        view.addSubview(hudContainer)
-        
-        let contentView = hudPanel.contentView
-        
-        let iconView = UIImageView(image: UIImage(systemName: "camera.viewfinder"))
-        iconView.translatesAutoresizingMaskIntoConstraints = false
-        iconView.tintColor = .systemBlue
-        iconView.contentMode = .scaleAspectFit
-        contentView.addSubview(iconView)
-
-        instructionLabel.translatesAutoresizingMaskIntoConstraints = false
-        instructionLabel.font = UIFont.preferredFont(forTextStyle: .headline)
-        instructionLabel.textColor = .label
-        instructionLabel.textAlignment = .center
-        instructionLabel.numberOfLines = 0
-        instructionLabel.text = "Apunta la cámara a los jugadores para analizar a los equipos."
-        contentView.addSubview(instructionLabel)
-        
-        timerLabel.translatesAutoresizingMaskIntoConstraints = false
-        timerLabel.font = .monospacedDigitSystemFont(ofSize: 64, weight: .bold)
-        timerLabel.textColor = .label
-        timerLabel.textAlignment = .center
-        contentView.addSubview(timerLabel)
-        
-        let cancelGlassEffect = UIGlassEffect(style: .clear)
-        cancelGlassEffect.isInteractive = true
-        let cancelGlassView = UIVisualEffectView(effect: cancelGlassEffect)
-        cancelGlassView.translatesAutoresizingMaskIntoConstraints = false
-        cancelGlassView.layer.cornerRadius = 16
-        cancelGlassView.clipsToBounds = true
-        
-        cancelButton.translatesAutoresizingMaskIntoConstraints = false
-        cancelButton.setTitle("Cancelar", for: .normal)
-        cancelButton.titleLabel?.font = UIFont.preferredFont(forTextStyle: .headline)
-        cancelButton.setTitleColor(.label, for: .normal)
-        cancelButton.backgroundColor = .clear
-        
-        cancelGlassView.contentView.addSubview(cancelButton)
-        view.addSubview(cancelGlassView)
-        
-        let loadingGlassEffect = UIGlassEffect(style: .clear)
-        let loadingGlassView = UIVisualEffectView(effect: loadingGlassEffect)
-        loadingGlassView.translatesAutoresizingMaskIntoConstraints = false
-        
-        loadingIndicator.translatesAutoresizingMaskIntoConstraints = false
-        loadingIndicator.color = .white
-        
-        loadingLabel.translatesAutoresizingMaskIntoConstraints = false
-        loadingLabel.font = UIFont.preferredFont(forTextStyle: .title3)
-        loadingLabel.textColor = .white
-        loadingLabel.text = "Analizando a los equipos..."
-
-        loadingGlassView.contentView.addSubview(loadingIndicator)
-        loadingGlassView.contentView.addSubview(loadingLabel)
-        
-        loadingGlassView.tag = 100
-        view.addSubview(loadingGlassView)
-        
-        NSLayoutConstraint.activate([
-            hudContainer.topAnchor.constraint(equalTo: view.safeAreaLayoutGuide.topAnchor, constant: 16),
-            hudContainer.centerXAnchor.constraint(equalTo: view.centerXAnchor),
-            hudContainer.widthAnchor.constraint(lessThanOrEqualTo: view.widthAnchor, constant: -32),
-            
-            hudPanel.topAnchor.constraint(equalTo: hudContainer.topAnchor),
-            hudPanel.leadingAnchor.constraint(equalTo: hudContainer.leadingAnchor),
-            hudPanel.trailingAnchor.constraint(equalTo: hudContainer.trailingAnchor),
-            hudPanel.bottomAnchor.constraint(equalTo: hudContainer.bottomAnchor),
-            
-            iconView.topAnchor.constraint(equalTo: contentView.topAnchor, constant: 20),
-            iconView.centerXAnchor.constraint(equalTo: contentView.centerXAnchor),
-            iconView.widthAnchor.constraint(equalToConstant: 44),
-            iconView.heightAnchor.constraint(equalToConstant: 44),
-            
-            instructionLabel.topAnchor.constraint(equalTo: iconView.bottomAnchor, constant: 12),
-            instructionLabel.leadingAnchor.constraint(equalTo: contentView.leadingAnchor, constant: 24),
-            instructionLabel.trailingAnchor.constraint(equalTo: contentView.trailingAnchor, constant: -24),
-            
-            timerLabel.topAnchor.constraint(equalTo: instructionLabel.bottomAnchor, constant: 16),
-            timerLabel.centerXAnchor.constraint(equalTo: contentView.centerXAnchor),
-            timerLabel.bottomAnchor.constraint(equalTo: contentView.bottomAnchor, constant: -20),
-            
-            cancelGlassView.bottomAnchor.constraint(equalTo: view.safeAreaLayoutGuide.bottomAnchor, constant: -24),
-            cancelGlassView.centerXAnchor.constraint(equalTo: view.centerXAnchor),
-            cancelGlassView.widthAnchor.constraint(equalToConstant: 160),
-            cancelGlassView.heightAnchor.constraint(equalToConstant: 56),
-            
-            cancelButton.topAnchor.constraint(equalTo: cancelGlassView.contentView.topAnchor),
-            cancelButton.leadingAnchor.constraint(equalTo: cancelGlassView.contentView.leadingAnchor),
-            cancelButton.trailingAnchor.constraint(equalTo: cancelGlassView.contentView.trailingAnchor),
-            cancelButton.bottomAnchor.constraint(equalTo: cancelGlassView.contentView.bottomAnchor),
-            
-            loadingGlassView.topAnchor.constraint(equalTo: view.topAnchor),
-            loadingGlassView.bottomAnchor.constraint(equalTo: view.bottomAnchor),
-            loadingGlassView.leadingAnchor.constraint(equalTo: view.leadingAnchor),
-            loadingGlassView.trailingAnchor.constraint(equalTo: view.trailingAnchor),
-            
-            loadingIndicator.centerXAnchor.constraint(equalTo: loadingGlassView.contentView.centerXAnchor),
-            loadingIndicator.centerYAnchor.constraint(equalTo: loadingGlassView.contentView.centerYAnchor, constant: -30),
-            
-            loadingLabel.topAnchor.constraint(equalTo: loadingIndicator.bottomAnchor, constant: 24),
-            loadingLabel.centerXAnchor.constraint(equalTo: loadingGlassView.contentView.centerXAnchor)
-        ])
-        
-        showLoadingUI(false)
-    }
-    
-    private func showLoadingUI(_ show: Bool) {
-        guard let loadingView = view.viewWithTag(100) else { return }
-        loadingView.isHidden = !show
-        
-        if show {
-            loadingIndicator.startAnimating()
-        } else {
-            loadingIndicator.stopAnimating()
-        }
-    }
-}
-
-#Preview("Calibration UI - Collecting") {
-    CalibrationUIPreviewController()
-}
-
-#Preview("Calibration UI - Loading") {
-    let vc = CalibrationUIPreviewController()
-    vc.showLoadingState = true
-    return vc
-}
-
-#endif
+//#if DEBUG
+//
+//private class CalibrationUIPreviewController: UIViewController {
+//    private let instructionLabel = UILabel()
+//    private let timerLabel = UILabel()
+//    private let cancelButton = UIButton(type: .system)
+//    private let loadingIndicator = UIActivityIndicatorView(style: .large)
+//    private let loadingLabel = UILabel()
+//    
+//    var showLoadingState = false
+//    
+//    override func viewDidLoad() {
+//        super.viewDidLoad()
+//        view.backgroundColor = .darkGray
+//        setupUI()
+//        
+//        timerLabel.text = "10.0 s"
+//        
+//        if showLoadingState {
+//            DispatchQueue.main.asyncAfter(deadline: .now() + 0.1) {
+//                self.showLoadingUI(true)
+//            }
+//        }
+//    }
+//    
+//    private func setupUI() {
+//        let glassEffect = UIGlassEffect()
+//        let hudPanel = UIVisualEffectView(effect: glassEffect)
+//        hudPanel.translatesAutoresizingMaskIntoConstraints = false
+//        hudPanel.layer.cornerRadius = 24
+//        hudPanel.clipsToBounds = true
+//        
+//        let hudContainer = UIView()
+//        hudContainer.translatesAutoresizingMaskIntoConstraints = false
+//        hudContainer.layer.shadowColor = UIColor.black.cgColor
+//        hudContainer.layer.shadowOpacity = 0.15
+//        hudContainer.layer.shadowOffset = CGSize(width: 0, height: 4)
+//        hudContainer.layer.shadowRadius = 12
+//        hudContainer.addSubview(hudPanel)
+//        view.addSubview(hudContainer)
+//        
+//        let contentView = hudPanel.contentView
+//        
+////        let iconView = UIImageView(image: UIImage(systemName: "camera.viewfinder"))
+////        iconView.translatesAutoresizingMaskIntoConstraints = false
+////        iconView.tintColor = .tintColor
+////        iconView.contentMode = .scaleAspectFit
+////        contentView.addSubview(iconView)
+//
+//        instructionLabel.translatesAutoresizingMaskIntoConstraints = false
+//        instructionLabel.font = UIFont.preferredFont(forTextStyle: .headline)
+//        instructionLabel.textColor = .label
+//        instructionLabel.textAlignment = .center
+//        instructionLabel.numberOfLines = 0
+//        instructionLabel.text = "Continúa apuntando la cámara a los jugadores y la cancha"
+//        contentView.addSubview(instructionLabel)
+//        
+//        timerLabel.translatesAutoresizingMaskIntoConstraints = false
+//        timerLabel.font = .monospacedDigitSystemFont(ofSize: 64, weight: .bold)
+//        timerLabel.textColor = .label
+//        timerLabel.textAlignment = .center
+//        contentView.addSubview(timerLabel)
+//        
+//        let cancelGlassEffect = UIGlassEffect(style: .clear)
+//        cancelGlassEffect.tintColor = UIColor.red
+//        cancelGlassEffect.isInteractive = true
+//        let cancelGlassView = UIVisualEffectView(effect: cancelGlassEffect)
+//        cancelGlassView.translatesAutoresizingMaskIntoConstraints = false
+//        cancelGlassView.layer.cornerRadius = 16
+//        cancelGlassView.clipsToBounds = true
+//        
+//        cancelButton.translatesAutoresizingMaskIntoConstraints = false
+//        cancelButton.setTitle("Cancelar", for: .normal)
+//        cancelButton.titleLabel?.font = UIFont.preferredFont(forTextStyle: .headline)
+//        cancelButton.setTitleColor(.label, for: .normal)
+//        cancelButton.backgroundColor = .clear
+//        
+//        cancelGlassView.contentView.addSubview(cancelButton)
+//        view.addSubview(cancelGlassView)
+//        
+//        let loadingGlassEffect = UIGlassEffect(style: .clear)
+//        let loadingGlassView = UIVisualEffectView(effect: loadingGlassEffect)
+//        loadingGlassView.translatesAutoresizingMaskIntoConstraints = false
+//        
+//        loadingIndicator.translatesAutoresizingMaskIntoConstraints = false
+//        loadingIndicator.color = .white
+//        
+//        loadingLabel.translatesAutoresizingMaskIntoConstraints = false
+//        loadingLabel.font = UIFont.preferredFont(forTextStyle: .title3)
+//        loadingLabel.textColor = .white
+//        loadingLabel.text = "Analizando a los equipos..."
+//
+//        loadingGlassView.contentView.addSubview(loadingIndicator)
+//        loadingGlassView.contentView.addSubview(loadingLabel)
+//        
+//        loadingGlassView.tag = 100
+//        view.addSubview(loadingGlassView)
+//        
+//        NSLayoutConstraint.activate([
+//            hudContainer.topAnchor.constraint(equalTo: view.safeAreaLayoutGuide.topAnchor, constant: 16),
+//            hudContainer.centerXAnchor.constraint(equalTo: view.centerXAnchor),
+//            hudContainer.widthAnchor.constraint(lessThanOrEqualTo: view.widthAnchor, constant: -32),
+//            
+//            hudPanel.topAnchor.constraint(equalTo: hudContainer.topAnchor),
+//            hudPanel.leadingAnchor.constraint(equalTo: hudContainer.leadingAnchor),
+//            hudPanel.trailingAnchor.constraint(equalTo: hudContainer.trailingAnchor),
+//            hudPanel.bottomAnchor.constraint(equalTo: hudContainer.bottomAnchor),
+//            
+////            iconView.topAnchor.constraint(equalTo: contentView.topAnchor, constant: 20),
+////            iconView.centerXAnchor.constraint(equalTo: contentView.centerXAnchor),
+////            iconView.widthAnchor.constraint(equalToConstant: 44),
+////            iconView.heightAnchor.constraint(equalToConstant: 44),
+//            
+//            instructionLabel.topAnchor.constraint(equalTo: contentView.topAnchor, constant: 20),
+//            instructionLabel.leadingAnchor.constraint(equalTo: contentView.leadingAnchor, constant: 20),
+//            instructionLabel.trailingAnchor.constraint(equalTo: contentView.trailingAnchor, constant: -20),
+//            
+//            timerLabel.topAnchor.constraint(equalTo: instructionLabel.bottomAnchor, constant: 6),
+//            timerLabel.centerXAnchor.constraint(equalTo: contentView.centerXAnchor),
+//            timerLabel.bottomAnchor.constraint(equalTo: contentView.bottomAnchor, constant: -10),
+//            
+//            cancelGlassView.bottomAnchor.constraint(equalTo: view.safeAreaLayoutGuide.bottomAnchor),
+//            cancelGlassView.centerXAnchor.constraint(equalTo: view.centerXAnchor),
+//            cancelGlassView.widthAnchor.constraint(equalToConstant: 160),
+//            cancelGlassView.heightAnchor.constraint(equalToConstant: 56),
+//            
+//            cancelButton.topAnchor.constraint(equalTo: cancelGlassView.contentView.topAnchor),
+//            cancelButton.leadingAnchor.constraint(equalTo: cancelGlassView.contentView.leadingAnchor),
+//            cancelButton.trailingAnchor.constraint(equalTo: cancelGlassView.contentView.trailingAnchor),
+//            cancelButton.bottomAnchor.constraint(equalTo: cancelGlassView.contentView.bottomAnchor),
+//            
+//            loadingGlassView.topAnchor.constraint(equalTo: view.topAnchor),
+//            loadingGlassView.bottomAnchor.constraint(equalTo: view.bottomAnchor),
+//            loadingGlassView.leadingAnchor.constraint(equalTo: view.leadingAnchor),
+//            loadingGlassView.trailingAnchor.constraint(equalTo: view.trailingAnchor),
+//            
+//            loadingIndicator.centerXAnchor.constraint(equalTo: loadingGlassView.contentView.centerXAnchor),
+//            loadingIndicator.centerYAnchor.constraint(equalTo: loadingGlassView.contentView.centerYAnchor, constant: -30),
+//            
+//            loadingLabel.topAnchor.constraint(equalTo: loadingIndicator.bottomAnchor, constant: 24),
+//            loadingLabel.centerXAnchor.constraint(equalTo: loadingGlassView.contentView.centerXAnchor)
+//        ])
+//        
+//        showLoadingUI(false)
+//    }
+//    
+//    private func showLoadingUI(_ show: Bool) {
+//        guard let loadingView = view.viewWithTag(100) else { return }
+//        loadingView.isHidden = !show
+//        
+//        if show {
+//            loadingIndicator.startAnimating()
+//        } else {
+//            loadingIndicator.stopAnimating()
+//        }
+//    }
+//}
+//
+//#Preview("Calibration UI - Collecting") {
+//    CalibrationUIPreviewController()
+//}
+//
+//#Preview("Calibration UI - Loading") {
+//    let vc = CalibrationUIPreviewController()
+//    vc.showLoadingState = true
+//    return vc
+//}
+//
+//#endif

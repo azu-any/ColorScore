@@ -94,8 +94,10 @@ class LiveAnalysisViewController: VisionViewController {
                 calibrationVC.setCameraFilter(filter)
             }
             calibrationVC.delegate = self.coordinator
-            calibrationVC.modalPresentationStyle = .fullScreen
-            self.present(calibrationVC, animated: true)
+            
+            let navController = UINavigationController(rootViewController: calibrationVC)
+            navController.modalPresentationStyle = .fullScreen
+            self.present(navController, animated: true)
         }
     }
     

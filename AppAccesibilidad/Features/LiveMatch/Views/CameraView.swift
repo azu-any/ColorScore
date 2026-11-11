@@ -32,7 +32,9 @@ struct CameraView: UIViewControllerRepresentable {
         uiViewController.setZoom(factor: settings.zoom)
         uiViewController.setCameraFilter(settings.cameraFilter)
         
-        if let calibrationVC = uiViewController.presentedViewController as? CalibrationViewController {
+        let presentedCalibrationVC = (uiViewController.presentedViewController as? UINavigationController)?.topViewController as? CalibrationViewController
+            ?? (uiViewController.presentedViewController as? CalibrationViewController)
+        if let calibrationVC = presentedCalibrationVC {
             calibrationVC.settings = settings
             calibrationVC.setCameraFilter(settings.cameraFilter)
         }

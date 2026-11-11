@@ -16,12 +16,11 @@ struct TeamGlassLargeCard: View {
     let overlayColor: Color
 
     var body: some View {
-        ZStack {
-            // Use solid color background for all teams
+        ZStack(alignment: .topLeading) {
+            // 1. Fondo base sólido con gradiente y borde
             RoundedRectangle(cornerRadius: 24, style: .continuous)
                 .fill(overlayColor)
                 .overlay(
-                    // Add subtle gradient for depth
                     LinearGradient(
                         colors: [
                             Color.black.opacity(0.2),
@@ -36,66 +35,64 @@ struct TeamGlassLargeCard: View {
                         .strokeBorder(.white.opacity(0.25), lineWidth: 1)
                 )
                 .shadow(color: .black.opacity(0.15), radius: 12, x: 0, y: 8)
-            
-            VStack(alignment: .leading, spacing: 12) {
-                // Logo placeholder en la esquina superior izquierda
-                HStack {
-                    // Logo o badge del equipo
-                    if let badgeData = badgeData, let uiImage = UIImage(data: badgeData) {
-                        // Custom team logo from data
-                        Image(uiImage: uiImage)
-                            .resizable()
-                            .scaledToFit()
-                            .frame(width: 65, height: 65)
-                            .clipShape(RoundedRectangle(cornerRadius: 8))
-                            .accessibilityHidden(true)
-                    } else if !badge.isEmpty, UIImage(named: badge) != nil {
-                        // Predefined team logo from assets
-                        Image(badge)
-                            .resizable()
-                            .scaledToFit()
-                            .frame(width: 65, height: 65)
-                            .accessibilityHidden(true)
-                    } else {
-                        // Placeholder icon if no image
-                        Image(systemName: "shield.fill")
-                            .font(.title2.weight(.medium))
-                            .foregroundStyle(.white.opacity(0.9))
-                            .accessibilityHidden(true)
-                    }
-                    
+
+            // 2. Marca de agua decorativa de fondo (no desplaza el contenido)
+            HStack {
+                Spacer()
+                badgeImageView
+                    .scaledToFit()
+                    .frame(width: 200, height: 200)
+                    .rotationEffect(.degrees(17))
+                    .opacity(0.1)
+                    .offset(x: 40, y: 25)
+                    .accessibilityHidden(true)
+            }
+            .allowsHitTesting(false)
+
+            // 3. Contenido interactivo principal
+            VStack(alignment: .leading, spacing: 0) {
+                // Fila superior: Logo del equipo en la esquina superior izquierda y chevron
+                HStack(alignment: .top) {
+                    badgeImageView
+                        .scaledToFit()
+                        .frame(width: 65, height: 65)
+                        .clipShape(RoundedRectangle(cornerRadius: 10, style: .continuous))
+                        .accessibilityHidden(true)
+
                     Spacer()
-                    
-                    // Indicador de navegación
+
                     Image(systemName: "chevron.right")
                         .font(.callout.weight(.semibold))
                         .foregroundStyle(.white.opacity(0.8))
                         .padding(8)
                         .background(
                             Circle()
-                                .fill(.ultraThinMaterial)
+                                .fill(overlayColor)
                         )
                         .accessibilityHidden(true)
                 }
-                
+
                 Spacer(minLength: 8)
-                
+
                 // Información del equipo en la parte inferior
                 VStack(alignment: .leading, spacing: 4) {
                     Text(teamTitle)
                         .font(.subheadline.bold())
-                        .foregroundStyle(.white.opacity(0.9))
+                        .foregroundStyle(.white.opacity(0.85))
+                        .lineLimit(1)
+
                     Text(teamName)
                         .font(.title3.bold())
                         .foregroundStyle(.white)
                         .multilineTextAlignment(.leading)
+                        .lineLimit(2)
                         .fixedSize(horizontal: false, vertical: true)
                 }
             }
-            .padding(20)
+            .padding(25)
         }
         .frame(maxWidth: .infinity)
-        .frame(minHeight: 170)
+        .frame(height: 200)
         .clipShape(RoundedRectangle(cornerRadius: 24, style: .continuous))
         .glassEffect(.regular.interactive(), in: .rect(cornerRadius: 24))
         .accessibilityElement(children: .ignore)
@@ -103,6 +100,22 @@ struct TeamGlassLargeCard: View {
         .accessibilityValue(teamName == "Seleccionar equipo" ? "Sin seleccionar" : teamName)
         .accessibilityHint("Toca dos veces para seleccionar este equipo")
         .accessibilityAddTraits(.isButton)
+    }
+
+    // Helper view para evitar duplicar la lógica de resolución de imágenes
+    @ViewBuilder
+    private var badgeImageView: some View {
+        if let badgeData = badgeData, let uiImage = UIImage(data: badgeData) {
+            Image(uiImage: uiImage)
+                .resizable()
+        } else if !badge.isEmpty, UIImage(named: badge) != nil {
+            Image(badge)
+                .resizable()
+        } else {
+            Image(systemName: "shield.fill")
+                .resizable()
+                .foregroundStyle(.white.opacity(0.9))
+        }
     }
 }
 

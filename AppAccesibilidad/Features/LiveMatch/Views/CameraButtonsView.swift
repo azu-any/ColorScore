@@ -71,13 +71,14 @@ struct CameraButtonsView: View {
                     .padding(.vertical, 12)
                     .padding(.horizontal, 28)
                     .frame(maxWidth: 500)
+                    .glassEffect(.regular.interactive(), in: .rect(cornerRadius: 28))
                     .background(
                         RoundedRectangle(cornerRadius: 28, style: .continuous)
                             .fill(
                                 LinearGradient(
                                     colors: [
-                                        Color("CalibrationBannerStart").opacity(0.92),
-                                        Color("CalibrationBannerEnd").opacity(0.95)
+                                        .primary.opacity(0.92),
+                                        .primary.opacity(0.95)
                                     ],
                                     startPoint: .topLeading,
                                     endPoint: .bottomTrailing
@@ -116,6 +117,19 @@ struct CameraButtonsView: View {
                         .contentShape(Capsule())
                     }
                     .buttonStyle(.plain)
+                    .background(
+                        RoundedRectangle(cornerRadius: 28, style: .continuous)
+                            .fill(
+                                LinearGradient(
+                                    colors: [
+                                        Color("CalibrationBannerStart").opacity(0.92),
+                                        Color("CalibrationBannerEnd").opacity(0.95)
+                                    ],
+                                    startPoint: .topLeading,
+                                    endPoint: .bottomTrailing
+                                )
+                            )
+                    )
                     .glassEffect(.regular.interactive(), in: .capsule)
                     .shadow(color: .black.opacity(0.2), radius: 16, x: 0, y: 8)
                     .accessibilityElement(children: .combine)
@@ -386,7 +400,7 @@ private extension CameraButtonsView {
                             )
                     }
                     .buttonStyle(.plain)
-                    .frame(minWidth: 40, minHeight: 44)
+                    .frame(minWidth: 40, minHeight: 40)
                     .contentShape(Rectangle())
                     .accessibilityLabel("Marcador de \(team1DisplayName): \(leftScore)")
                     .accessibilityHint(activeTeamScoreControl == 1 ? "Toca dos veces para cerrar controles" : "Toca dos veces para mostrar botones más y menos alrededor del marcador")
@@ -459,7 +473,7 @@ private extension CameraButtonsView {
                             )
                     }
                     .buttonStyle(.plain)
-                    .frame(minWidth: 40, minHeight: 44)
+                    .frame(minWidth: 40, minHeight: 40)
                     .contentShape(Rectangle())
                     .accessibilityLabel("Marcador de \(team2DisplayName): \(rightScore)")
                     .accessibilityHint(activeTeamScoreControl == 2 ? "Toca dos veces para cerrar controles" : "Toca dos veces para mostrar botones más y menos alrededor del marcador")
@@ -514,7 +528,7 @@ private extension CameraButtonsView {
             .accessibilityAddTraits(.isButton)
         }
         .padding(.horizontal, 8)
-        .padding(.vertical, 6)
+        .padding(.vertical, 4)
         .glassEffect(.regular.interactive(), in: .capsule)
         .shadow(color: Color.black.opacity(0.15), radius: 10, x: 0, y: 4)
         .accessibilityElement(children: .contain)

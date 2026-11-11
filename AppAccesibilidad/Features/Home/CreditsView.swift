@@ -37,7 +37,7 @@ struct CreditsView: View {
     private let teamMembers: [CreditPerson] = [
         CreditPerson(
             name: "Azuany Mila Ceron",
-            description: "Desarrolladora de software apasionada por crear herramientas tecnológicas accesibles e inclusivas.",
+            description: "Desarrolladora de software apasionada por crear herramientas tecnológicas accesibles e inclusivas. CS 2027 @ UDLAP",
             profileImage: "Azu",
             socials: [
                 CreditSocial(platform: "GitHub", handle: "@azu-any", icon: "github", url: "https://github.com/azu-any"),
@@ -47,25 +47,25 @@ struct CreditsView: View {
         ),
         CreditPerson(
             name: "Nina Maeva Mazadiego Cortés",
-            description: "Desarrolladora de software apasionada por crear herramientas tecnológicas accesibles e inclusivas.",
+            description: "Desarrolladora de software @ Apple",
             profileImage: nil,
             socials: [
-                CreditSocial(platform: "GitHub", handle: "@maeva-mazadiego", icon: "github"),
+                CreditSocial(platform: "GitHub", handle: "@MaeMazcort", icon: "github", url: "https://github.com/MaeMazcort"),
                 CreditSocial(platform: "LinkedIn", handle: "Nina Maeva Mazadiego Cortés", icon: "linkedin"),
             ]
         ),
         CreditPerson(
             name: "Daniela Renée Ramírez Gutiérrez",
-            description: "Desarrolladora de software apasionada por crear herramientas tecnológicas accesibles e inclusivas.",
+            description: "Ciencia de Datos @ UDLAP 2027",
             profileImage: nil,
             socials: [
-                CreditSocial(platform: "GitHub", handle: "@daniela-ramirez", icon: "github", url: "https://github.com/danielarenee"),
+                CreditSocial(platform: "GitHub", handle: "@danielarenee", icon: "github", url: "https://github.com/danielarenee"),
                 CreditSocial(platform: "LinkedIn", handle: "Daniela Renée Ramírez Gutiérrez", icon: "linkedin", url: "https://github.com/MaeMazcort"),
             ]
         ),
         CreditPerson(
             name: "Goben Diego Constantino Aguirre",
-            description: "Desarrollador de software apasionado por crear herramientas tecnológicas accesibles e inclusivas.",
+            description: "SoC Analyst. CS 2026 @ UDLAP",
             profileImage: nil,
             socials: [
                 CreditSocial(platform: "GitHub", handle: "@goben-constantino", icon: "github", url: "https://github.com/PocketNugget"),
@@ -100,6 +100,11 @@ struct CreditsView: View {
             tint: .indigo
         )
     ]
+    
+    let columns = [
+            GridItem(.flexible(minimum: 100, maximum: .infinity)),
+            GridItem(.flexible(minimum: 100, maximum: .infinity))
+        ]
 
     var body: some View {
         ZStack {
@@ -143,8 +148,10 @@ struct CreditsView: View {
                             .padding(.horizontal, 4)
                             .accessibilityAddTraits(.isHeader)
 
-                        ForEach(technologies) { tech in
-                            techCard(tech)
+                        LazyVGrid(columns: columns, spacing: 16) {
+                            ForEach(technologies) { tech in
+                                techCard(tech)
+                            }
                         }
                     }
 
@@ -161,7 +168,7 @@ struct CreditsView: View {
                 .padding(.vertical, 16)
             }
         }
-        .navigationTitle("Créditos")
+        .navigationTitle("Información")
         .navigationBarTitleDisplayMode(.inline)
     }
 
@@ -235,12 +242,12 @@ struct CreditsView: View {
 
                 } else {
                     Circle()
-                        .fill(.primary.opacity(0.15))
+                        .fill(.tint.opacity(0.15))
                         .frame(width: 52, height: 52)
                     
                     Image(systemName: "person.crop.circle.fill")
                         .font(.title2.weight(.semibold))
-                        .foregroundStyle(.primary)
+                        .foregroundStyle(.tint)
                 }
             }
             .accessibilityHidden(true)
@@ -267,7 +274,9 @@ struct CreditsView: View {
     }
 
     private func techCard(_ tech: CreditTech) -> some View {
-        HStack(spacing: 16) {
+        VStack(alignment: .center, spacing: 16) {
+            Spacer(minLength: 0)
+            
             ZStack {
                 Circle()
                     .fill(tech.tint.opacity(0.15))
@@ -279,22 +288,19 @@ struct CreditsView: View {
             }
             .accessibilityHidden(true)
 
-            VStack(alignment: .leading, spacing: 4) {
+            VStack(alignment: .center, spacing: 4) {
                 Text(tech.name)
                     .font(.subheadline.bold())
                     .foregroundStyle(.primary)
-
-                Text(tech.detail)
-                    .font(.caption)
-                    .foregroundStyle(.secondary)
                     .fixedSize(horizontal: false, vertical: true)
+                    .multilineTextAlignment(.center)
             }
 
             Spacer(minLength: 0)
         }
-        .padding(16)
-        .frame(maxWidth: .infinity, alignment: .leading)
-        .glassEffect(.regular.tint(tech.tint.opacity(0.1)), in: .rect(cornerRadius: 18))
+        .padding(12)
+        .frame(maxWidth: .infinity, alignment: .center)
+        .glassEffect(.regular.tint(.primary.opacity(0.1)), in: .rect(cornerRadius: 18))
         .accessibilityElement(children: .combine)
         .accessibilityLabel("\(tech.name): \(tech.detail)")
     }
@@ -364,13 +370,13 @@ struct CreditPersonProfileView: View {
                 } else {
                     ZStack {
                         Circle()
-                            .fill(.primary.opacity(0.15))
+                            .fill(.tint.opacity(0.15))
 
                         Image(systemName: "person.crop.circle.fill")
                             .resizable()
                             .scaledToFit()
                             .padding(24)
-                            .foregroundStyle(.primary)
+                            .foregroundStyle(.tint)
                     }
                     .frame(maxWidth: 150, maxHeight: 150)
                 }
@@ -437,9 +443,9 @@ struct CreditPersonProfileView: View {
                     .foregroundStyle(.secondary)
             }
         }
-        .padding(16)
+        .padding(4)
         .frame(maxWidth: .infinity, alignment: .leading)
-        .glassEffect(.regular.tint(.primary.opacity(0.1)), in: .rect(cornerRadius: 18))
+        .glassEffect(.regular.tint(Color.accentColor.opacity(0.1)), in: .rect(cornerRadius: 18))
         .accessibilityElement(children: .combine)
         .accessibilityLabel("\(social.platform): \(social.handle)")
     }
