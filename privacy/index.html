@@ -12,6 +12,9 @@
       --card-bg: #f8f9fa;
       --border-color: #e5e7eb;
       --accent-color: #0066cc;
+      --toggle-bg: #e5e7eb;
+      --toggle-active-bg: #ffffff;
+      --toggle-active-text: #111111;
     }
 
     @media (prefers-color-scheme: dark) {
@@ -22,6 +25,9 @@
         --card-bg: #1e1e1e;
         --border-color: #2e2e2e;
         --accent-color: #3b82f6;
+        --toggle-bg: #2a2a2a;
+        --toggle-active-bg: #3a3a3a;
+        --toggle-active-text: #ffffff;
       }
     }
 
@@ -44,10 +50,18 @@
       margin: 0 auto;
     }
 
-    header {
+    .header-bar {
+      display: flex;
+      justify-content: space-between;
+      align-items: flex-start;
       border-bottom: 1px solid var(--border-color);
       padding-bottom: 24px;
       margin-bottom: 32px;
+      gap: 16px;
+    }
+
+    .header-titles {
+      flex: 1;
     }
 
     h1 {
@@ -60,6 +74,32 @@
     .meta {
       color: var(--text-secondary);
       font-size: 0.95rem;
+    }
+
+    .lang-switcher {
+      display: inline-flex;
+      background-color: var(--toggle-bg);
+      border-radius: 8px;
+      padding: 3px;
+      user-select: none;
+    }
+
+    .lang-btn {
+      border: none;
+      background: transparent;
+      color: var(--text-secondary);
+      font-size: 0.85rem;
+      font-weight: 600;
+      padding: 6px 14px;
+      border-radius: 6px;
+      cursor: pointer;
+      transition: all 0.15s ease-in-out;
+    }
+
+    .lang-btn.active {
+      background-color: var(--toggle-active-bg);
+      color: var(--toggle-active-text);
+      box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
     }
 
     h2 {
@@ -113,42 +153,50 @@
 </head>
 <body>
   <div class="container">
-    <header>
-      <h1>Privacy Policy</h1>
-      <p class="meta">App: <strong>ColorScore</strong> &bull; Effective Date: November 10, 2026</p>
-    </header>
+    <div class="header-bar">
+      <div class="header-titles">
+        <h1 id="title-text">Privacy Policy</h1>
+        <p class="meta" id="meta-text">App: <strong>ColorScore</strong> &bull; Effective Date: November 10, 2026</p>
+      </div>
 
-    <main>
+      <div class="lang-switcher" role="group" aria-label="Language selection">
+        <button id="btn-en" class="lang-btn active" onclick="setLanguage('en')">English</button>
+        <button id="btn-es" class="lang-btn" onclick="setLanguage('es')">Español</button>
+      </div>
+    </div>
+
+    <!-- ENGLISH SECTION -->
+    <div id="content-en" class="lang-content">
       <div class="highlight-box">
         <strong>Summary:</strong> ColorScore operates entirely on your device. We do not collect, store, transmit, or share any personal information, photos, videos, or camera data.
       </div>
 
       <h2>1. Overview</h2>
       <p>
-        ColorScore ("we", "our", or "us") is committed to protecting your privacy. This Privacy Policy describes how the ColorScore mobile application for iOS handles your data when you use the app.
+        ColorScore ("we", "our", or "us") is dedicated to protecting your privacy. This Privacy Policy describes how the ColorScore mobile application for iOS handles data when you use the app.
       </p>
 
       <h2>2. Information We Do Not Collect</h2>
-      <p>We built ColorScore with a strict privacy-first architecture:</p>
+      <p>We engineered ColorScore with a strict privacy-first architecture:</p>
       <ul>
-        <li><strong>No User Accounts:</strong> You do not need to register, log in, or provide an email address, name, or phone number to use the app.</li>
-        <li><strong>No Telemetry or Analytics:</strong> We do not include third-party advertising SDKs, behavioral tracking frameworks, or diagnostic tracking suites.</li>
-        <li><strong>No Location Tracking:</strong> We do not access, track, collect, or store your GPS or network-based geolocation data.</li>
+        <li><strong>No User Accounts:</strong> You do not need to register, log in, or provide an email address, name, or phone number.</li>
+        <li><strong>No Telemetry or Tracking:</strong> We do not include advertising SDKs, behavioral analytics, or third-party trackers.</li>
+        <li><strong>No Location Data:</strong> We do not access, track, or collect GPS or network-based geolocation data.</li>
       </ul>
 
-      <h2>3. Camera Usage &amp; Real-Time Image Processing</h2>
+      <h2>3. Camera Usage &amp; On-Device Processing</h2>
       <p>
-        ColorScore requires camera access (<code>NSCameraUsageDescription</code>) exclusively to assist viewers in distinguishing teams and players in real time through computer vision and machine learning models.
+        ColorScore requests camera access (<code>NSCameraUsageDescription</code>) solely to detect players, referee uniforms, and field boundaries in real time to overlay assistive geometric markers.
       </p>
       <ul>
-        <li><strong>Strictly On-Device:</strong> All video frames captured by your camera are analyzed entirely on your device using Apple's Neural Engine and GPU via Core ML.</li>
-        <li><strong>Volatile Memory Only:</strong> Camera frames are processed transiently in memory (RAM) and immediately discarded once markers are calculated.</li>
-        <li><strong>Zero Remote Transmission:</strong> No video streams, screenshots, or visual data are ever recorded, saved to your photo gallery, or uploaded to external servers or cloud services.</li>
+        <li><strong>Strictly On-Device:</strong> All computer vision and machine learning inferences are executed entirely on your iPhone's Neural Engine and GPU using Core ML.</li>
+        <li><strong>Volatile Memory Only:</strong> Camera frames are processed transiently in device memory (RAM) and immediately discarded.</li>
+        <li><strong>Zero Transmission:</strong> No video streams, photos, or visual data are ever recorded, saved to your photo library, or sent over the internet to external servers.</li>
       </ul>
 
       <h2>4. Local Preferences</h2>
       <p>
-        Any settings you customize within the application—such as geometric shape selection, color filter adjustments, stroke thickness, and display contrast preferences—are stored locally on your device via standard iOS storage (such as <code>UserDefaults</code>). This configuration never leaves your device and is completely removed if you uninstall the app.
+        Any settings you customize within the application—such as geometric shape selection, color filter adjustments, stroke thickness, and display contrast preferences—are stored locally on your device via standard iOS storage (<code>UserDefaults</code>). This configuration never leaves your device and is completely removed if you uninstall the app.
       </p>
 
       <h2>5. Third-Party Sharing and Disclosures</h2>
@@ -158,12 +206,12 @@
 
       <h2>6. Children’s Privacy (COPPA &amp; GDPR Compliance)</h2>
       <p>
-        ColorScore complies with the Children’s Online Privacy Protection Act (COPPA) and the General Data Protection Regulation (GDPR). We do not knowingly collect personal information from individuals under any circumstances, making the application safe for users of all ages.
+        ColorScore complies with the Children’s Online Privacy Protection Act (COPPA) and the General Data Protection Regulation (GDPR). We do not collect personal information from individuals of any age.
       </p>
 
       <h2>7. Changes to This Policy</h2>
       <p>
-        We may update this Privacy Policy if application capabilities evolve. Any updates will be published directly to this page along with a revised "Effective Date" at the top.
+        We may update this Privacy Policy if application capabilities evolve. Any updates will be published directly to this page along with an updated effective date.
       </p>
 
       <h2>8. Contact Information</h2>
@@ -172,13 +220,109 @@
       </p>
       <ul>
         <li><strong>GitHub Issues:</strong> <a href="https://github.com/azu-any/ColorScore/issues" target="_blank" rel="noopener noreferrer">github.com/azu-any/ColorScore/issues</a></li>
-        <li><strong>Support Email:</strong> <a href="mailto:azuany.mila@gmail.com">azuany.mila@gmail.com</a></li>
+        <li><strong>Support Email:</strong> <a href="mailto:your-email@example.com">your-email@example.com</a></li>
       </ul>
-    </main>
+    </div>
+
+    <!-- SPANISH SECTION -->
+    <div id="content-es" class="lang-content" style="display: none;">
+      <div class="highlight-box">
+        <strong>Resumen:</strong> ColorScore funciona íntegramente en tu dispositivo. No recopilamos, almacenamos, transmitimos ni compartimos ninguna información personal, fotografías, transmisiones de video ni datos de la cámara.
+      </div>
+
+      <h2>1. Descripción General</h2>
+      <p>
+        ColorScore ("nosotros" o "nuestro") está comprometido con la protección de tu privacidad. Esta Política de Privacidad describe cómo la aplicación móvil ColorScore para iOS gestiona tus datos al utilizarla.
+      </p>
+
+      <h2>2. Información que No Recopilamos</h2>
+      <p>Diseñamos ColorScore bajo una estricta arquitectura de privacidad desde el origen:</p>
+      <ul>
+        <li><strong>Sin Cuentas de Usuario:</strong> No requieres registrarte, iniciar sesión ni proporcionar nombres, correos electrónicos o números telefónicos.</li>
+        <li><strong>Sin Telemetría ni Rastreadores:</strong> No integramos SDKs de publicidad, herramientas de análisis de comportamiento ni rastreadores de terceros.</li>
+        <li><strong>Sin Ubicación:</strong> No solicitamos, rastreamos ni almacenamos coordenadas GPS ni ubicación por red.</li>
+      </ul>
+
+      <h2>3. Uso de la Cámara y Procesamiento en el Dispositivo</h2>
+      <p>
+        ColorScore solicita acceso a la cámara de tu dispositivo (<code>NSCameraUsageDescription</code>) exclusivamente para detectar jugadores, uniformes y elementos de la cancha en tiempo real con el fin de superponer figuras geométricas accesibles.
+      </p>
+      <ul>
+        <li><strong>Procesamiento 100% Local:</strong> Todos los modelos de visión computacional y aprendizaje automático se ejecutan en el Neural Engine y GPU de tu iPhone mediante Core ML.</li>
+        <li><strong>Memoria Volátil:</strong> Los cuadros de video capturados por la cámara se procesan temporalmente en la memoria RAM y se descartan al instante.</li>
+        <li><strong>Cero Transmisión Externa:</strong> Ningún fotograma, video o dato visual se graba, almacena en tu galería ni se envía a servidores en la nube.</li>
+      </ul>
+
+      <h2>4. Preferencias Locales</h2>
+      <p>
+        Cualquier ajuste configurado en la aplicación (como formas geométricas elegidas, grosor de trazo, contraste o esquemas de color) se almacena de forma local mediante el almacenamiento estándar de iOS (<code>UserDefaults</code>). Esta configuración nunca sale de tu dispositivo y se elimina por completo al desinstalar la app.
+      </p>
+
+      <h2>5. Divulgación a Terceros</h2>
+      <p>
+        Dado que ColorScore opera de manera independiente y sin conectividad de red para su funcionamiento esencial, no vendemos, rentamos, monetizamos ni transferimos ningún dato a terceros o anunciantes.
+      </p>
+
+      <h2>6. Privacidad de Menores (COPPA y RGPD)</h2>
+      <p>
+        ColorScore cumple con las normativas internacionales de protección de menores (COPPA y RGPD). Al no recopilar ningún dato personal, la aplicación es apta y segura para usuarios de todas las edades.
+      </p>
+
+      <h2>7. Cambios a esta Política</h2>
+      <p>
+        Esta política puede actualizarse si las funcionalidades técnicas evolucionan. Cualquier cambio se publicará directamente en esta página junto con la fecha de entrada en vigor actualizada.
+      </p>
+
+      <h2>8. Contacto</h2>
+      <p>
+        Si tienes preguntas o comentarios respecto a esta Política de Privacidad o a ColorScore, puedes ponerte en contacto a través de:
+      </p>
+      <ul>
+        <li><strong>Reportes en GitHub:</strong> <a href="https://github.com/azu-any/ColorScore/issues" target="_blank" rel="noopener noreferrer">github.com/azu-any/ColorScore/issues</a></li>
+        <li><strong>Correo de Soporte:</strong> <a href="mailto:azuany.mila@gmail.com">azuany.mila@gmail.com</a></li>
+      </ul>
+    </div>
 
     <footer>
       <p>&copy; 2026 ColorScore. All rights reserved.</p>
     </footer>
   </div>
+
+  <script>
+    function setLanguage(lang) {
+      const enContent = document.getElementById('content-en');
+      const esContent = document.getElementById('content-es');
+      const btnEn = document.getElementById('btn-en');
+      const btnEs = document.getElementById('btn-es');
+      const title = document.getElementById('title-text');
+      const meta = document.getElementById('meta-text');
+
+      if (lang === 'es') {
+        enContent.style.display = 'none';
+        esContent.style.display = 'block';
+        btnEn.classList.remove('active');
+        btnEs.classList.add('active');
+        title.textContent = 'Política de Privacidad';
+        meta.innerHTML = 'App: <strong>ColorScore</strong> &bull; Fecha de entrada en vigor: 10 de noviembre de 2026';
+        document.documentElement.lang = 'es';
+      } else {
+        esContent.style.display = 'none';
+        enContent.style.display = 'block';
+        btnEs.classList.remove('active');
+        btnEn.classList.add('active');
+        title.textContent = 'Privacy Policy';
+        meta.innerHTML = 'App: <strong>ColorScore</strong> &bull; Effective Date: November 10, 2026';
+        document.documentElement.lang = 'en';
+      }
+    }
+
+    // Auto-detect browser preferred language on initial load
+    document.addEventListener('DOMContentLoaded', () => {
+      const browserLang = (navigator.language || navigator.userLanguage || '').toLowerCase();
+      if (browserLang.startsWith('es')) {
+        setLanguage('es');
+      }
+    });
+  </script>
 </body>
 </html>
